@@ -1,3 +1,6 @@
+// Model for an object containing MAPX information.
+// 
+// Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
 const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps']
 const PERIODICITY = ["continual", "daily", "weekly", "fortnightly", "monthly", "quarterly", "biannually",
@@ -13,7 +16,7 @@ module.exports = {
         mapx = {}
 
         text = {}
-        mapx['text'] = text
+        mapx['text'] = text;
 
         for (const name of ['title', 'abstract', 'notes']) {
             initLanguages(text, name)
@@ -87,6 +90,14 @@ module.exports = {
         checkLang(lang)
         mapx['text']['notes'][lang] = value
     },
+    add_note: function (mapx, lang, title, value) {
+        if(value) {
+            checkLang(lang);
+            var old = mapx['text']['notes'][lang];
+            var sep = old.length === 0 ? "" : "\n\n";
+            mapx['text']['notes'][lang] = old + sep + title + ": " + value;
+        }
+    },
 
     add_keyword: function (mapx, keyword) {
         mapx['text']['keywords']['keys'].push(keyword)
@@ -117,6 +128,10 @@ module.exports = {
             throw new Error("Unknown periodicity: " + periodicity)
 
         mapx['temporal']['issuance']['periodicity'] = periodicity
+    },
+
+    get_periodicity: function (mapx) {
+        return mapx['temporal']['issuance']['periodicity']
     },
 
     set_temporal_start: function (mapx, date) {
@@ -185,6 +200,7 @@ module.exports = {
     }
 
 };
+
 function initLanguages(map, name) {
     i18nmap = {}
     map[name] = i18nmap
