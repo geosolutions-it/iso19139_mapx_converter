@@ -84,10 +84,11 @@ function iso19139_to_mapx(data, params) {
         rootName = Object.keys(data)[0];
         if (log)
             console.log("Unwrapping ", rootName);
-        mdRoot = data[rootName][MD_ROOT_NAME];
+        mdRoot = data[rootName][MD_ROOT_NAME][0];
     }
 
-    // console.log("ROOT IS ", mdRoot);
+//    if(log)
+//        console.log("ROOT IS ", mdRoot);
 
     // Look for some of the main nodes
     if(mdRoot['identificationInfo'] && mdRoot['identificationInfo'].length > 1) {
@@ -109,7 +110,7 @@ function iso19139_to_mapx(data, params) {
     if(log)
         console.log("METADATA ID", uuid)
 
-
+        
     // Detect language
     var lang;
     var isoLang = getFirstFromPath(identNode, ["language", GCO_CHAR_NAME]);
@@ -122,12 +123,18 @@ function iso19139_to_mapx(data, params) {
 
         if (!lang) {
             lang = "en"; // default language
-            console.warn("Can't map language ", isoLang)
+            if(log)
+                console.warn("Can't map language ", isoLang)
         }
-        if(log)
-            console.log("Language", lang)
         MAPX.add_language(mapx, lang);
+    } else {
+        lang = "en"; // default language
+        if(log)
+            console.warn("Language definition not found");
     }
+
+//    if(log)
+//        console.log("Language", lang)
 
     // === Title
     var title = getFirstFromPath(dataCitationNode, ["title", GCO_CHAR_NAME]);
@@ -138,7 +145,7 @@ function iso19139_to_mapx(data, params) {
     MAPX.set_abstract(mapx, lang, abstract);
 
     // === Keywords
-    for (var dk of identNode["descriptiveKeywords"]) {
+    for (var dk of identNode["descriptiveKeywords"] || []) {
         for (var keywords of dk["MD_Keywords"]) {
             for (var keyword of keywords["keyword"]) {
                 MAPX.add_keyword(mapx, keyword[GCO_CHAR_NAME][0])
@@ -162,21 +169,24 @@ function iso19139_to_mapx(data, params) {
     // add lineage and processing steps
     for(var qinfo of mdRoot["dataQualityInfo"]) {
         var lineage = getFirstFromPath(qinfo, ["DQ_DataQuality", "lineage", "LI_Lineage"]);
-        MAPX.add_note(mapx, lang, "LINEAGE", getFirstFromPath(lineage, ["statement", GCO_CHAR_NAME]));
+        if (lineage) {
+        
+            MAPX.add_note(mapx, lang, "LINEAGE", getFirstFromPath(lineage, ["statement", GCO_CHAR_NAME]));
 
-        // add process steps
-        // "processStep":[{"LI_ProcessStep":[{"description":[{"CharacterString":["detailed description of processing: deliverables 3.7 and 3.8 available at: http://www.envirogrids.net/index.php?option=com_content&view=article&id=23&Itemid=40"]}]
-        if(lineage["processStep"]) {
-            for(var pstep of lineage["processStep"]) {
+            // add process steps
+            // "processStep":[{"LI_ProcessStep":[{"description":[{"CharacterString":["detailed description of processing: deliverables 3.7 and 3.8 available at: http://www.envirogrids.net/index.php?option=com_content&view=article&id=23&Itemid=40"]}]
+            if(lineage["processStep"]) {
+                for(var pstep of lineage["processStep"]) {
 
-                var stepDescr = getFirstFromPath(pstep, ["LI_ProcessStep", "description", GCO_CHAR_NAME]);
-                var stepRatio = getFirstFromPath(pstep, ["LI_ProcessStep", "rationale", GCO_CHAR_NAME]);
+                    var stepDescr = getFirstFromPath(pstep, ["LI_ProcessStep", "description", GCO_CHAR_NAME]);
+                    var stepRatio = getFirstFromPath(pstep, ["LI_ProcessStep", "rationale", GCO_CHAR_NAME]);
 
-                var stepText =
-                        (stepDescr ? "DESCRIPTION: " + stepDescr + "\n" : "") +
-                        (stepRatio ? "RATIONALE: " + stepRatio + "\n" : "");
+                    var stepText =
+                            (stepDescr ? "DESCRIPTION: " + stepDescr + "\n" : "") +
+                            (stepRatio ? "RATIONALE: " + stepRatio + "\n" : "");
 
-                MAPX.add_note(mapx, lang, "PROCESSING STEP", stepText);
+                    MAPX.add_note(mapx, lang, "PROCESSING STEP", stepText);
+                }
             }
         }
     }
@@ -193,10 +203,12 @@ function iso19139_to_mapx(data, params) {
     //              {"MD_MaintenanceFrequencyCode":[
     //                  {"$":{"codeListValue":"notPlanned",
     var isoFreqNode = getFirstFromPath(identNode, ["resourceMaintenance", "MD_MaintenanceInformation", "maintenanceAndUpdateFrequency", "MD_MaintenanceFrequencyCode"]);
-    var isoFreqVal = isoFreqNode["$"]["codeListValue"];
+    if (isoFreqNode) {
+        var isoFreqVal = isoFreqNode["$"]["codeListValue"];
 
-    var mapxFreq = FREQ_MAPPING[isoFreqVal];
-    MAPX.set_periodicity(mapx, mapxFreq ? mapxFreq : "unknown");
+        var mapxFreq = FREQ_MAPPING[isoFreqVal];
+        MAPX.set_periodicity(mapx, mapxFreq ? mapxFreq : "unknown");
+    }
 
     // Retrieve dates
     var datemap = {
@@ -207,7 +219,7 @@ function iso19139_to_mapx(data, params) {
     var datestamp = getFirstFromPath(mdRoot, ["dateStamp", "Date"]);
     var metadataDate = formatDate(datestamp, undefined);
 
-    for( var date of dataCitationNode["date"]) {
+    for( var date of dataCitationNode["date"] || []) {
         // console.log(JSON.stringify(date));
         // {"CI_Date":[{
         //      "date":[{
@@ -289,7 +301,7 @@ function iso19139_to_mapx(data, params) {
         }
     } else {
         // use the default
-        console.warn("Could not parse CRS");
+        console.warn("CRS not found");
     }
 
     // == BBOX
@@ -307,10 +319,10 @@ function iso19139_to_mapx(data, params) {
     // === Contacts
 
     // add all metadata contacts
-    addContacts(mapx, "Metadata ", mdRoot["contact"]);
+    addContacts(mapx, "Metadata ", mdRoot["contact"] || []);
 
     // add all data contacts
-    addContacts(mapx, "Dataset ", identNode["pointOfContact"]);
+    addContacts(mapx, "Dataset ", identNode["pointOfContact"] || []);
 
     // === Origin
 
@@ -368,7 +380,7 @@ function iso19139_to_mapx(data, params) {
     var distributionNode = getFirstFromPath(mdRoot, [ "distributionInfo", "MD_Distribution"]);
     for(var transfOpt of distributionNode['transferOptions']) {
         for(var dto of transfOpt['MD_DigitalTransferOptions']) {
-            for(var online of dto['onLine']) {
+            for(var online of dto['onLine'] || []) {
                 for(var onlineRes of online['CI_OnlineResource']) {
                     var link = onlineRes["linkage"][0];
                     var url = getFirstFromPath(link, ["URL"]);
@@ -379,12 +391,13 @@ function iso19139_to_mapx(data, params) {
                     if(proto && proto.startsWith("OGC"))
                         isOgc = true;
 
-                    var isDownload = proto && proto.startsWith("WWW:DOWNLOAD");
+                    var isDownload = (proto !== undefined) && proto.startsWith("WWW:DOWNLOAD");
 
                     if(proto && proto.endsWith("get-map"))
                         url = url + "&LAYER=" + name;
 
-                    MAPX.add_source(mapx, url, isDownload);
+                    if(url.length > 0)
+                        MAPX.add_source(mapx, url, isDownload);
                 }
             }
         }
@@ -464,7 +477,7 @@ function parseResponsibleParty(rp) {
     // Extract role
     //"role":[{"CI_RoleCode":[{"$":{"codeListValue":"pointOfContact","codeList":"http://standa...
     var rolecode = getFirstFromPath(rp, [RP_ROLE, RP_CI_ROLECODE]);
-    var roleValue = rolecode["$"][ATTR_CLV];
+    var roleValue = rolecode ? rolecode["$"][ATTR_CLV] : "unknown";
     rp_map[RP_ROLE] = roleValue;
 
     return rp_map;
