@@ -175,7 +175,7 @@ function iso19139_to_mapx(data, params) {
     if (isoFreqNode) {
         var isoFreqVal = isoFreqNode["$"]["codeListValue"];
 
-        var mapxFreq = FREQ_MAPPING[isoFreqVal];
+        var mapxFreq = UTIL.FREQ_MAPPING_I2M[isoFreqVal];
         MAPX.set_periodicity(mapx, mapxFreq ? mapxFreq : "unknown");
     }
 
