@@ -1,11 +1,11 @@
-// Load a remote ISO19139 document and transforms it into a MAPX json
+// Load a MAPX json document and transforms it into an ISO19139 XML
 // 
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-const iso2mapx = require("./convert_iso_to_mapx");
-
+const m2i = require("./convert_mapx_to_iso");
 const UTILS = require("./mapx_utils");
 
+const builder = require('xmlbuilder');
 const xml2js = require('xml2js');
 const request = require('request');
 const fs = require("fs");
@@ -16,8 +16,6 @@ const fs = require("fs");
 args = [];
 
 var params = {};
-params[UTILS.PARAM_LOG_INFO_NAME] = false;
-params[UTILS.PARAM_LOG_DEBUG_NAME] = false;
 
 for (let j = 2; j < process.argv.length; j++) {  
     var arg = process.argv[j];
@@ -30,7 +28,7 @@ for (let j = 2; j < process.argv.length; j++) {
     }
 }
 
-if(args.length < 3) {
+if(args.length < 2) {
     usage();
     throw("Missing arguments");
 } 
@@ -42,50 +40,45 @@ params[UTILS.PARAM_HOMEPAGE_TEMPLATE_NAME] = args[2];
 const log_info = params[UTILS.PARAM_LOG_INFO_NAME];
 const log_debug = params[UTILS.PARAM_LOG_DEBUG_NAME] || log_info;
 
+if(log_info)
+    console.log("Params --> " + JSON.stringify(params));
+
 run(source, destination, params)
 
 
 async function run(source, destination, params) {
 
-    var xml = source.startsWith("http") ?
+    var json = source.startsWith("http") ?
         await loadFromUrl(source) :
         loadFromFile(source);
 
-    if(xml) {
+    if(json) {
+        if(log_debug)
+            console.log("METADATA as JSON", json);
 
-        xml2js.parseString(
-            xml,
-            {
-                tagNameProcessors: [xml2js.processors.stripPrefix]
-            },
-            function (error, json) {
-                if (error === null) {
-                    
-                    if(log_debug)
-                        console.log("METADATA as JSON", JSON.stringify(json));
+        if (log_info) 
+            console.log("PARSING MAPX into ISO");
+                
+        var mapx = JSON.parse(json);
+        var iso = m2i.mapx_to_iso19139(mapx);
+        
+        if(log_debug)
+            console.log("METADATA as ISO/JSON", JSON.stringify(iso));
+        
+        var xml = builder.create(iso, { encoding: 'utf-8' })
+        var xmlFormatted = xml.end({ pretty: true });
 
-                    if (log_info) 
-                        console.log("PARSING ISO19139 into MAPX");
-
-                    mapx = iso2mapx.iso19139_to_mapx(json, params);
-
-                    fs.writeFile(destination, JSON.stringify(mapx, null, 3), (err) => {
-                        if (err) 
-                            console.log(err);
-                        else
-                            console.log("Successfully Written to File ", destination);
-                    });
-
-                } else {
-                    console.error(error);
-                    console.log(xml);
-                    return;
-                }
-            }
-        );    
+        if(log_debug)
+            console.log("METADATA as XML", xmlFormatted);
+        
+        fs.writeFile(destination, xmlFormatted, (err) => {
+            if (err) 
+                console.log(err);
+            else
+                console.log("Successfully Written to File ", destination);
+        });
     } else {
-
-        console.log("Error in getting ISO document");
+        console.log("No JSON data found");
     }
 }
 
@@ -116,7 +109,7 @@ function downloadUrl(url) {
 
 function loadFromFile(url) {
     try {
-      return fs.readFileSync(url);      
+      return fs.readFileSync(url).toString();
     } catch (err) {
         console.warn("Error while reading file". err);
         return undefined;
@@ -124,5 +117,5 @@ function loadFromFile(url) {
 }
 
 function usage() {
-    console.log("loadISO [-v] URL destination_file homepage_template")    ;
+    console.log("loadMAPX [-v[v]] INPUT OUTPUT");
 }

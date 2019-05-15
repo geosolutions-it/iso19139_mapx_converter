@@ -3,9 +3,7 @@
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
 const MAPX = require("./mapx");
-
-const PARAM_VERBOSE_NAME = "verbose";
-const PARAM_HOMEPAGE_TEMPLATE_NAME = "homepage_template";
+const UTILS = require("./mapx_utils");
 
 const ATTR_CLV = "codeListValue";
 const MD_ROOT_NAME = 'MD_Metadata';
@@ -15,36 +13,7 @@ const SERV_IDENT_NAME = 'SRV_ServiceIdentification';
 const CI_RP = "CI_ResponsibleParty";
 const CI_CITATION = "CI_Citation";
 
-const LANG_MAPPING = {
-    "eng": "en",
-    "fre": "fr",
-    "fra": "fr",
-    "spa": "es",
-    "rus": "ru",
-    "chi": "zh",
-    "zho": "zh",
-    "deu": "de",
-    "ger": "de",
-    "ben": "bn",
-    "per": "fa",
-    "fas": "fa",
-    "pus": "ps"
-};
 
-const FREQ_MAPPING= {
-    "continual":    "continual" ,
-    "daily":        "daily" ,
-    "weekly":       "weekly" ,
-    "fortnightly":  "fortnightly" ,
-    "monthly":      "monthly" ,
-    "quarterly":    "quarterly" ,
-    "biannually":   "biannually" ,
-    "annually":     "annually" ,
-    "asNeeded":     "as_needed" ,
-    "irregular" :   "irregular" ,
-    "notPlanned":   "not_planned" ,
-    "unknown":      "unknown"
-};
 
 const FREQ_D41_MAPPING= {
     "continual":    "3" ,
@@ -66,7 +35,7 @@ const DATE_DEFAULT = "0001-01-01";
 
 function iso19139_to_mapx(data, params) {
 
-    var log = params ? params[PARAM_VERBOSE_NAME] : false;
+    var log = params ? params[UTILS.PARAM_LOG_INFO_NAME] : false;
 
     var mapx = MAPX.create_object();
 
@@ -118,7 +87,7 @@ function iso19139_to_mapx(data, params) {
         if (isoLang.length == 2) {
             lang = isoLang;
         } else {
-            lang = LANG_MAPPING[isoLang];
+            lang = UTIL.LANG_MAPPING_I2M[isoLang];
         }
 
         if (!lang) {
@@ -327,7 +296,7 @@ function iso19139_to_mapx(data, params) {
     // === Origin
 
     // == Homepage
-    var homepage_template = params[PARAM_HOMEPAGE_TEMPLATE_NAME];
+    var homepage_template = params[UTILS.PARAM_HOMEPAGE_TEMPLATE_NAME];
     if(homepage_template === undefined) {
         homepage_template = "Undefined homepage for {UUID}";
     }
@@ -670,8 +639,6 @@ function addCostraints(mapx, constraintsList, context) {
 }
 
 module.exports = {
-        iso19139_to_mapx,
-        PARAM_HOMEPAGE_TEMPLATE_NAME,
-        PARAM_VERBOSE_NAME: PARAM_VERBOSE_NAME
+        iso19139_to_mapx
 };
 

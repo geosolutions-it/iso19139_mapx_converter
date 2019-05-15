@@ -1,31 +1,34 @@
 {
-    "name": "iso19139_mapx_converter",
-    "version": "1.0.0",
-    "description": "Provides functions to translate ISO19139 from/to MapX format",
-
-    "keywords": [
-        "iso19139", "iso19115",
-        "mapx",
-        "geonetwork",
-        "metadata",
-        "convert", "conversion", "transform",
-        "geosolutions"
-    ],
-
-    "author": "Emanuele Tajariol <etj@geo-solutions.it>",
-    "contributors": [],
-
-    "homepage": "https://github.com/geosolutions-it/iso19139_mapx_converter",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/geosolutions-it/iso19139_mapx_converter.git"
-    },
-
-    "license": "GPL-2.0",
-
-    "dependencies": {
-        "https": "^1.0.0",
-        "xml2js": "^0.4.19"
-    },
-    "bundledDependencies": []
+  "name": "iso19139_mapx_converter",
+  "version": "1.0.0",
+  "description": "Provides functions to translate ISO19139 from/to MapX format",
+  "keywords": [
+    "iso19139",
+    "iso19115",
+    "mapx",
+    "geonetwork",
+    "metadata",
+    "convert",
+    "conversion",
+    "transform",
+    "geosolutions"
+  ],
+  "author": "Emanuele Tajariol <etj@geo-solutions.it>",
+  "contributors": [],
+  "homepage": "https://github.com/geosolutions-it/iso19139_mapx_converter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geosolutions-it/iso19139_mapx_converter.git"
+  },
+  "license": "GPL-2.0",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "fs": "0.0.1-security",
+    "http": "0.0.0",
+    "https": "^1.0.0",
+    "md5": "^2.2.1",
+    "xml2js": "^0.4.19",
+    "xmlbuilder": "^13.0.1"
+  },
+  "bundledDependencies": []
 }

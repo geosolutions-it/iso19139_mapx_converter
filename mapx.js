@@ -82,14 +82,34 @@ module.exports = {
         checkLang(lang)
         mapx['text']['title'][lang] = value
     },
+    get_title: function (mapx, lang) {
+        return mapx['text']['title'][lang];
+    },
+    get_all_titles: function (mapx) {
+        return mapx['text']['title'];
+    },
+        
     set_abstract: function (mapx, lang, value) {
         checkLang(lang)
         mapx['text']['abstract'][lang] = value
     },
+    get_abstract: function (mapx, lang) {
+        return mapx['text']['abstract'][lang];
+    },
+    get_all_abstracts: function (mapx) {
+        return mapx['text']['abstract'];
+    },
+    
     set_notes: function (mapx, lang, value) {
         checkLang(lang)
         mapx['text']['notes'][lang] = value
     },
+    get_notes: function (mapx, lang) {
+        return mapx['text']['notes'][lang];
+    },
+    get_all_notes: function (mapx) {
+        return mapx['text']['notes'];
+    },    
     add_note: function (mapx, lang, title, value) {
         if(value) {
             checkLang(lang);
@@ -102,10 +122,19 @@ module.exports = {
     add_keyword: function (mapx, keyword) {
         mapx['text']['keywords']['keys'].push(keyword)
     },
+    get_keywords: function (mapx) {
+        return mapx['text']['keywords']['keys'];
+    },
 
     add_language: function (mapx, langcode) {
         checkLang(langcode)
         mapx['text']['language']['codes'].push({'code': langcode})
+    },
+    get_languages: function (mapx) {
+        var ret = [];
+        for (var code of mapx['text']['language']['codes']) 
+            ret.push(code["code"]);
+        return ret;
     },
 
     set_attribute: function (mapx, lang, attname, value) {
@@ -117,10 +146,16 @@ module.exports = {
         checkDate(date)
         mapx['temporal']['issuance']['released_at'] = date
     },
+    get_release_date: function (mapx) {
+        return mapx['temporal']['issuance']['released_at'];
+    },
 
     set_modified_date: function (mapx, date) {
         checkDate(date)
         mapx['temporal']['issuance']['modified_at'] = date
+    },
+    get_modified_date: function (mapx) {
+        return mapx['temporal']['issuance']['modified_at'];
     },
 
     set_periodicity: function (mapx, periodicity) {
@@ -129,7 +164,6 @@ module.exports = {
 
         mapx['temporal']['issuance']['periodicity'] = periodicity
     },
-
     get_periodicity: function (mapx) {
         return mapx['temporal']['issuance']['periodicity']
     },
@@ -144,10 +178,22 @@ module.exports = {
         mapx['temporal']['range']['end_at'] = date
         mapx['temporal']['range']['is_timeless'] = false
     },
+    is_timeless: function (mapx) {
+        return mapx['temporal']['range']['is_timeless'];
+    },
+    get_temporal_start: function (mapx) {
+        return mapx['temporal']['range']['start_at'];
+    },
+    get_temporal_end: function (mapx) {
+        return mapx['temporal']['range']['end_at'];
+    },
 
     set_crs: function (mapx, code, url) {
         mapx['spatial']['crs']['code'] = code
         mapx['spatial']['crs']['url'] = url
+    },
+    get_crs_code: function (mapx) {
+        return mapx['spatial']['crs']['code'];
     },
 
     set_bbox: function (mapx, lng_min, lng_max, lat_min, lat_max) {
@@ -156,7 +202,14 @@ module.exports = {
         mapx['spatial']['bbox']['lat_min'] = lat_min
         mapx['spatial']['bbox']['lat_max'] = lat_max
     },
-
+    get_bbox: function (mapx) {
+        return [
+            mapx['spatial']['bbox']['lng_min'],
+            mapx['spatial']['bbox']['lng_max'],
+            mapx['spatial']['bbox']['lat_min'],
+            mapx['spatial']['bbox']['lat_max']]
+    },
+    
     add_contact: function (mapx, func, name, addr, mail) {
 
         mapx['contact']['contacts'].push({
@@ -166,17 +219,22 @@ module.exports = {
             "email": mail
         })
     },
+    get_contacts: function (mapx) {
+        return (mapx['contact']||[])['contacts'];
+    },
 
     set_homepage: function (mapx, url) {
         mapx['origin']['homepage']['url'] = url
     },
 
     add_source: function (mapx, url, is_download_link) {
-
         mapx['origin']['source']['urls'].push({
             'is_download_link': is_download_link,
             'url': url
         })
+    },
+    get_sources: function (mapx) {
+        return mapx['origin']['source']['urls'];
     },
 
     set_license_download: function (mapx, allow) {
@@ -184,11 +242,13 @@ module.exports = {
     },
 
     add_license: function (mapx, name, text) {
-
         mapx['license']['licenses'].push({
             'name': name,
             'text': text
         })
+    },
+    get_licenses: function (mapx) {
+        return mapx['license']['licenses'];
     },
 
     add_reference: function (mapx, url) {
