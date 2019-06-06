@@ -23,15 +23,13 @@ These scripts can also be used as examples for using the mapping functions.
 Basic usage:
 
 ```
-node ./loadISO.js [-v | -vv] INPUT OUTPUT HOMEPAGE_TEMPLATE
+node ./loadISO.js [-v | -vv] INPUT OUTPUT
 ```
 
 - `-v`: verbose output (i.e. INFO level logging)
 - `-vv`: very verbose output (i.e. DEBUG level logging)
 - `INPUT`: either: HTTP URL, HTTPS URL, local file
 - `OUTPUT`: the output file name for the mapx JSON
-- `HOMEPAGE_TEMPLATE`: a template to fill in the `homepage` link, since ISO19139 does not have this info.  
-  You may use the `{UUID}` token that will be replaced with the metadata UUID.
 
 
 ### MAPX to ISO19139 conversion
