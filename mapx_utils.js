@@ -4,8 +4,6 @@
 module.exports = {
         PARAM_LOG_INFO_NAME: "log_info",
         PARAM_LOG_DEBUG_NAME: "log_debug",
-
-        PARAM_HOMEPAGE_TEMPLATE_NAME: "homepage_template",
     
         LANG_MAPPING_I2M: {
             "eng": "en",

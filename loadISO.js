@@ -30,14 +30,13 @@ for (let j = 2; j < process.argv.length; j++) {
     }
 }
 
-if(args.length < 3) {
+if(args.length < 2) {
     usage();
     throw("Missing arguments");
 } 
 
 var source = args[0];
 var destination = args[1];
-params[UTILS.PARAM_HOMEPAGE_TEMPLATE_NAME] = args[2];
 
 const log_info = params[UTILS.PARAM_LOG_INFO_NAME];
 const log_debug = params[UTILS.PARAM_LOG_DEBUG_NAME] || log_info;
@@ -124,5 +123,5 @@ function loadFromFile(url) {
 }
 
 function usage() {
-    console.log("loadISO [-v] URL destination_file homepage_template")    ;
+    console.log("loadISO [-v] URL destination_file");
 }

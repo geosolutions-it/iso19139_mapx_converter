@@ -295,15 +295,6 @@ function iso19139_to_mapx(data, params) {
 
     // === Origin
 
-    // == Homepage
-    var homepage_template = params[UTILS.PARAM_HOMEPAGE_TEMPLATE_NAME];
-    if(homepage_template === undefined) {
-        homepage_template = "Undefined homepage for {UUID}";
-    }
-
-    var homepage = homepage_template.replace(/\{UUID\}/, uuid);
-    MAPX.set_homepage(mapx, homepage);
-
     // == Source
     //
     // "distributionInfo":[
@@ -641,4 +632,3 @@ function addCostraints(mapx, constraintsList, context) {
 module.exports = {
         iso19139_to_mapx
 };
-
