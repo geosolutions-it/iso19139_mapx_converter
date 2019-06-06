@@ -77,11 +77,11 @@ function mapx_to_iso19139(mapx, params) {
     // gather keywords
     var keywordList = [];
     for(var kw of MAPX.get_keywords(mapx)) {
-        keywordList.push({"gmd:keyword": {"gco:CharacterString": kw}});
+        keywordList.push({"gco:CharacterString": kw});
     }
 
     if(keywordList.length > 0) {
-        identification["gmd:descriptiveKeywords"] = {"gmd:MD_Keywords": keywordList};
+        identification["gmd:descriptiveKeywords"] = {"gmd:MD_Keywords": {"gmd:keyword": keywordList}};
     }
 
 
