@@ -136,29 +136,30 @@ function iso19139_to_mapx(data, params) {
     MAPX.add_note(mapx, lang, "SUPPLEMENTAL INFO", getFirstFromPath(identNode, ["supplementalInformation", GCO_CHAR_NAME]));
 
     // add lineage and processing steps
-    for(var qinfo of mdRoot["dataQualityInfo"]) {
-        var lineage = getFirstFromPath(qinfo, ["DQ_DataQuality", "lineage", "LI_Lineage"]);
-        if (lineage) {
-        
-            MAPX.add_note(mapx, lang, "LINEAGE", getFirstFromPath(lineage, ["statement", GCO_CHAR_NAME]));
+    if(mdRoot["dataQualityInfo"])
+        for(var qinfo of mdRoot["dataQualityInfo"]) {
+            var lineage = getFirstFromPath(qinfo, ["DQ_DataQuality", "lineage", "LI_Lineage"]);
+            if (lineage) {
 
-            // add process steps
-            // "processStep":[{"LI_ProcessStep":[{"description":[{"CharacterString":["detailed description of processing: deliverables 3.7 and 3.8 available at: http://www.envirogrids.net/index.php?option=com_content&view=article&id=23&Itemid=40"]}]
-            if(lineage["processStep"]) {
-                for(var pstep of lineage["processStep"]) {
+                MAPX.add_note(mapx, lang, "LINEAGE", getFirstFromPath(lineage, ["statement", GCO_CHAR_NAME]));
 
-                    var stepDescr = getFirstFromPath(pstep, ["LI_ProcessStep", "description", GCO_CHAR_NAME]);
-                    var stepRatio = getFirstFromPath(pstep, ["LI_ProcessStep", "rationale", GCO_CHAR_NAME]);
+                // add process steps
+                // "processStep":[{"LI_ProcessStep":[{"description":[{"CharacterString":["detailed description of processing: deliverables 3.7 and 3.8 available at: http://www.envirogrids.net/index.php?option=com_content&view=article&id=23&Itemid=40"]}]
+                if(lineage["processStep"]) {
+                    for(var pstep of lineage["processStep"]) {
 
-                    var stepText =
-                            (stepDescr ? "DESCRIPTION: " + stepDescr + "\n" : "") +
-                            (stepRatio ? "RATIONALE: " + stepRatio + "\n" : "");
+                        var stepDescr = getFirstFromPath(pstep, ["LI_ProcessStep", "description", GCO_CHAR_NAME]);
+                        var stepRatio = getFirstFromPath(pstep, ["LI_ProcessStep", "rationale", GCO_CHAR_NAME]);
 
-                    MAPX.add_note(mapx, lang, "PROCESSING STEP", stepText);
+                        var stepText =
+                                (stepDescr ? "DESCRIPTION: " + stepDescr + "\n" : "") +
+                                (stepRatio ? "RATIONALE: " + stepRatio + "\n" : "");
+
+                        MAPX.add_note(mapx, lang, "PROCESSING STEP", stepText);
+                    }
                 }
             }
         }
-    }
 
 
     // === Temporal
