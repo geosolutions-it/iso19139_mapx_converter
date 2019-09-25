@@ -6,7 +6,7 @@ JS functions to translate ISO19139 from/to MapX format
 Grab the source by git cloning and run
 
 ```shell
-node install
+npm install
 ```
 
 to install the required dependencies.
