@@ -28,8 +28,8 @@ function mapx_to_iso19139(mapx, params) {
     }
     metadata["gmd:contact"] = contacts;
 
-    // release date --> metadata
-    metadata["gmd:dateStamp"] = {"gco:Date": MAPX.get_release_date(mapx)};
+    // current date
+    metadata["gmd:dateStamp"] = {"gco:Date": new Date().toISOString()};
 
     // crs
     metadata["gmd:referenceSystemInfo"] =
@@ -39,24 +39,43 @@ function mapx_to_iso19139(mapx, params) {
                         {"gmd:code":
                             {"gco:CharacterString": MAPX.get_crs_code(mapx)}}}}};
 
-
+    dates = []
+    if(MAPX.exist_release_date(mapx)) {
+        dates.push({"gmd:CI_Date":
+                        {"gmd:date":
+                            // modified date --> dataset
+                            {"gco:Date" : MAPX.get_release_date(mapx)},
+                        "gmd:dateType":
+                            {"gmd:CI_DateTypeCode":
+                                { "@codeListValue":"publication",
+                                  "@codeList": "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode"}}
+                        }
+                    });        
+    }    
+    
+    if(MAPX.exist_modified_date(mapx) && 
+            (! MAPX.exist_release_date(mapx) || 
+                ( MAPX.get_modified_date(mapx) != MAPX.get_release_date(mapx)))) {
+            
+        dates.push({"gmd:CI_Date":
+                        {"gmd:date":
+                            // modified date --> dataset
+                            {"gco:Date" : MAPX.get_modified_date(mapx)},
+                        "gmd:dateType":
+                            {"gmd:CI_DateTypeCode":
+                                { "@codeListValue":"revision",
+                                  "@codeList": "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode"}}
+                        }
+                    });        
+    }
+    
     var identification = {};
     identification["gmd:citation"] =
         {"gmd:CI_Citation":
             // title
             {"gmd:title":
                 {"gco:CharacterString": MAPX.get_title(mapx,lang)},
-            "gmd:date":
-                {"gmd:CI_Date":
-                    {"gmd:date":
-                        // modified date --> dataset
-                        {"gco:Date" : MAPX.get_modified_date(mapx)},
-                    "gmd:dateType":
-                        {"gmd:CI_DateTypeCode":
-                            { "@codeListValue":"revision",
-                              "@codeList": "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode"}}
-                    }
-                }
+             "gmd:date": dates
             }
         };
 
@@ -126,17 +145,22 @@ function mapx_to_iso19139(mapx, params) {
 
     // temporal
     if(! MAPX.is_timeless(mapx)) {
+        period = {}
+        period["@gml:id"] = "missing";
+        
+        if(MAPX.exist_temporal_start(mapx)) {
+            period["gml:beginPosition"] =  MAPX.get_temporal_start(mapx)
+        }
+        if(MAPX.exist_temporal_end(mapx)) {
+            period["gml:endPosition"] =  MAPX.get_temporal_end(mapx)
+        }
+        
         extents.push(
             {"gmd:EX_Extent":
                 {"gmd:temporalElement":
                     {"gmd:EX_TemporalExtent":
                         {"gmd:extent":
-                            {"gml:TimePeriod":
-                                {"@gml:id" : "missing",
-                                "gml:beginPosition": MAPX.get_temporal_start(mapx),
-                                "gml:endPosition": MAPX.get_temporal_end(mapx)
-                                }
-                            }
+                            {"gml:TimePeriod": period}
                         }
                     }
                 }
@@ -179,6 +203,18 @@ function mapx_to_iso19139(mapx, params) {
                     }
                 }
             };
+    }
+    
+    if(MAPX.get_homepage(mapx)) {
+        resources.push(
+                {"gmd:CI_OnlineResource":
+                    {"gmd:linkage":
+                        {"gmd:URL": MAPX.get_homepage(mapx) },
+                    "gmd:description":
+                        {"gco:CharacterString": "Homepage"}
+                    }
+                }
+        )
     }
 
 

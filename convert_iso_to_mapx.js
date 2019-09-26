@@ -87,7 +87,7 @@ function iso19139_to_mapx(data, params) {
         if (isoLang.length == 2) {
             lang = isoLang;
         } else {
-            lang = UTIL.LANG_MAPPING_I2M[isoLang];
+            lang = UTILS.LANG_MAPPING_I2M[isoLang];
         }
 
         if (!lang) {
@@ -631,5 +631,7 @@ function addCostraints(mapx, constraintsList, context) {
 }
 
 module.exports = {
-        iso19139_to_mapx
+        iso19139_to_mapx,
+        getFirstFromPath,
+        findFirstFromPath
 };

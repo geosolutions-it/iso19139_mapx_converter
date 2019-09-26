@@ -149,6 +149,9 @@ module.exports = {
     get_release_date: function (mapx) {
         return mapx['temporal']['issuance']['released_at'];
     },
+    exist_release_date: function (mapx) {
+        return mapx['temporal']['issuance']['released_at'] != '0001-01-01';
+    },
 
     set_modified_date: function (mapx, date) {
         checkDate(date)
@@ -156,6 +159,9 @@ module.exports = {
     },
     get_modified_date: function (mapx) {
         return mapx['temporal']['issuance']['modified_at'];
+    },
+    exist_modified_date: function (mapx) {
+        return mapx['temporal']['issuance']['modified_at'] != '0001-01-01';
     },
 
     set_periodicity: function (mapx, periodicity) {
@@ -186,6 +192,12 @@ module.exports = {
     },
     get_temporal_end: function (mapx) {
         return mapx['temporal']['range']['end_at'];
+    },
+    exist_temporal_start: function (mapx) {
+        return mapx['temporal']['range']['start_at'] != '0001-01-01';
+    },
+    exist_temporal_end: function (mapx) {
+        return mapx['temporal']['range']['end_at'] != '0001-01-01';
     },
 
     set_crs: function (mapx, code, url) {
@@ -225,6 +237,9 @@ module.exports = {
 
     set_homepage: function (mapx, url) {
         mapx['origin']['homepage']['url'] = url
+    },
+    get_homepage: function (mapx) {
+        return mapx['origin']['homepage']['url'];
     },
 
     add_source: function (mapx, url, is_download_link) {
