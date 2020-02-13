@@ -79,7 +79,7 @@ function iso19139_to_mapx(data, params) {
     if(log)
         console.log("METADATA ID", uuid)
 
-        
+
     // Detect language
     var lang;
     var isoLang = getFirstFromPath(identNode, ["language", GCO_CHAR_NAME]);
@@ -454,9 +454,12 @@ function addContacts(mapx, context, isoContacts) {
 
 function mapContact(parsedContact) {
     var names = [];
-    names.push(parsedContact[RP_INDIVIDUAL_NAME]);
-    names.push(parsedContact[RP_POSITION_NAME]);
-    names.push(parsedContact[RP_ORG_NAME]);
+    if(parsedContact[RP_INDIVIDUAL_NAME])
+        names.push(parsedContact[RP_INDIVIDUAL_NAME]);
+    if(parsedContact[RP_POSITION_NAME])
+        names.push(parsedContact[RP_POSITION_NAME]);
+    if(parsedContact[RP_ORG_NAME])
+        names.push(parsedContact[RP_ORG_NAME]);
     var retnames = names.join(", ");
 
     var addrs = [];
