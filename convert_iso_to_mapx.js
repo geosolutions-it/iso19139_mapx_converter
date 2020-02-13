@@ -439,6 +439,10 @@ function parseResponsibleParty(rp) {
     //"role":[{"CI_RoleCode":[{"$":{"codeListValue":"pointOfContact","codeList":"http://standa...
     var rolecode = getFirstFromPath(rp, [RP_ROLE, RP_CI_ROLECODE]);
     var roleValue = rolecode ? rolecode["$"][ATTR_CLV] : "unknown";
+
+    if( roleValue in UTILS.ROLE_MAPPING_TRANS) {
+        roleValue = UTILS.ROLE_MAPPING_TRANS[roleValue];
+    }
     rp_map[RP_ROLE] = roleValue;
 
     return rp_map;

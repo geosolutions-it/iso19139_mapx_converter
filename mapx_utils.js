@@ -1,10 +1,10 @@
-/* 
+/*
  */
 
 module.exports = {
         PARAM_LOG_INFO_NAME: "log_info",
         PARAM_LOG_DEBUG_NAME: "log_debug",
-    
+
         LANG_MAPPING_I2M: {
             "eng": "en",
             "fre": "fr",
@@ -20,7 +20,7 @@ module.exports = {
             "fas": "fa",
             "pus": "ps"
         },
-        
+
         LANG_MAPPING_M2I: {
           "en" : "eng",
           "fr" : "fra",
@@ -33,7 +33,7 @@ module.exports = {
           "fa" : "per",
           "ps" : "pus"
         },
-               
+
         FREQ_MAPPING_I2M:  {
             "continual":    "continual" ,
             "daily":        "daily" ,
@@ -50,7 +50,7 @@ module.exports = {
         },
         FREQ_MAPPING_M2I:  {
             "continual"   : "continual",
-            "daily"       : "daily",    
+            "daily"       : "daily",
             "weekly"      : "weekly",
             "fortnightly" : "fortnightly",
             "monthly"     : "monthly",
@@ -61,7 +61,23 @@ module.exports = {
             "irregular"   : "irregular",
             "not_planned" : "notPlanned",
             "unknown"     : "unknown"
+        },
+
+        ROLE_MAPPING_TRANS: {
+            "resourceProvider" : "Resource provider",
+            "custodian" : "Custodian",
+            "owner" : "Owner",
+            "user" : "User",
+            "distributor" : "Distributor",
+            "originator" : "Originator",
+            "pointOfContact" : "Point of Contact",
+            "principalInvestigator" : "Principal investigator",
+            "processor" : "Processor",
+            "publisher" : "Publisher",
+            "author" : "Author"
         }
+
+
 };
 
 

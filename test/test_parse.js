@@ -158,6 +158,17 @@ it('#2 I2M comma separated contacts' , function(done) {
     done();
 });
 
+it('#3 I2M role codes' , function(done) {
+
+    var mapx = load_xml(__dirname + "/data/contacts_01.xml")
+
+    cont = MAPX.get_contacts(mapx)[0]
+
+    assert.equal(cont.function, 'Metadata  Point of Contact');
+
+    done();
+});
+
 
 function get_date_from_iso(iso_xml) {
 
