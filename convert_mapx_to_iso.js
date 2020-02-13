@@ -50,13 +50,13 @@ function mapx_to_iso19139(mapx, params) {
                                 { "@codeListValue":"publication",
                                   "@codeList": "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode"}}
                         }
-                    });        
-    }    
-    
-    if(MAPX.exist_modified_date(mapx) && 
-            (! MAPX.exist_release_date(mapx) || 
+                    });
+    }
+
+    if(MAPX.exist_modified_date(mapx) &&
+            (! MAPX.exist_release_date(mapx) ||
                 ( MAPX.get_modified_date(mapx) != MAPX.get_release_date(mapx)))) {
-            
+
         dates.push({"gmd:CI_Date":
                         {"gmd:date":
                             // modified date --> dataset
@@ -66,9 +66,9 @@ function mapx_to_iso19139(mapx, params) {
                                 { "@codeListValue":"revision",
                                   "@codeList": "http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode"}}
                         }
-                    });        
+                    });
     }
-    
+
     var identification = {};
     identification["gmd:citation"] =
         {"gmd:CI_Citation":
@@ -110,7 +110,12 @@ function mapx_to_iso19139(mapx, params) {
     if(licenses.length > 0) {
         var oc = [];
         for(var l of licenses) {
-            oc.push({"gco:CharacterString": l["name"] + ": " + l["text"]});
+            if(l["name"]) {
+                txt = l["name"] + ": " + l["text"];
+            } else {
+                txt = l["text"];
+            }
+            oc.push({"gco:CharacterString": txt});
         }
         identification["gmd:resourceConstraints"] =
             {"gmd:MD_LegalConstraints":
@@ -149,7 +154,7 @@ function mapx_to_iso19139(mapx, params) {
         period["@gml:id"] = "missing";
 
         add_extent = false;
-        
+
         if(MAPX.exist_temporal_start(mapx)) {
             period["gml:beginPosition"] =  MAPX.get_temporal_start(mapx)
             add_extent = true;
@@ -158,7 +163,7 @@ function mapx_to_iso19139(mapx, params) {
             period["gml:endPosition"] =  MAPX.get_temporal_end(mapx)
             add_extent = true;
         }
-        
+
         if(add_extent) {
             extents.push(
                 {"gmd:EX_Extent":
@@ -219,7 +224,7 @@ function mapx_to_iso19139(mapx, params) {
             );
         }
     }
-    
+
     if(MAPX.get_homepage(mapx)) {
         resources.push(
                 {"gmd:CI_OnlineResource":

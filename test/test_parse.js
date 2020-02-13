@@ -17,6 +17,9 @@ const findFirstFromPath = I2M.findFirstFromPath;
 const MAPX = require("../mapx");
 
 const DATE_DEFAULT = "0001-01-01";
+const MD_ROOT_NAME = 'gmd:MD_Metadata';
+const DATA_IDENT_NAME = 'gmd:MD_DataIdentification';
+
 
 it('Basic MAPX object parsing', function(done) {
 
@@ -127,9 +130,6 @@ it('Check begin time extent', function(done) {
 
 it('#5 M2I check default date mapping', function(done) {
 
-    const MD_ROOT_NAME = 'gmd:MD_Metadata';
-    const DATA_IDENT_NAME = 'gmd:MD_DataIdentification';
-
     var mapx = create_sample_mapx();
     assert.isTrue(MAPX.is_timeless(mapx));
 
@@ -158,9 +158,6 @@ it('#5 M2I check default date mapping', function(done) {
 
 it('#7 M2I add annexes', function(done) {
 
-//    const MD_ROOT_NAME = 'gmd:MD_Metadata';
-//    const DATA_IDENT_NAME = 'gmd:MD_DataIdentification';
-
     var mapx = create_sample_mapx();
     assert.equal(3, MAPX.get_references(mapx).length);
     assert.equal("ref3", MAPX.get_references(mapx)[2]);
@@ -188,6 +185,23 @@ it('#7 M2I add annexes', function(done) {
     }
 
     assert.equal(3, annex_cnt);
+
+    done();
+});
+
+it('#8 constraints semicolon', function(done) {
+
+    var mapx = create_sample_mapx();
+    assert.equal(3, MAPX.get_licenses(mapx).length);
+
+    iso_json = create_nomalized_iso_json(mapx);
+    var identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
+    var legalNode = identNode["gmd:resourceConstraints"][0]["gmd:MD_LegalConstraints"][0];
+    // console.log("MD_LegalConstraints ---> ", JSON.stringify(legalNode,null,3));
+    var otherNode = legalNode["gmd:otherConstraints"];
+    assert.equal(3, otherNode.length);
+    assert.equal('licname1: lictext1', otherNode[0]['gco:CharacterString'][0]);
+    assert.equal('lictext3',           otherNode[2]['gco:CharacterString'][0]);
 
     done();
 });
@@ -333,7 +347,7 @@ function create_sample_mapx() {
 
     MAPX.add_license(mapx, "licname1", "lictext1");
     MAPX.add_license(mapx, "licname2", "lictext2");
-    MAPX.add_license(mapx, "licname3", "lictext3");
+    MAPX.add_license(mapx, "", "lictext3");
 
     MAPX.set_notes(mapx, "en", "note1", "textnote1");
 
