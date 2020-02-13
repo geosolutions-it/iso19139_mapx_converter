@@ -194,7 +194,7 @@ function mapx_to_iso19139(mapx, params) {
                     {"gmd:CI_OnlineResource":
                         {"gmd:linkage":
                             {"gmd:URL": source["url"] },
-                        "gmd:description":
+                        "gmd:name":
                             {"gco:CharacterString": source["is_download_link"]?"Downloadable resource":"Other resource"}
                         }
                     }
@@ -216,7 +216,7 @@ function mapx_to_iso19139(mapx, params) {
                 {"gmd:CI_OnlineResource":
                     {"gmd:linkage":
                         {"gmd:URL": MAPX.get_homepage(mapx) },
-                    "gmd:description":
+                    "gmd:name":
                         {"gco:CharacterString": "Homepage"}
                     }
                 }
