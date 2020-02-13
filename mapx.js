@@ -1,5 +1,5 @@
 // Model for an object containing MAPX information.
-// 
+//
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
 const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps']
@@ -7,7 +7,7 @@ const PERIODICITY = ["continual", "daily", "weekly", "fortnightly", "monthly", "
     "annually", "as_needed", "irregular", "not_planned", "unknown"]
 
 module.exports = {
-    
+
     LANGUAGES : LANGUAGES,
     PERIODICITY : PERIODICITY,
 
@@ -88,7 +88,7 @@ module.exports = {
     get_all_titles: function (mapx) {
         return mapx['text']['title'];
     },
-        
+
     set_abstract: function (mapx, lang, value) {
         checkLang(lang)
         mapx['text']['abstract'][lang] = value
@@ -99,7 +99,7 @@ module.exports = {
     get_all_abstracts: function (mapx) {
         return mapx['text']['abstract'];
     },
-    
+
     set_notes: function (mapx, lang, value) {
         checkLang(lang)
         mapx['text']['notes'][lang] = value
@@ -109,7 +109,7 @@ module.exports = {
     },
     get_all_notes: function (mapx) {
         return mapx['text']['notes'];
-    },    
+    },
     add_note: function (mapx, lang, title, value) {
         if(value) {
             checkLang(lang);
@@ -132,7 +132,7 @@ module.exports = {
     },
     get_languages: function (mapx) {
         var ret = [];
-        for (var code of mapx['text']['language']['codes']) 
+        for (var code of mapx['text']['language']['codes'])
             ret.push(code["code"]);
         return ret;
     },
@@ -221,7 +221,7 @@ module.exports = {
             mapx['spatial']['bbox']['lat_min'],
             mapx['spatial']['bbox']['lat_max']]
     },
-    
+
     add_contact: function (mapx, func, name, addr, mail) {
 
         mapx['contact']['contacts'].push({
@@ -269,6 +269,14 @@ module.exports = {
     add_reference: function (mapx, url) {
         mapx['annex']['references'].push({'url': url})
     },
+    get_references: function (mapx) {
+        ret = []
+        for (var u of mapx['annex']['references']) {
+            ret.push(u['url']);
+        }
+        return ret;
+    },
+
 
     set_integrity: function (mapx, i1, i2, value) {
         mapx['integrity']['di_' + i1 + "_" + i2] = value

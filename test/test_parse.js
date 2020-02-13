@@ -156,6 +156,42 @@ it('#5 M2I check default date mapping', function(done) {
     done();
 });
 
+it('#7 M2I add annexes', function(done) {
+
+//    const MD_ROOT_NAME = 'gmd:MD_Metadata';
+//    const DATA_IDENT_NAME = 'gmd:MD_DataIdentification';
+
+    var mapx = create_sample_mapx();
+    assert.equal(3, MAPX.get_references(mapx).length);
+    assert.equal("ref3", MAPX.get_references(mapx)[2]);
+
+    iso_json = create_nomalized_iso_json(mapx);
+    const MD_ROOT_NAME = 'gmd:MD_Metadata';
+
+    distrNode = iso_json[MD_ROOT_NAME]['gmd:distributionInfo'][0]["gmd:MD_Distribution"][0];
+    transfNode = distrNode['gmd:transferOptions'][0]['gmd:MD_DigitalTransferOptions'][0];
+    // console.log("MD_DigitalTransferOptions ---> ", JSON.stringify(transfNode));
+    onlineNodes = transfNode['gmd:onLine']; // [0]['gmd:CI_OnlineResource'];
+    // console.log("CI_OnlineResource ---> ", JSON.stringify(onlineNodes));
+
+    assert.equal(6, onlineNodes.length);
+
+    annex_cnt = 0;
+    for (var res of onlineNodes) {
+         // console.log("RES is ", JSON.stringify(res));
+        name = res
+            ["gmd:CI_OnlineResource"][0]
+            ["gmd:name"][0]
+            ["gco:CharacterString"][0];
+        if(name == 'Annex')
+            annex_cnt++;
+    }
+
+    assert.equal(3, annex_cnt);
+
+    done();
+});
+
 
 it('#1 I2M dates' , function(done) {
 

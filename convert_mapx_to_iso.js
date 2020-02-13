@@ -184,10 +184,11 @@ function mapx_to_iso19139(mapx, params) {
 
     metadata["gmd:identificationInfo"] = {"gmd:MD_DataIdentification": identification};
 
+    var resources = [];
+
     // sources
     var sources = MAPX.get_sources(mapx);
     if(sources.length > 0) {
-        var resources = [];
 
         for(var source of sources) {
             resources.push(
@@ -200,15 +201,23 @@ function mapx_to_iso19139(mapx, params) {
                     }
             )
         }
+    }
 
-        metadata["gmd:distributionInfo"] =
-            {"gmd:MD_Distribution":
-                {"gmd:transferOptions":
-                    {"gmd:MD_DigitalTransferOptions":
-                        {"gmd:onLine": resources}
+    // annexes
+    var annexes = MAPX.get_references(mapx);
+    if(annexes.length > 0) {
+
+        for(var annex of annexes) {
+            resources.push(
+                    {"gmd:CI_OnlineResource":
+                        {"gmd:linkage":
+                            {"gmd:URL": annex },
+                        "gmd:name":
+                            {"gco:CharacterString": "Annex"}
+                        }
                     }
-                }
-            };
+            );
+        }
     }
     
     if(MAPX.get_homepage(mapx)) {
@@ -223,8 +232,16 @@ function mapx_to_iso19139(mapx, params) {
         )
     }
 
-
-    // references
+    if(resources.length > 0) {
+        metadata["gmd:distributionInfo"] =
+            {"gmd:MD_Distribution":
+                {"gmd:transferOptions":
+                    {"gmd:MD_DigitalTransferOptions":
+                        {"gmd:onLine": resources}
+                    }
+                }
+            };
+    }
 
 
     // create an UUID on the hash of all the fields stored so far
