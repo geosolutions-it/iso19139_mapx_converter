@@ -147,25 +147,31 @@ function mapx_to_iso19139(mapx, params) {
     if(! MAPX.is_timeless(mapx)) {
         period = {}
         period["@gml:id"] = "missing";
+
+        add_extent = false;
         
         if(MAPX.exist_temporal_start(mapx)) {
             period["gml:beginPosition"] =  MAPX.get_temporal_start(mapx)
+            add_extent = true;
         }
         if(MAPX.exist_temporal_end(mapx)) {
             period["gml:endPosition"] =  MAPX.get_temporal_end(mapx)
+            add_extent = true;
         }
         
-        extents.push(
-            {"gmd:EX_Extent":
-                {"gmd:temporalElement":
-                    {"gmd:EX_TemporalExtent":
-                        {"gmd:extent":
-                            {"gml:TimePeriod": period}
+        if(add_extent) {
+            extents.push(
+                {"gmd:EX_Extent":
+                    {"gmd:temporalElement":
+                        {"gmd:EX_TemporalExtent":
+                            {"gmd:extent":
+                                {"gml:TimePeriod": period}
+                            }
                         }
                     }
                 }
-            }
-        );
+            );
+        }
     }
 
     identification["gmd:extent"] = extents;

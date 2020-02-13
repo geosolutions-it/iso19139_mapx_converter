@@ -8,6 +8,8 @@ var expect  = chai.expect;
 const xml2js = require('xml2js');
 const builder = require('xmlbuilder');
 
+const M2I = require("../convert_mapx_to_iso");
+
 const I2M = require("../convert_iso_to_mapx");
 const getFirstFromPath = I2M.getFirstFromPath;
 const findFirstFromPath = I2M.findFirstFromPath;
@@ -40,8 +42,7 @@ it('MAPX to ISO parsing', function(done) {
 
     var mapx = create_sample_mapx();
 
-    const m2i = require("../convert_mapx_to_iso");
-    var iso = m2i.mapx_to_iso19139(mapx);
+    var iso = M2I.mapx_to_iso19139(mapx);
 
     const builder = require('xmlbuilder');
     var xml = builder.create(iso, { encoding: 'utf-8' })
@@ -57,8 +58,7 @@ it('Check M2I dates', function(done) {
 
     var mapx = create_sample_mapx();
 
-    const m2i = require("../convert_mapx_to_iso");
-    var iso = m2i.mapx_to_iso19139(mapx);
+    var iso = M2I.mapx_to_iso19139(mapx);
     var xml = builder.create(iso, { encoding: 'utf-8' })
     var xmlFormatted = xml.end({ pretty: true });
 
@@ -76,8 +76,7 @@ it('Check void M2I dates', function(done) {
 
     var mapx = MAPX.create_object();
 
-    const m2i = require("../convert_mapx_to_iso");
-    var iso = m2i.mapx_to_iso19139(mapx);
+    var iso = M2I.mapx_to_iso19139(mapx);
     var xml = builder.create(iso, { encoding: 'utf-8' })
     var xmlFormatted = xml.end({ pretty: true });
 
@@ -90,15 +89,12 @@ it('Check void M2I dates', function(done) {
 
 
 it('Check equals M2I dates', function(done) {
-    const getFirstFromPath = require("../convert_iso_to_mapx").getFirstFromPath;
-
     var mapx = MAPX.create_object();
 
     MAPX.set_modified_date(mapx, "2019-09-25");
     MAPX.set_release_date(mapx, "2019-09-25");
 
-    const m2i = require("../convert_mapx_to_iso");
-    var iso = m2i.mapx_to_iso19139(mapx);
+    var iso = M2I.mapx_to_iso19139(mapx);
     var xml = builder.create(iso, { encoding: 'utf-8' })
     var xmlFormatted = xml.end({ pretty: true });
 
@@ -113,13 +109,10 @@ it('Check equals M2I dates', function(done) {
 
 it('Check begin time extent', function(done) {
 
-    const getFirstFromPath = require("../convert_iso_to_mapx").getFirstFromPath;
-
     var mapx = create_sample_mapx();
     MAPX.set_temporal_start(mapx, "2019-09-26")
 
-    const m2i = require("../convert_mapx_to_iso");
-    var iso = m2i.mapx_to_iso19139(mapx);
+    var iso = M2I.mapx_to_iso19139(mapx);
     var xml = builder.create(iso, { encoding: 'utf-8' })
     var xmlFormatted = xml.end({ pretty: true });
 //    console.log("ISO ", xmlFormatted);
@@ -128,6 +121,37 @@ it('Check begin time extent', function(done) {
 
     assert.equal(Object.keys(dates).length, 1);
     assert.equal(dates['start'],"2019-09-26");
+
+    done();
+});
+
+it('#5 M2I check default date mapping', function(done) {
+
+    const MD_ROOT_NAME = 'gmd:MD_Metadata';
+    const DATA_IDENT_NAME = 'gmd:MD_DataIdentification';
+
+    var mapx = create_sample_mapx();
+    assert.isTrue(MAPX.is_timeless(mapx));
+
+    var iso_json = create_nomalized_iso_json(mapx);
+    var identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
+    var timeExtent = findFirstFromPath(identNode, [ "gmd:extent", "gmd:EX_Extent", "gmd:temporalElement"]);
+    assert.isUndefined(timeExtent);
+
+
+    mapx = create_sample_mapx();
+    MAPX.set_temporal_start(mapx, "2019-09-26");
+    iso_json = create_nomalized_iso_json(mapx);
+    identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
+    timeExtent = findFirstFromPath(identNode, [ "gmd:extent", "gmd:EX_Extent", "gmd:temporalElement"]);
+    assert.isDefined(timeExtent);
+
+    mapx = create_sample_mapx();
+    MAPX.set_temporal_start(mapx, DATE_DEFAULT);
+    iso_json = create_nomalized_iso_json(mapx);
+    identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
+    timeExtent = findFirstFromPath(identNode, [ "gmd:extent", "gmd:EX_Extent", "gmd:temporalElement"]);
+    assert.isUndefined(timeExtent);
 
     done();
 });
@@ -214,6 +238,17 @@ function get_date_from_iso(iso_xml) {
     return ret;
 }
 
+
+function create_nomalized_iso_json(mapx) {
+    var iso = M2I.mapx_to_iso19139(mapx);
+    var xml = builder.create(iso, { encoding: 'utf-8' })
+    var xmlFormatted = xml.end({ pretty: true });
+
+    var result;
+//    var prc = {tagNameProcessors: [xml2js.processors.stripPrefix]};
+    new xml2js.Parser().parseString(xmlFormatted, (e, r) => { result = r });
+    return result;
+}
 
 function get_time_extent_from_iso(iso_xml) {
 
