@@ -462,11 +462,11 @@ function mapContact(parsedContact) {
         names.push(parsedContact[RP_INDIVIDUAL_NAME]);
     if(parsedContact[RP_POSITION_NAME])
         names.push(parsedContact[RP_POSITION_NAME]);
-    if(parsedContact[RP_ORG_NAME])
-        names.push(parsedContact[RP_ORG_NAME]);
     var retnames = names.join(", ");
 
     var addrs = [];
+    if(parsedContact[RP_ORG_NAME])
+        addrs.push(parsedContact[RP_ORG_NAME]);
     if (parsedContact[RP_ADDR_DELIVERY])
         addrs.push("Address: " + parsedContact[RP_ADDR_DELIVERY]);
     if (parsedContact[RP_ADDR_CITY])

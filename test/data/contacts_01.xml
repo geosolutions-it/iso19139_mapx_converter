@@ -24,8 +24,8 @@
          <gmd:organisationName>
             <gco:CharacterString>UN Environment-GRID</gco:CharacterString>
          </gmd:organisationName>
-         <gmd:positionName gco:nilReason="missing">
-            <gco:CharacterString/>
+         <gmd:positionName>
+             <gco:CharacterString>CTO</gco:CharacterString>
          </gmd:positionName>
          <gmd:contactInfo>
             <gmd:CI_Contact>
@@ -117,7 +117,7 @@ changes in ocean acidification. Raw stressor data from "Benjamin Halpern, Melani
                   <gco:CharacterString>Benjamin S. Halpern</gco:CharacterString>
                </gmd:individualName>
                <gmd:organisationName>
-                  <gco:CharacterString>Bren School of Environmental Science and Management, University of California, Santa Barbara, California 93106, USA</gco:CharacterString>
+                  <gco:CharacterString>Bren School of Environmental Science and Management, University of California</gco:CharacterString>
                </gmd:organisationName>
                <gmd:positionName gco:nilReason="missing">
                   <gco:CharacterString/>
@@ -140,16 +140,16 @@ changes in ocean acidification. Raw stressor data from "Benjamin Halpern, Melani
                               <gco:CharacterString/>
                            </gmd:deliveryPoint>
                            <gmd:city gco:nilReason="missing">
-                              <gco:CharacterString/>
+                               <gco:CharacterString>Santa Barbara</gco:CharacterString>
                            </gmd:city>
                            <gmd:administrativeArea gco:nilReason="missing">
-                              <gco:CharacterString/>
+                               <gco:CharacterString>California</gco:CharacterString>
                            </gmd:administrativeArea>
-                           <gmd:postalCode gco:nilReason="missing">
-                              <gco:CharacterString/>
+                           <gmd:postalCode>
+                               <gco:CharacterString>93106</gco:CharacterString>
                            </gmd:postalCode>
                            <gmd:country gco:nilReason="missing">
-                              <gco:CharacterString/>
+                               <gco:CharacterString>USA</gco:CharacterString>
                            </gmd:country>
                            <gmd:electronicMailAddress>
                               <gco:CharacterString>halpern@bren.ucsb.edu</gco:CharacterString>

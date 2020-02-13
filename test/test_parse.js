@@ -1,8 +1,9 @@
 /*
  */
 
-var expect  = require('chai').expect;
-const assert = require('assert');
+var chai = require('chai');
+var assert = chai.assert;
+var expect  = chai.expect;
 
 const xml2js = require('xml2js');
 const builder = require('xmlbuilder');
@@ -153,7 +154,7 @@ it('#2 I2M comma separated contacts' , function(done) {
 
     cont = MAPX.get_contacts(mapx)[0]
 
-    assert.equal(cont.name, 'UN Environment-GRID');
+    assert.equal(cont.name, 'CTO');
 
     done();
 });
@@ -165,6 +166,18 @@ it('#3 I2M role codes' , function(done) {
     cont = MAPX.get_contacts(mapx)[0]
 
     assert.equal(cont.function, 'Metadata  Point of Contact');
+
+    done();
+});
+
+it('#4 I2M Org as address' , function(done) {
+
+    var mapx = load_xml(__dirname + "/data/contacts_01.xml")
+
+    cont = MAPX.get_contacts(mapx)[1]
+
+    assert.notInclude(cont.name, ('Bren School'));
+    assert.isTrue(cont.address.startsWith('Bren School'));
 
     done();
 });
