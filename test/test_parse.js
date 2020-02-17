@@ -189,7 +189,7 @@ it('#7 M2I add annexes', function(done) {
     done();
 });
 
-it('#8 constraints semicolon', function(done) {
+it('#8 M2I constraints semicolon', function(done) {
 
     var mapx = create_sample_mapx();
     assert.equal(3, MAPX.get_licenses(mapx).length);
@@ -202,6 +202,25 @@ it('#8 constraints semicolon', function(done) {
     assert.equal(3, otherNode.length);
     assert.equal('licname1: lictext1', otherNode[0]['gco:CharacterString'][0]);
     assert.equal('lictext3',           otherNode[2]['gco:CharacterString'][0]);
+
+    done();
+});
+
+it('#9 M2I point of concats', function(done) {
+
+    var mapx = create_sample_mapx();
+    MAPX.add_contact(mapx, "metadata f1", "name1", "addr1", "mail@mail1");
+    MAPX.add_contact(mapx, "metadata f2", "name2", "addr2", "mail@mail2");
+
+    assert.equal(5, MAPX.get_contacts(mapx).length);
+    iso_json = create_nomalized_iso_json(mapx);
+
+    var md_contacts = iso_json[MD_ROOT_NAME]['gmd:contact'];
+    assert.equal(2, md_contacts.length);
+
+    var identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
+    var data_poc = identNode["gmd:pointOfContact"];
+    assert.equal(3, data_poc.length);
 
     done();
 });

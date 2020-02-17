@@ -22,11 +22,19 @@ function mapx_to_iso19139(mapx, params) {
     metadata["gmd:fileIdentifier"] = {"gco:CharacterString": fileIdentifier};
     metadata["gmd:language"] = {"gco:CharacterString": lang};
 
-    contacts = []
+    metadata_contacts = []
+    data_contacts = []
+
     for(var c of MAPX.get_contacts(mapx)) {
-        contacts.push(createResponsibleParty(c));
+        f = c["function"];
+        if(f.toLowerCase().includes('metadata')) {
+            metadata_contacts.push(createResponsibleParty(c));
+        } else {
+            data_contacts.push(createResponsibleParty(c));
+        }
     }
-    metadata["gmd:contact"] = contacts;
+
+    metadata["gmd:contact"] = metadata_contacts;
 
     // current date
     metadata["gmd:dateStamp"] = {"gco:Date": new Date().toISOString()};
@@ -81,6 +89,9 @@ function mapx_to_iso19139(mapx, params) {
 
     // abstract
     identification["gmd:abstract"] = {"gco:CharacterString" : MAPX.get_abstract(mapx, lang)};
+
+    // data points of concat
+    identification["gmd:pointOfContact"] = data_contacts;
 
     // frequency
     identification["gmd:resourceMaintenance"] =
