@@ -208,11 +208,16 @@ function iso19139_to_mapx(data, params) {
         datemap[typeValue] = mapxdate;
     }
 
+    // The Publication Date field must be converted into “temporal>issuance>released_at”.
+    // The DateStamp field should not be used basically.
+    // In case the Publication Date field is not provided, the dateStamp field should be used instead for the issuance released date.
+
+    // pub null, rev null --> rev = timestamp
+
     // = Released
     var releaseDate = getFirstDefined([
             datemap["publication"],
             datemap["creation"],
-            metadataDate,
             DATE_DEFAULT]);
 
     // = Modified
@@ -220,8 +225,11 @@ function iso19139_to_mapx(data, params) {
             datemap["revision"],
             datemap["publication"],
             datemap["creation"],
-            metadataDate,
             DATE_DEFAULT]);
+
+    if(releaseDate == DATE_DEFAULT && updateDate == DATE_DEFAULT) {
+        releaseDate = metadataDate;
+    }
 
     MAPX.set_release_date(mapx, releaseDate);
     MAPX.set_modified_date(mapx, updateDate);

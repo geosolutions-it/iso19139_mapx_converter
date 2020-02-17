@@ -235,7 +235,7 @@ it('#1 I2M dates' , function(done) {
 
     mapx = load_xml(__dirname + "/data/no_pubdate_no_revision.xml")
 
-    assert.equal(MAPX.get_release_date(mapx), DATE_DEFAULT);
+    assert.equal(MAPX.get_release_date(mapx), '2020-01-01');
     assert.equal(MAPX.get_modified_date(mapx), DATE_DEFAULT);
 
     done();
