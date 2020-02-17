@@ -67,6 +67,7 @@ module.exports = {
 
         mapx['annex'] = {'references': []}
 
+        // DEPRECATED
         integrity = {}
         mapx['integrity'] = integrity
         for (var i1 = 1; i1 < 5; i1++) {
@@ -277,7 +278,7 @@ module.exports = {
         return ret;
     },
 
-
+    // DEPRECATED
     set_integrity: function (mapx, i1, i2, value) {
         mapx['integrity']['di_' + i1 + "_" + i2] = value
     }
