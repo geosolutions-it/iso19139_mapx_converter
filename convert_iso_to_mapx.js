@@ -2,8 +2,11 @@
 //
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-const MAPX = require("./mapx");
-const UTILS = require("./mapx_utils");
+import xml2js from "xml2js";
+
+import * as MAPX from "./mapx.js";
+import * as UTILS from "./mapx_utils.js";
+
 
 const ATTR_CLV = "codeListValue";
 const MD_ROOT_NAME = 'MD_Metadata';
@@ -12,7 +15,6 @@ const DATA_IDENT_NAME = 'MD_DataIdentification';
 const SERV_IDENT_NAME = 'SRV_ServiceIdentification';
 const CI_RP = "CI_ResponsibleParty";
 const CI_CITATION = "CI_Citation";
-
 
 
 const FREQ_D41_MAPPING= {
@@ -33,7 +35,16 @@ const FREQ_D41_MAPPING= {
 const DATE_DEFAULT = "0001-01-01";
 
 
-function iso19139_to_mapx(data, params) {
+export function iso19139_to_mapx_t_t(isostring) {
+    var isojson = xml2json(isostring);
+    var mapxjson = iso19139_to_mapx(isojson, null);
+    var mapxstring = JSON.stringify(mapxjson, null, 3);
+    
+    return mapxstring;
+}
+        
+
+export function iso19139_to_mapx(data, params) {
 
     var log = params ? params[UTILS.PARAM_LOG_INFO_NAME] : false;
 
@@ -377,21 +388,6 @@ function iso19139_to_mapx(data, params) {
     addCostraints(mapx, mdRoot["metadataConstraints"], "Metadata");
     addCostraints(mapx, identNode["resourceConstraints"], "Dataset");
 
-    // === Integrity
-
-    //1_1: Does the data provider have the capacity to document the data and provide basic metadata (e.g.
-    //name, coordinate system, year, update frequency, description, and methodology)?
-    MAPX.set_integrity(mapx, 1,1, "1"); // we're populating the metadata from an existing ISO metadata
-
-    //_2_4: string , x ∈ { "0" (default) , "1" , "2" , "3" }
-    // Is the data compliant with applicable Open Geospatial Consortium standards, e.g. Web Map Service (WMS)?
-    MAPX.set_integrity(mapx, 2,4, isOgc?"1":"0");
-
-    //di_4_1: string , x ∈ { "0" (default) , "1" , "2" , "3" }
-    // The data provider is able to maintain, update and publish it on a regular basis
-    var i41 = FREQ_D41_MAPPING[MAPX.get_periodicity(mapx)];
-    MAPX.set_integrity(mapx, 4,1, i41);
-
     return mapx;
 }
 
@@ -422,7 +418,7 @@ const RP_CI_ROLECODE = "CI_RoleCode";
 
 function parseResponsibleParty(rp) {
 
-    rp_map = {}
+    var rp_map = {}
 
     rp_map[RP_INDIVIDUAL_NAME] = getFirstFromPath(rp, [RP_INDIVIDUAL_NAME, GCO_CHAR_NAME]);
     rp_map[RP_POSITION_NAME] = getFirstFromPath(rp, [RP_POSITION_NAME, GCO_CHAR_NAME]);
@@ -495,7 +491,7 @@ function mapContact(parsedContact) {
     return [parsedContact[RP_ROLE], retnames, retaddr, parsedContact[RP_ADDR_EMAIL]];
 }
 
-function getFirstFromPath(m, path) {
+export function getFirstFromPath(m, path) {
 
     if (m === undefined)
         return undefined;
@@ -514,7 +510,7 @@ function getFirstFromPath(m, path) {
     return nodeset;
 }
 
-function findFirstFromPath(nodeset, path, index) {
+export function findFirstFromPath(nodeset, path, index) {
 
     if (nodeset === undefined)
         return undefined;
@@ -568,7 +564,7 @@ function extractEpsgCode(crsid) {
         /.*\(EPSG\:([0-9]+)\)/,
         /EPSG\:([0-9]+)/]
 
-    for(re of RE) {
+    for(var re of RE) {
         var m = crsid.match(re);
         if(m) {
             return m[1];
@@ -645,8 +641,17 @@ function addCostraints(mapx, constraintsList, context) {
 
 }
 
-module.exports = {
-        iso19139_to_mapx,
-        getFirstFromPath,
-        findFirstFromPath
-};
+const xml2json = function (bodyStr) {
+    var d = {};
+    xml2js.parseString(
+        bodyStr,
+        {
+            tagNameProcessors: [xml2js.processors.stripPrefix]
+        },
+        function (err, result) {
+            d = result;
+        }
+    );
+    
+    return d;
+}

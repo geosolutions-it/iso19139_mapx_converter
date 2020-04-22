@@ -2,19 +2,18 @@
 // 
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-const m2i = require("./convert_mapx_to_iso");
-const UTILS = require("./mapx_utils");
+import * as m2i from "./convert_mapx_to_iso.js";
+import * as UTILS from "./mapx_utils.js";
 
-const builder = require('xmlbuilder');
-const xml2js = require('xml2js');
-const request = require('request');
-const fs = require("fs");
+import xml2js from "xml2js";
+import * as fs from "fs";
+
+import builder from "xmlbuilder";
 
 
 // ===== Parse arguments 
 
-args = [];
-
+var args = [];
 var params = {};
 
 for (let j = 2; j < process.argv.length; j++) {  
@@ -48,9 +47,7 @@ run(source, destination, params)
 
 async function run(source, destination, params) {
 
-    var json = source.startsWith("http") ?
-        await loadFromUrl(source) :
-        loadFromFile(source);
+    var json = loadFromFile(source);
 
     if(json) {
         if(log_debug)
@@ -65,7 +62,7 @@ async function run(source, destination, params) {
         if(log_debug)
             console.log("METADATA as ISO/JSON", JSON.stringify(iso));
         
-        var xml = builder.create(iso, { encoding: 'utf-8' })
+        var xml = builder.create(iso, { encoding: 'utf-8' });
         var xmlFormatted = xml.end({ pretty: true });
 
         if(log_debug)
@@ -82,30 +79,6 @@ async function run(source, destination, params) {
     }
 }
 
-
-async function loadFromUrl(url) {
-
-    try {
-        return await downloadUrl(url);
-        
-    } catch (error) {
-        console.error('ERROR:');
-        console.error(error);
-    }
-}
-
-
-function downloadUrl(url) {
-    return new Promise((resolve, reject) => {
-        request(url, (error, response, body) => {
-            if (error) reject(error);
-            if (response.statusCode != 200) {
-                reject('Invalid status code <' + response.statusCode + '>');
-            }
-            resolve(body);
-        });
-    });
-}
 
 function loadFromFile(url) {
     try {

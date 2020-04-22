@@ -2,30 +2,25 @@
 //
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps']
-const PERIODICITY = ["continual", "daily", "weekly", "fortnightly", "monthly", "quarterly", "biannually",
-    "annually", "as_needed", "irregular", "not_planned", "unknown"]
+export const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps'];
+export const PERIODICITY = ["continual", "daily", "weekly", "fortnightly", "monthly", "quarterly", "biannually",
+    "annually", "as_needed", "irregular", "not_planned", "unknown"];
 
-module.exports = {
+export function create_object() {
 
-    LANGUAGES : LANGUAGES,
-    PERIODICITY : PERIODICITY,
+        var mapx = {};
 
-    create_object: function () {
-
-        mapx = {}
-
-        text = {}
+        var text = {};
         mapx['text'] = text;
 
         for (const name of ['title', 'abstract', 'notes']) {
-            initLanguages(text, name)
+            initLanguages(text, name);
         }
 
-        text['keywords'] = {'keys': []}
-        text['attributes'] = {}
-        text['attributes_alias'] = {}
-        text['language'] = {'codes': []}
+        text['keywords'] = {'keys': []};
+        text['attributes'] = {};
+        text['attributes_alias'] = {};
+        text['language'] = {'codes': []};
 
         mapx['temporal'] = {
             'issuance': {
@@ -38,7 +33,7 @@ module.exports = {
                 'start_at': '0001-01-01',
                 'end_at': '0001-01-01'
             }
-        }
+        };
 
         mapx['spatial'] = {
             'crs': {
@@ -51,242 +46,227 @@ module.exports = {
                 "lat_min": -90,
                 "lat_max": 90
             }
-        }
+        };
 
-        mapx['contact'] = {'contacts': []}
+        mapx['contact'] = {'contacts': []};
 
         mapx['origin'] = {
             'homepage': {'url': undefined},
             'source': {'urls': []}
-        }
+        };
 
         mapx['license'] = {
             'allowDownload': true,
             'licenses': []
-        }
+        };
 
-        mapx['annex'] = {'references': []}
+        mapx['annex'] = {'references': []};
 
-        // DEPRECATED
-        integrity = {}
-        mapx['integrity'] = integrity
-        for (var i1 = 1; i1 < 5; i1++) {
-            for (var i2 = 1; i2 < 5; i2++) {
-                integrity['di_' + i1 + "_" + i2] = "0"
-            }
-        }
+        return mapx;
+}
 
-        return mapx
-    },
+export function set_title(mapx, lang, value) {
+    checkLang(lang);
+    mapx['text']['title'][lang] = value;
+}
+export function  get_title(mapx, lang) {
+    return mapx['text']['title'][lang];
+}
+export function  get_all_titles(mapx) {
+    return mapx['text']['title'];
+}
 
-    set_title: function (mapx, lang, value) {
-        checkLang(lang)
-        mapx['text']['title'][lang] = value
-    },
-    get_title: function (mapx, lang) {
-        return mapx['text']['title'][lang];
-    },
-    get_all_titles: function (mapx) {
-        return mapx['text']['title'];
-    },
+export function set_abstract(mapx, lang, value) {
+    checkLang(lang);
+    mapx['text']['abstract'][lang] = value;
+}
+export function get_abstract(mapx, lang) {
+    return mapx['text']['abstract'][lang];
+}
+export function get_all_abstracts(mapx) {
+    return mapx['text']['abstract'];
+}
 
-    set_abstract: function (mapx, lang, value) {
-        checkLang(lang)
-        mapx['text']['abstract'][lang] = value
-    },
-    get_abstract: function (mapx, lang) {
-        return mapx['text']['abstract'][lang];
-    },
-    get_all_abstracts: function (mapx) {
-        return mapx['text']['abstract'];
-    },
-
-    set_notes: function (mapx, lang, value) {
-        checkLang(lang)
-        mapx['text']['notes'][lang] = value
-    },
-    get_notes: function (mapx, lang) {
-        return mapx['text']['notes'][lang];
-    },
-    get_all_notes: function (mapx) {
-        return mapx['text']['notes'];
-    },
-    add_note: function (mapx, lang, title, value) {
-        if(value) {
-            checkLang(lang);
-            var old = mapx['text']['notes'][lang];
-            var sep = old.length === 0 ? "" : "\n\n";
-            mapx['text']['notes'][lang] = old + sep + title + ": " + value;
-        }
-    },
-
-    add_keyword: function (mapx, keyword) {
-        mapx['text']['keywords']['keys'].push(keyword)
-    },
-    get_keywords: function (mapx) {
-        return mapx['text']['keywords']['keys'];
-    },
-
-    add_language: function (mapx, langcode) {
-        checkLang(langcode)
-        mapx['text']['language']['codes'].push({'code': langcode})
-    },
-    get_languages: function (mapx) {
-        var ret = [];
-        for (var code of mapx['text']['language']['codes'])
-            ret.push(code["code"]);
-        return ret;
-    },
-
-    set_attribute: function (mapx, lang, attname, value) {
-        // check: if not exists, init all langs
-        // then set the value
-    },
-
-    set_release_date: function (mapx, date) {
-        checkDate(date)
-        mapx['temporal']['issuance']['released_at'] = date
-    },
-    get_release_date: function (mapx) {
-        return mapx['temporal']['issuance']['released_at'];
-    },
-    exist_release_date: function (mapx) {
-        return mapx['temporal']['issuance']['released_at'] != '0001-01-01';
-    },
-
-    set_modified_date: function (mapx, date) {
-        checkDate(date)
-        mapx['temporal']['issuance']['modified_at'] = date
-    },
-    get_modified_date: function (mapx) {
-        return mapx['temporal']['issuance']['modified_at'];
-    },
-    exist_modified_date: function (mapx) {
-        return mapx['temporal']['issuance']['modified_at'] != '0001-01-01';
-    },
-
-    set_periodicity: function (mapx, periodicity) {
-        if (!PERIODICITY.includes(periodicity))
-            throw new Error("Unknown periodicity: " + periodicity)
-
-        mapx['temporal']['issuance']['periodicity'] = periodicity
-    },
-    get_periodicity: function (mapx) {
-        return mapx['temporal']['issuance']['periodicity']
-    },
-
-    set_temporal_start: function (mapx, date) {
-        checkDate(date)
-        mapx['temporal']['range']['start_at'] = date
-        mapx['temporal']['range']['is_timeless'] = false
-    },
-    set_temporal_end: function (mapx, date) {
-        checkDate(date)
-        mapx['temporal']['range']['end_at'] = date
-        mapx['temporal']['range']['is_timeless'] = false
-    },
-    is_timeless: function (mapx) {
-        return mapx['temporal']['range']['is_timeless'];
-    },
-    get_temporal_start: function (mapx) {
-        return mapx['temporal']['range']['start_at'];
-    },
-    get_temporal_end: function (mapx) {
-        return mapx['temporal']['range']['end_at'];
-    },
-    exist_temporal_start: function (mapx) {
-        return mapx['temporal']['range']['start_at'] != '0001-01-01';
-    },
-    exist_temporal_end: function (mapx) {
-        return mapx['temporal']['range']['end_at'] != '0001-01-01';
-    },
-
-    set_crs: function (mapx, code, url) {
-        mapx['spatial']['crs']['code'] = code
-        mapx['spatial']['crs']['url'] = url
-    },
-    get_crs_code: function (mapx) {
-        return mapx['spatial']['crs']['code'];
-    },
-
-    set_bbox: function (mapx, lng_min, lng_max, lat_min, lat_max) {
-        mapx['spatial']['bbox']['lng_min'] = lng_min
-        mapx['spatial']['bbox']['lng_max'] = lng_max
-        mapx['spatial']['bbox']['lat_min'] = lat_min
-        mapx['spatial']['bbox']['lat_max'] = lat_max
-    },
-    get_bbox: function (mapx) {
-        return [
-            mapx['spatial']['bbox']['lng_min'],
-            mapx['spatial']['bbox']['lng_max'],
-            mapx['spatial']['bbox']['lat_min'],
-            mapx['spatial']['bbox']['lat_max']]
-    },
-
-    add_contact: function (mapx, func, name, addr, mail) {
-
-        mapx['contact']['contacts'].push({
-            "function": func,
-            "name": name,
-            "address": addr,
-            "email": mail
-        })
-    },
-    get_contacts: function (mapx) {
-        return (mapx['contact']||[])['contacts'];
-    },
-
-    set_homepage: function (mapx, url) {
-        mapx['origin']['homepage']['url'] = url
-    },
-    get_homepage: function (mapx) {
-        return mapx['origin']['homepage']['url'];
-    },
-
-    add_source: function (mapx, url, is_download_link) {
-        mapx['origin']['source']['urls'].push({
-            'is_download_link': is_download_link,
-            'url': url
-        })
-    },
-    get_sources: function (mapx) {
-        return mapx['origin']['source']['urls'];
-    },
-
-    set_license_download: function (mapx, allow) {
-        mapx['license']['allowDownload'] = allow ? true : false;
-    },
-
-    add_license: function (mapx, name, text) {
-        mapx['license']['licenses'].push({
-            'name': name,
-            'text': text
-        })
-    },
-    get_licenses: function (mapx) {
-        return mapx['license']['licenses'];
-    },
-
-    add_reference: function (mapx, url) {
-        mapx['annex']['references'].push({'url': url})
-    },
-    get_references: function (mapx) {
-        ret = []
-        for (var u of mapx['annex']['references']) {
-            ret.push(u['url']);
-        }
-        return ret;
-    },
-
-    // DEPRECATED
-    set_integrity: function (mapx, i1, i2, value) {
-        mapx['integrity']['di_' + i1 + "_" + i2] = value
+export function set_notes(mapx, lang, value) {
+    checkLang(lang);
+    mapx['text']['notes'][lang] = value;
+}
+export function get_notes(mapx, lang) {
+    return mapx['text']['notes'][lang];
+}
+export function get_all_notes(mapx) {
+    return mapx['text']['notes'];
+}
+export function add_note(mapx, lang, title, value) {
+    if(value) {
+        checkLang(lang);
+        var old = mapx['text']['notes'][lang];
+        var sep = old.length === 0 ? "" : "\n\n";
+        mapx['text']['notes'][lang] = old + sep + title + ": " + value;
     }
+}
 
-};
+export function add_keyword(mapx, keyword) {
+    mapx['text']['keywords']['keys'].push(keyword);
+}
+export function get_keywords(mapx) {
+    return mapx['text']['keywords']['keys'];
+}
+
+export function add_language(mapx, langcode) {
+    checkLang(langcode);
+    mapx['text']['language']['codes'].push({'code': langcode});
+}
+export function get_languages(mapx) {
+    var ret = [];
+    for (var code of mapx['text']['language']['codes'])
+        ret.push(code["code"]);
+    return ret;
+}
+
+export function set_attribute(mapx, lang, attname, value) {
+    // check: if not exists, init all langs
+    // then set the value
+}
+
+export function set_release_date(mapx, date) {
+    checkDate(date);
+    mapx['temporal']['issuance']['released_at'] = date;
+}
+export function get_release_date(mapx) {
+    return mapx['temporal']['issuance']['released_at'];
+}
+export function exist_release_date(mapx) {
+    return mapx['temporal']['issuance']['released_at'] != '0001-01-01';
+}
+
+export function set_modified_date(mapx, date) {
+    checkDate(date);
+    mapx['temporal']['issuance']['modified_at'] = date
+}
+export function get_modified_date(mapx) {
+    return mapx['temporal']['issuance']['modified_at'];
+}
+export function exist_modified_date(mapx) {
+    return mapx['temporal']['issuance']['modified_at'] != '0001-01-01';
+}
+
+export function set_periodicity(mapx, periodicity) {
+    if (!PERIODICITY.includes(periodicity))
+        throw new Error("Unknown periodicity: " + periodicity);
+    
+    mapx['temporal']['issuance']['periodicity'] = periodicity;
+}
+export function get_periodicity(mapx) {
+    return mapx['temporal']['issuance']['periodicity'];
+}
+
+export function set_temporal_start(mapx, date) {
+    checkDate(date)
+    mapx['temporal']['range']['start_at'] = date;
+    mapx['temporal']['range']['is_timeless'] = false;
+}
+export function set_temporal_end(mapx, date) {
+    checkDate(date);
+    mapx['temporal']['range']['end_at'] = date;
+    mapx['temporal']['range']['is_timeless'] = false;
+}
+export function is_timeless(mapx) {
+    return mapx['temporal']['range']['is_timeless'];
+}
+export function get_temporal_start(mapx) {
+    return mapx['temporal']['range']['start_at'];
+}
+export function get_temporal_end(mapx) {
+    return mapx['temporal']['range']['end_at'];
+}
+export function exist_temporal_start(mapx) {
+    return mapx['temporal']['range']['start_at'] != '0001-01-01';
+}
+export function exist_temporal_end(mapx) {
+    return mapx['temporal']['range']['end_at'] != '0001-01-01';
+}
+
+export function set_crs(mapx, code, url) {
+    mapx['spatial']['crs']['code'] = code;
+    mapx['spatial']['crs']['url'] = url;
+}
+export function get_crs_code(mapx) {
+    return mapx['spatial']['crs']['code'];
+}
+
+export function set_bbox(mapx, lng_min, lng_max, lat_min, lat_max) {
+    mapx['spatial']['bbox']['lng_min'] = lng_min;
+    mapx['spatial']['bbox']['lng_max'] = lng_max;
+    mapx['spatial']['bbox']['lat_min'] = lat_min;
+    mapx['spatial']['bbox']['lat_max'] = lat_max;
+}
+export function get_bbox(mapx) {
+    return [
+        mapx['spatial']['bbox']['lng_min'],
+        mapx['spatial']['bbox']['lng_max'],
+        mapx['spatial']['bbox']['lat_min'],
+        mapx['spatial']['bbox']['lat_max']]
+}
+
+export function add_contact(mapx, func, name, addr, mail) {
+    mapx['contact']['contacts'].push({
+        "function": func,
+        "name": name,
+        "address": addr,
+        "email": mail
+    })
+}
+export function get_contacts(mapx) {
+    return (mapx['contact']||[])['contacts'];
+}
+
+export function set_homepage(mapx, url) {
+    mapx['origin']['homepage']['url'] = url;
+}
+export function get_homepage(mapx) {
+    return mapx['origin']['homepage']['url'];
+}
+
+export function add_source(mapx, url, is_download_link) {
+    mapx['origin']['source']['urls'].push({
+        'is_download_link': is_download_link,
+        'url': url
+    })
+}
+export function get_sources(mapx) {
+    return mapx['origin']['source']['urls'];
+}
+
+export function set_license_download(mapx, allow) {
+    mapx['license']['allowDownload'] = allow ? true : false;
+}
+
+export function add_license(mapx, name, text) {
+    mapx['license']['licenses'].push({
+        'name': name,
+        'text': text
+    })
+}
+export function get_licenses(mapx) {
+    return mapx['license']['licenses'];
+}
+
+export function add_reference(mapx, url) {
+        mapx['annex']['references'].push({'url': url})
+}
+export function get_references(mapx) {
+    var ret = [];
+    for (var u of mapx['annex']['references']) {
+        ret.push(u['url']);
+    }
+    return ret;
+}
+
+
 
 function initLanguages(map, name) {
-    i18nmap = {}
+    var i18nmap = {}
     map[name] = i18nmap
 
     for (const lang of LANGUAGES) {

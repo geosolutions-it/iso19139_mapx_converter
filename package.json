@@ -2,6 +2,7 @@
   "name": "iso19139_mapx_converter",
   "version": "1.0.0",
   "description": "Provides functions to translate ISO19139 from/to MapX format",
+  "type": "module",
   "keywords": [
     "iso19139",
     "iso19115",
@@ -18,21 +19,55 @@
   "homepage": "https://github.com/geosolutions-it/iso19139_mapx_converter",
   "repository": {
     "type": "git",
-    "url": "https://github.com/geosolutions-it/iso19139_mapx_converter.git"
+    "url": "git+https://github.com/geosolutions-it/iso19139_mapx_converter.git"
   },
   "license": "GPL-2.0",
   "dependencies": {
-    "assert": "^2.0.0",
+    "browserify": "^16.5.1",
+    "crypto-md5": "^1.0.0",
     "fs": "0.0.1-security",
     "http": "0.0.0",
     "https": "^1.0.0",
     "md5": "^2.2.1",
+    "watchify": "^3.11.1",
     "xml2js": "^0.4.19",
     "xmlbuilder": "^13.0.1"
   },
-  "bundledDependencies": [],
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "babelify": "^10.0.0",
     "chai": "^4.2.0",
-    "mocha": "^6.2.0"
+    "jsdoc": "^3.6.4",
+    "mocha": "^7.1.1"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "@babel/preset-env"
+          ],
+          "comments": false,
+          "sourceMaps": true
+        }
+      ]
+    ]
+  },
+  "bugs": {
+    "url": "https://github.com/geosolutions-it/iso19139_mapx_converter/issues"
+  },
+  "bundleDependencies": [],
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "__build": "browserify index.js -o dist/bundle.js",
+    "build": "browserify index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
+    "watch": "watchify index.js -o dist/bundle.js -v",
+    "test": "./node_modules/mocha/bin/mocha --experimental-modules"
   }
 }

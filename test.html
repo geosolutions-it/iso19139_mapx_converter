@@ -1,0 +1,48 @@
+<html>
+    <body onload="loadiso();">
+
+    <script src="dist/iso19139_mapx_converter.js"></script> 
+        
+    <script>
+        function loadiso() {
+            var url = "http://localhost:8000/test/data/contacts_01.xml";
+            var xmlhttp, text;
+            xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('GET', url, false);
+            xmlhttp.send();
+            text = xmlhttp.responseText;
+            document.getElementById("ta_iso").value = text;
+        }
+        // document.addEventListener('onload', loadiso());
+        
+        function iso2mapx() {
+            var iso_xml = document.getElementById("ta_iso").value;
+            var mapx_txt = window.iso19139_mapx_converter.iso19139_to_mapx(iso_xml);
+            document.getElementById("ta_mapx").value = mapx_txt;            
+        }
+        
+        function mapx2iso() {
+            var mapx = document.getElementById("ta_mapx").value;
+            var iso = window.iso19139_mapx_converter.mapx_to_iso19139(mapx);
+            document.getElementById("ta_iso").value = iso;            
+        }
+        
+    </script>
+    
+    <label for="ta_iso">ISO19139:</label>
+    <input id="i2m" type="button" value="ISO 2 MAPX" onclick="iso2mapx();" />    
+    <br/>
+    <textarea id="ta_iso" rows="40" cols="150">
+    </textarea>
+        
+    <br/>
+    
+    <label for="ta_mapx">mapX:</label>
+    <input id="m2i" type="button" value="MAPX 2 ISO" onclick="mapx2iso();" />    
+    <br/>
+    <textarea id="ta_mapx" rows="40" cols="150">
+    </textarea>
+    <br/>
+    
+  </body>      
+</html>

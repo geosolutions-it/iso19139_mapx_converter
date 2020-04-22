@@ -2,14 +2,24 @@
 //
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-const MAPX = require("./mapx");
-const UTILS = require("./mapx_utils");
+import * as MAPX from "./mapx.js";
+import * as UTILS from "./mapx_utils.js";
 
-var md5 = require('md5');
+import MD5 from "crypto-md5/md5.js";
+import builder from "xmlbuilder";
 
-function mapx_to_iso19139(mapx, params) {
 
-    var log = params ? params[UTILS.PARAM_LOG_INFO_NAME] : false;
+export function mapx_to_iso19139_t_t(mapx_text) {
+    var mapx =  JSON.parse(mapx_text);
+    var iso = mapx_to_iso19139(mapx, null);
+    var isoxml = builder.create(iso, { encoding: 'utf-8' });
+    var isotext = isoxml.end({ pretty: true }); 
+    return isotext;
+}
+
+export function mapx_to_iso19139(mapx, params) {
+
+    //  var log = params ? params[UTILS.PARAM_LOG_INFO_NAME] : false;
 
     var fileIdentifier = "TODO";
     var lang = "en"; // TODO
@@ -22,11 +32,11 @@ function mapx_to_iso19139(mapx, params) {
     metadata["gmd:fileIdentifier"] = {"gco:CharacterString": fileIdentifier};
     metadata["gmd:language"] = {"gco:CharacterString": lang};
 
-    metadata_contacts = []
-    data_contacts = []
+    var metadata_contacts = [];
+    var data_contacts = [];
 
     for(var c of MAPX.get_contacts(mapx)) {
-        f = c["function"];
+        var f = c["function"];
         if(f.toLowerCase().includes('metadata')) {
             metadata_contacts.push(createResponsibleParty(c));
         } else {
@@ -47,7 +57,7 @@ function mapx_to_iso19139(mapx, params) {
                         {"gmd:code":
                             {"gco:CharacterString": MAPX.get_crs_code(mapx)}}}}};
 
-    dates = []
+    var dates = [];
     if(MAPX.exist_release_date(mapx)) {
         dates.push({"gmd:CI_Date":
                         {"gmd:date":
@@ -120,6 +130,7 @@ function mapx_to_iso19139(mapx, params) {
     var licenses = MAPX.get_licenses(mapx);
     if(licenses.length > 0) {
         var oc = [];
+        var txt;
         for(var l of licenses) {
             if(l["name"]) {
                 txt = l["name"] + ": " + l["text"];
@@ -141,7 +152,7 @@ function mapx_to_iso19139(mapx, params) {
             };
     }
 
-    var extents = []
+    var extents = [];
 
     // bbox
     var [x0,x1,y0,y1] = MAPX.get_bbox(mapx);
@@ -161,17 +172,17 @@ function mapx_to_iso19139(mapx, params) {
 
     // temporal
     if(! MAPX.is_timeless(mapx)) {
-        period = {}
+        var period = {};
         period["@gml:id"] = "missing";
 
-        add_extent = false;
+        var add_extent = false;
 
         if(MAPX.exist_temporal_start(mapx)) {
-            period["gml:beginPosition"] =  MAPX.get_temporal_start(mapx)
+            period["gml:beginPosition"] =  MAPX.get_temporal_start(mapx);
             add_extent = true;
         }
         if(MAPX.exist_temporal_end(mapx)) {
-            period["gml:endPosition"] =  MAPX.get_temporal_end(mapx)
+            period["gml:endPosition"] =  MAPX.get_temporal_end(mapx);
             add_extent = true;
         }
 
@@ -215,7 +226,7 @@ function mapx_to_iso19139(mapx, params) {
                             {"gco:CharacterString": source["is_download_link"]?"Downloadable resource":"Other resource"}
                         }
                     }
-            )
+            );
         }
     }
 
@@ -245,7 +256,7 @@ function mapx_to_iso19139(mapx, params) {
                         {"gco:CharacterString": "Homepage"}
                     }
                 }
-        )
+        );
     }
 
     if(resources.length > 0) {
@@ -261,10 +272,10 @@ function mapx_to_iso19139(mapx, params) {
 
 
     // create an UUID on the hash of all the fields stored so far
-    var uuid = md5(JSON.stringify(metadata));
+    var uuid = MD5(JSON.stringify(metadata), 'hex');
     metadata["gmd:fileIdentifier"] = {"gco:CharacterString": uuid};
 
-    var root = { "gmd:MD_Metadata": metadata }
+    var root = { "gmd:MD_Metadata": metadata };
     return root;
 }
 
@@ -293,8 +304,4 @@ function createResponsibleParty(c) {
                     "@codeListValue":"pointOfContact"}}}
     };
 }
-
-module.exports = {
-    mapx_to_iso19139
-};
 

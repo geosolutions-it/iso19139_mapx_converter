@@ -2,18 +2,16 @@
 // 
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-const iso2mapx = require("./convert_iso_to_mapx");
+import * as iso2mapx from "./convert_iso_to_mapx.js";
+import * as UTILS from "./mapx_utils.js";
 
-const UTILS = require("./mapx_utils");
-
-const xml2js = require('xml2js');
-const request = require('request');
-const fs = require("fs");
+import xml2js from "xml2js";
+import * as fs from "fs";
 
 
 // ===== Parse arguments 
 
-args = [];
+var args = [];
 
 var params = {};
 params[UTILS.PARAM_LOG_INFO_NAME] = false;
@@ -41,14 +39,25 @@ var destination = args[1];
 const log_info = params[UTILS.PARAM_LOG_INFO_NAME];
 const log_debug = params[UTILS.PARAM_LOG_DEBUG_NAME] || log_info;
 
-run(source, destination, params)
+run(source, destination, params);
 
 
-async function run(source, destination, params) {
+function run(source, destination, params) {
+    var xml_text = loadFromFile(source);
+    var mapx_text = iso2mapx.iso19139_to_mapx_t_t(xml_text);
+    
+    fs.writeFile(destination, mapx_text, (err) => {
+        if (err) 
+            console.log(err);
+        else
+            console.log("Successfully Written to File ", destination);
+    });
+}
+    
 
-    var xml = source.startsWith("http") ?
-        await loadFromUrl(source) :
-        loadFromFile(source);
+function run_OLD(source, destination, params) {
+
+    var xml = loadFromFile(source);
 
     if(xml) {
 
@@ -66,7 +75,7 @@ async function run(source, destination, params) {
                     if (log_info) 
                         console.log("PARSING ISO19139 into MAPX");
 
-                    mapx = iso2mapx.iso19139_to_mapx(json, params);
+                    var mapx = iso2mapx.iso19139_to_mapx(json, params);
 
                     fs.writeFile(destination, JSON.stringify(mapx, null, 3), (err) => {
                         if (err) 
@@ -88,30 +97,6 @@ async function run(source, destination, params) {
     }
 }
 
-
-async function loadFromUrl(url) {
-
-    try {
-        return await downloadUrl(url);
-        
-    } catch (error) {
-        console.error('ERROR:');
-        console.error(error);
-    }
-}
-
-
-function downloadUrl(url) {
-    return new Promise((resolve, reject) => {
-        request(url, (error, response, body) => {
-            if (error) reject(error);
-            if (response.statusCode != 200) {
-                reject('Invalid status code <' + response.statusCode + '>');
-            }
-            resolve(body);
-        });
-    });
-}
 
 function loadFromFile(url) {
     try {

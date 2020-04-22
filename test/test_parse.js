@@ -1,25 +1,28 @@
 /*
  */
 
-var chai = require('chai');
-var assert = chai.assert;
-var expect  = chai.expect;
+import * as assert from "assert";
+import xml2js from "xml2js";
+import builder from "xmlbuilder";
+import fs from "fs";
 
-const xml2js = require('xml2js');
-const builder = require('xmlbuilder');
+import * as M2I from "../convert_mapx_to_iso.js";
+import * as I2M from "../convert_iso_to_mapx.js";
+import * as MAPX from "../mapx.js";
 
-const M2I = require("../convert_mapx_to_iso");
 
-const I2M = require("../convert_iso_to_mapx");
 const getFirstFromPath = I2M.getFirstFromPath;
 const findFirstFromPath = I2M.findFirstFromPath;
 
-const MAPX = require("../mapx");
 
 const DATE_DEFAULT = "0001-01-01";
 const MD_ROOT_NAME = 'gmd:MD_Metadata';
 const DATA_IDENT_NAME = 'gmd:MD_DataIdentification';
 
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 it('Basic MAPX object parsing', function(done) {
 
@@ -47,8 +50,9 @@ it('MAPX to ISO parsing', function(done) {
 
     var iso = M2I.mapx_to_iso19139(mapx);
 
-    const builder = require('xmlbuilder');
-    var xml = builder.create(iso, { encoding: 'utf-8' })
+    // nst builder = require('xmlbuilder');
+    
+    var xml = builder.create(iso, { encoding: 'utf-8' });
     var xmlFormatted = xml.end({ pretty: true });
     // console.log("METADATA as XML", xmlFormatted);
     done();
@@ -57,15 +61,13 @@ it('MAPX to ISO parsing', function(done) {
 
 it('Check M2I dates', function(done) {
 
-    const getFirstFromPath = require("../convert_iso_to_mapx").getFirstFromPath;
-
     var mapx = create_sample_mapx();
 
     var iso = M2I.mapx_to_iso19139(mapx);
-    var xml = builder.create(iso, { encoding: 'utf-8' })
+    var xml = builder.create(iso, { encoding: 'utf-8' });
     var xmlFormatted = xml.end({ pretty: true });
 
-    dates = get_date_from_iso(xmlFormatted);
+    var dates = get_date_from_iso(xmlFormatted);
 
     assert.equal(dates['publication'],"2019-01-01");
     assert.equal(dates['revision'],"2019-05-01");
@@ -75,15 +77,13 @@ it('Check M2I dates', function(done) {
 
 
 it('Check void M2I dates', function(done) {
-    const getFirstFromPath = require("../convert_iso_to_mapx").getFirstFromPath;
-
     var mapx = MAPX.create_object();
 
     var iso = M2I.mapx_to_iso19139(mapx);
-    var xml = builder.create(iso, { encoding: 'utf-8' })
+    var xml = builder.create(iso, { encoding: 'utf-8' });
     var xmlFormatted = xml.end({ pretty: true });
 
-    dates = get_date_from_iso(xmlFormatted);
+    var dates = get_date_from_iso(xmlFormatted);
 
     assert.equal(Object.keys(dates).length, 0);
 
@@ -98,10 +98,10 @@ it('Check equals M2I dates', function(done) {
     MAPX.set_release_date(mapx, "2019-09-25");
 
     var iso = M2I.mapx_to_iso19139(mapx);
-    var xml = builder.create(iso, { encoding: 'utf-8' })
+    var xml = builder.create(iso, { encoding: 'utf-8' });
     var xmlFormatted = xml.end({ pretty: true });
 
-    dates = get_date_from_iso(xmlFormatted);
+    var dates = get_date_from_iso(xmlFormatted);
 
     assert.equal(Object.keys(dates).length, 1);
     assert.equal(dates['publication'],"2019-09-25");
@@ -113,14 +113,14 @@ it('Check equals M2I dates', function(done) {
 it('Check begin time extent', function(done) {
 
     var mapx = create_sample_mapx();
-    MAPX.set_temporal_start(mapx, "2019-09-26")
+    MAPX.set_temporal_start(mapx, "2019-09-26");
 
     var iso = M2I.mapx_to_iso19139(mapx);
-    var xml = builder.create(iso, { encoding: 'utf-8' })
+    var xml = builder.create(iso, { encoding: 'utf-8' });
     var xmlFormatted = xml.end({ pretty: true });
 //    console.log("ISO ", xmlFormatted);
 
-    dates = get_time_extent_from_iso(xmlFormatted);
+    var dates = get_time_extent_from_iso(xmlFormatted);
 
     assert.equal(Object.keys(dates).length, 1);
     assert.equal(dates['start'],"2019-09-26");
@@ -131,27 +131,26 @@ it('Check begin time extent', function(done) {
 it('#5 M2I check default date mapping', function(done) {
 
     var mapx = create_sample_mapx();
-    assert.isTrue(MAPX.is_timeless(mapx));
+    assert.equal(true, MAPX.is_timeless(mapx));
 
     var iso_json = create_nomalized_iso_json(mapx);
     var identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
     var timeExtent = findFirstFromPath(identNode, [ "gmd:extent", "gmd:EX_Extent", "gmd:temporalElement"]);
-    assert.isUndefined(timeExtent);
-
+    assert.ok(typeof timeExtent === "undefined");
 
     mapx = create_sample_mapx();
     MAPX.set_temporal_start(mapx, "2019-09-26");
     iso_json = create_nomalized_iso_json(mapx);
     identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
     timeExtent = findFirstFromPath(identNode, [ "gmd:extent", "gmd:EX_Extent", "gmd:temporalElement"]);
-    assert.isDefined(timeExtent);
+    assert.ok(typeof timeExtent !== "undefined");        
 
     mapx = create_sample_mapx();
     MAPX.set_temporal_start(mapx, DATE_DEFAULT);
     iso_json = create_nomalized_iso_json(mapx);
     identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
     timeExtent = findFirstFromPath(identNode, [ "gmd:extent", "gmd:EX_Extent", "gmd:temporalElement"]);
-    assert.isUndefined(timeExtent);
+    assert.ok(typeof timeExtent === "undefined");    
 
     done();
 });
@@ -162,21 +161,21 @@ it('#7 M2I add annexes', function(done) {
     assert.equal(3, MAPX.get_references(mapx).length);
     assert.equal("ref3", MAPX.get_references(mapx)[2]);
 
-    iso_json = create_nomalized_iso_json(mapx);
+    var iso_json = create_nomalized_iso_json(mapx);
     const MD_ROOT_NAME = 'gmd:MD_Metadata';
 
-    distrNode = iso_json[MD_ROOT_NAME]['gmd:distributionInfo'][0]["gmd:MD_Distribution"][0];
-    transfNode = distrNode['gmd:transferOptions'][0]['gmd:MD_DigitalTransferOptions'][0];
+    var distrNode = iso_json[MD_ROOT_NAME]['gmd:distributionInfo'][0]["gmd:MD_Distribution"][0];
+    var transfNode = distrNode['gmd:transferOptions'][0]['gmd:MD_DigitalTransferOptions'][0];
     // console.log("MD_DigitalTransferOptions ---> ", JSON.stringify(transfNode));
-    onlineNodes = transfNode['gmd:onLine']; // [0]['gmd:CI_OnlineResource'];
+    var onlineNodes = transfNode['gmd:onLine']; // [0]['gmd:CI_OnlineResource'];
     // console.log("CI_OnlineResource ---> ", JSON.stringify(onlineNodes));
 
     assert.equal(6, onlineNodes.length);
 
-    annex_cnt = 0;
+    var annex_cnt = 0;
     for (var res of onlineNodes) {
          // console.log("RES is ", JSON.stringify(res));
-        name = res
+        var name = res
             ["gmd:CI_OnlineResource"][0]
             ["gmd:name"][0]
             ["gco:CharacterString"][0];
@@ -194,7 +193,7 @@ it('#8 M2I constraints semicolon', function(done) {
     var mapx = create_sample_mapx();
     assert.equal(3, MAPX.get_licenses(mapx).length);
 
-    iso_json = create_nomalized_iso_json(mapx);
+    var iso_json = create_nomalized_iso_json(mapx);
     var identNode = iso_json[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0];
     var legalNode = identNode["gmd:resourceConstraints"][0]["gmd:MD_LegalConstraints"][0];
     // console.log("MD_LegalConstraints ---> ", JSON.stringify(legalNode,null,3));
@@ -213,7 +212,7 @@ it('#9 M2I point of concats', function(done) {
     MAPX.add_contact(mapx, "metadata f2", "name2", "addr2", "mail@mail2");
 
     assert.equal(5, MAPX.get_contacts(mapx).length);
-    iso_json = create_nomalized_iso_json(mapx);
+    var iso_json = create_nomalized_iso_json(mapx);
 
     var md_contacts = iso_json[MD_ROOT_NAME]['gmd:contact'];
     assert.equal(2, md_contacts.length);
@@ -228,12 +227,12 @@ it('#9 M2I point of concats', function(done) {
 
 it('#1 I2M dates' , function(done) {
 
-    var mapx = load_xml(__dirname + "/data/no_pubdate_yes_revision.xml")
+    var mapx = load_xml(__dirname + "/data/no_pubdate_yes_revision.xml");
 
     assert.equal(MAPX.get_release_date(mapx), DATE_DEFAULT);
     assert.equal(MAPX.get_modified_date(mapx), '2015-07-14');
 
-    mapx = load_xml(__dirname + "/data/no_pubdate_no_revision.xml")
+    mapx = load_xml(__dirname + "/data/no_pubdate_no_revision.xml");
 
     assert.equal(MAPX.get_release_date(mapx), '2020-01-01');
     assert.equal(MAPX.get_modified_date(mapx), DATE_DEFAULT);
@@ -243,9 +242,9 @@ it('#1 I2M dates' , function(done) {
 
 it('#2 I2M comma separated contacts' , function(done) {
 
-    var mapx = load_xml(__dirname + "/data/contacts_01.xml")
+    var mapx = load_xml(__dirname + "/data/contacts_01.xml");
 
-    cont = MAPX.get_contacts(mapx)[0]
+    var cont = MAPX.get_contacts(mapx)[0];
 
     assert.equal(cont.name, 'CTO');
 
@@ -254,9 +253,9 @@ it('#2 I2M comma separated contacts' , function(done) {
 
 it('#3 I2M role codes' , function(done) {
 
-    var mapx = load_xml(__dirname + "/data/contacts_01.xml")
+    var mapx = load_xml(__dirname + "/data/contacts_01.xml");
 
-    cont = MAPX.get_contacts(mapx)[0]
+    var cont = MAPX.get_contacts(mapx)[0];
 
     assert.equal(cont.function, 'Metadata  Point of Contact');
 
@@ -265,12 +264,12 @@ it('#3 I2M role codes' , function(done) {
 
 it('#4 I2M Org as address' , function(done) {
 
-    var mapx = load_xml(__dirname + "/data/contacts_01.xml")
+    var mapx = load_xml(__dirname + "/data/contacts_01.xml");
 
-    cont = MAPX.get_contacts(mapx)[1]
+    var cont = MAPX.get_contacts(mapx)[1];
 
-    assert.notInclude(cont.name, ('Bren School'));
-    assert.isTrue(cont.address.startsWith('Bren School'));
+    assert.ok(! cont.name.includes('Bren School'));
+    assert.ok(cont.address.startsWith('Bren School'));
 
     done();
 });
@@ -310,7 +309,7 @@ function get_date_from_iso(iso_xml) {
 
 function create_nomalized_iso_json(mapx) {
     var iso = M2I.mapx_to_iso19139(mapx);
-    var xml = builder.create(iso, { encoding: 'utf-8' })
+    var xml = builder.create(iso, { encoding: 'utf-8' });
     var xmlFormatted = xml.end({ pretty: true });
 
     var result;
@@ -340,10 +339,10 @@ function get_time_extent_from_iso(iso_xml) {
             var optEnd = timePeriod["gml:endPosition"];
 
             if(optStart)
-                ret['start'] = optStart
+                ret['start'] = optStart;
 
             if(optEnd)
-                ret['end'] = optEnd
+                ret['end'] = optEnd;
         }
     });
 
@@ -392,10 +391,10 @@ function create_sample_mapx() {
 
 
 function load_xml(source) {
-    const fs = require("fs");
+    // const fs = require("fs");
 
-    xml = fs.readFileSync(source);
-    mapx = null;
+    var xml = fs.readFileSync(source);
+    var mapx = null;
     xml2js.parseString(
         xml,
         {
@@ -414,5 +413,4 @@ function load_xml(source) {
     );
 
     return mapx;
-
 }
