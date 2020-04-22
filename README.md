@@ -1,6 +1,12 @@
 # iso19139_mapx_converter
 JS functions to translate ISO19139 from/to MapX format
 
+## Environment 
+
+The package has been developed and tested using
+- node v12.16.2
+- npm 6.14.4
+
 ## Building and Installing
 
 Grab the source by git cloning and run
@@ -31,10 +37,14 @@ In order to run the tests, run
 npm run test
 ```
 
-## Run a client test
+Please note that the test script is run using the `--experimental-module` option,
+since full ES6 support is only implemented starting from node version 13.
 
-make sure you have python installed on your machine.  
-Run
+
+## Run a test on browser
+
+If you want to run a local test, first build the module, then make sure you have python installed on your machine.  
+Run:
 
 ```shell
 python -m SimpleHTTPServer
@@ -43,12 +53,11 @@ python -m SimpleHTTPServer
  then point the browser on http://localhost:8000/test.html 
 
 
-
-## Running via node
+## Running on command line
 
 This package implements a mapping from ISO19139 XML documents to MAPX JSON and vice versa.
 
-There are also a couple of command line scripts that performs the conversions. 
+There are a couple of command line scripts that performs the conversions. 
 These scripts can also be used as examples for using the mapping functions.
 
 ### ISO19139 to MAPX conversion
@@ -61,7 +70,7 @@ node --experimental-modules ./loadISO.js [-v | -vv] INPUT OUTPUT
 
 - `-v`: verbose output (i.e. INFO level logging)
 - `-vv`: very verbose output (i.e. DEBUG level logging)
-- `INPUT`: local file
+- `INPUT`: local filename
 - `OUTPUT`: the output file name for the mapx JSON
 
 
@@ -75,10 +84,10 @@ node --experimental-modules ./loadMAPX.js [-v | -vv] INPUT OUTPUT
 
 - `-v`: verbose output (i.e. INFO level logging)
 - `-vv`: very verbose output (i.e. DEBUG level logging)
-- `INPUT`: local file
+- `INPUT`: local filename
 - `OUTPUT`: the output file name for the ISO19139 XML
 
-### Using the cenoverter in the browser
+### Using the converter in the browser
 
 You can find a working example in the `test.html` file.
 
