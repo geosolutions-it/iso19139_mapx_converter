@@ -41,6 +41,12 @@ Please note that the test script is run using the `--experimental-module` option
 since full ES6 support is only implemented starting from node version 13.
 
 
+For a syntax check, run
+
+```shell
+npx eslint src/
+```
+  
 ## Run a test on browser
 
 If you want to run a local test, first build the module, then make sure you have python installed on your machine.  

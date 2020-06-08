@@ -39,6 +39,12 @@
     "@babel/preset-env": "^7.9.5",
     "babelify": "^10.0.0",
     "chai": "^4.2.0",
+    "eslint": "^7.1.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "jsdoc": "^3.6.4",
     "mocha": "^7.1.1"
   },
@@ -65,9 +71,9 @@
     "test": "test"
   },
   "scripts": {
-    "__build": "browserify index.js -o dist/bundle.js",
-    "build": "browserify index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
-    "watch": "watchify index.js -o dist/bundle.js -v",
+    "__build": "browserify src/index.js -o dist/bundle.js",
+    "build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
+    "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules"
   }
 }

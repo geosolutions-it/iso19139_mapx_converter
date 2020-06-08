@@ -1,7 +1,7 @@
 <html>
     <body onload="loadiso();">
 
-    <script src="dist/iso19139_mapx_converter.js"></script> 
+    <script src="/dist/iso19139_mapx_converter.js"></script> 
         
     <script>
         function loadiso() {
@@ -17,14 +17,14 @@
         
         function iso2mapx() {
             var iso_xml = document.getElementById("ta_iso").value;
-            var mapx_txt = window.iso19139_mapx_converter.iso19139_to_mapx(iso_xml);
-            document.getElementById("ta_mapx").value = mapx_txt;            
+            var mapx_txt = window.iso19139_mapx_converter.iso19139ToMapx(iso_xml);
+            document.getElementById("ta_mapx").value = mapx_txt;
         }
         
         function mapx2iso() {
             var mapx = document.getElementById("ta_mapx").value;
-            var iso = window.iso19139_mapx_converter.mapx_to_iso19139(mapx);
-            document.getElementById("ta_iso").value = iso;            
+            var iso = window.iso19139_mapx_converter.mapxToIso19139(mapx);
+            document.getElementById("ta_iso").value = iso;
         }
         
     </script>
