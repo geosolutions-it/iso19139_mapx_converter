@@ -2,7 +2,6 @@
   "name": "iso19139_mapx_converter",
   "version": "1.2.0",
   "description": "Provides functions to translate ISO19139 from/to MapX format",
-  "type": "module",
   "keywords": [
     "iso19139",
     "iso19115",
@@ -14,14 +13,18 @@
     "transform",
     "geosolutions"
   ],
+  "homepage": "https://github.com/geosolutions-it/iso19139_mapx_converter",
+  "bugs": {
+    "url": "https://github.com/geosolutions-it/iso19139_mapx_converter/issues"
+  },
+  "license": "GPL-2.0",
   "author": "Emanuele Tajariol <etj@geo-solutions.it>",
   "contributors": [],
-  "homepage": "https://github.com/geosolutions-it/iso19139_mapx_converter",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/geosolutions-it/iso19139_mapx_converter.git"
   },
-  "license": "GPL-2.0",
+  "type": "module",
   "dependencies": {
     "browserify": "^16.5.1",
     "crypto-md5": "^1.0.0",
@@ -46,8 +49,16 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "jsdoc": "^3.6.4",
-    "mocha": "^7.1.1"
+    "mocha": "^7.1.1",
+    "uglify-js": "^3.9.4"
   },
+  "bundleDependencies": [],
+  "files": [
+    "dist/**/*.js",
+    "src/**/*.js"
+  ],
+  "main": "src/index.js",
+  "unpkg": "dist/iso19139_mapx_converter.js",
   "browserify": {
     "transform": [
       [
@@ -62,16 +73,15 @@
       ]
     ]
   },
-  "bugs": {
-    "url": "https://github.com/geosolutions-it/iso19139_mapx_converter/issues"
-  },
-  "bundleDependencies": [],
-  "main": "index.js",
   "directories": {
+    "src": "src",
     "test": "test"
   },
+  "readmeFilename": "README.md",
   "scripts": {
-    "build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
+    "__build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js; uglifyjs dist/iso19139_mapx_converter.js -o dist/iso19139_mapx_converter.min.js ",
+    "build":       "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
+    "postpublish": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
     "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules",
     "jsdoc": "./node_modules/.bin/jsdoc src/index.js"
