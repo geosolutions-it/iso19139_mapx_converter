@@ -100,7 +100,7 @@ export function addNote (mapx, lang, title, value) {
   if (value) {
     checkLang(lang)
     var old = mapx.text.notes[lang]
-    var sep = old.length === 0 ? '' : '\n\n'
+    var sep = old.length === 0 ? '' : '. '
     mapx.text.notes[lang] = old + sep + title + ': ' + value
   }
 }
@@ -123,8 +123,29 @@ export function getLanguages (mapx) {
 }
 
 export function setAttribute (mapx, lang, attname, value) {
-  // check: if not exists, init all langs
-  // then set the value
+  var attr = mapx.text.attributes[attname] || initLanguages(mapx.text.attributes, attname)
+  attr.lang = value
+}
+export function getAttributeVal (mapx, lang, attname) {
+  var attr = mapx.text.attributes[attname]
+  return attr ? attr[lang] : undefined
+}
+export function getFirstAttributeVal (mapx, attname) {
+  var attr = mapx.text.attributes[attname]
+  if (attr) {
+    for (const lang of LANGUAGES) {
+      if (attr[lang]) {
+        return attr[lang]
+      }
+    }
+  }
+  return undefined
+}
+export function getAllAttributes (mapx) {
+  return mapx.text.attributes
+}
+export function getAttributeNames (mapx) {
+  return Object.getOwnPropertyNames(mapx.text.attributes)
 }
 
 export function setReleaseDate (mapx, date) {
@@ -267,12 +288,18 @@ function initLanguages (map, name) {
   for (const lang of LANGUAGES) {
     i18nmap[lang] = ''
   }
+
+  return i18nmap
 }
 
 function checkLang (langCode) {
   if (!LANGUAGES.includes(langCode)) { throw new Error('Unknown language ' + langCode) }
 }
 
-function checkDate (date) {
-  // TODO
+export function checkDate (date) {
+  if (date && date.length === 4) {
+    return false
+  }
+  var timestamp = Date.parse(date)
+  return !isNaN(timestamp)
 }

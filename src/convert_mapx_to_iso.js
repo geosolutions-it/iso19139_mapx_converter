@@ -50,9 +50,8 @@ export function mapxToIso19139Internal (mapx, params) {
 
   for (var c of MAPX.getContacts(mapx)) {
     var f = c.function
-    if (f.toLowerCase().includes('metadata')) {
-      metadataContacts.push(createResponsibleParty(c))
-    } else {
+    metadataContacts.push(createResponsibleParty(c))
+    if (!f.toLowerCase().includes('metadata')) {
       dataContacts.push(createResponsibleParty(c))
     }
   }
@@ -79,7 +78,9 @@ export function mapxToIso19139Internal (mapx, params) {
             }
 
   var dates = []
-  if (MAPX.existReleaseDate(mapx)) {
+
+  var useReleaseDate = MAPX.existReleaseDate(mapx) && MAPX.checkDate(MAPX.getReleaseDate(mapx))
+  if (useReleaseDate) {
     dates.push({
       'gmd:CI_Date':
                         {
@@ -98,8 +99,9 @@ export function mapxToIso19139Internal (mapx, params) {
     })
   }
 
-  if (MAPX.existModifiedDate(mapx) &&
-            (!MAPX.existReleaseDate(mapx) ||
+  var useModifiedDate = MAPX.existModifiedDate(mapx) && MAPX.checkDate(MAPX.getModifiedDate(mapx))
+  if (useModifiedDate &&
+            (!useReleaseDate ||
                 (MAPX.getModifiedDate(mapx) !== MAPX.getReleaseDate(mapx)))) {
     dates.push({
       'gmd:CI_Date':
@@ -168,14 +170,11 @@ export function mapxToIso19139Internal (mapx, params) {
   var licenses = MAPX.getLicenses(mapx)
   if (licenses.length > 0) {
     var oc = []
-    var txt
     for (var l of licenses) {
-      if (l.name) {
-        txt = l.name + ': ' + l.text
-      } else {
-        txt = l.text
-      }
-      oc.push({ 'gco:CharacterString': txt })
+      var larr = []
+      if (l.name) { larr.push(l.name) }
+      if (l.text) { larr.push(l.text) }
+      oc.push({ 'gco:CharacterString': larr.join(': ') })
     }
     identification['gmd:resourceConstraints'] =
             {
@@ -224,12 +223,18 @@ export function mapxToIso19139Internal (mapx, params) {
     var addExtent = false
 
     if (MAPX.existTemporalStart(mapx)) {
-      period['gml:beginPosition'] = MAPX.getTemporalStart(mapx)
-      addExtent = true
+      var date = MAPX.getTemporalStart(mapx)
+      if (MAPX.checkDate(date)) {
+        period['gml:beginPosition'] = date
+        addExtent = true
+      }
     }
     if (MAPX.existTemporalEnd(mapx)) {
-      period['gml:endPosition'] = MAPX.getTemporalEnd(mapx)
-      addExtent = true
+      date = MAPX.getTemporalEnd(mapx)
+      if (MAPX.checkDate(date)) {
+        period['gml:endPosition'] = date
+        addExtent = true
+      }
     }
 
     if (addExtent) {
@@ -253,15 +258,45 @@ export function mapxToIso19139Internal (mapx, params) {
 
   identification['gmd:extent'] = extents
 
-  // supplementalinfo
+  // supplementalInformation
+  var suppInfo = []
+
   var note = MAPX.getNotes(mapx, lang)
-  if (note) {
-    identification['gmd:supplementalInformation'] = { 'gco:CharacterString': note }
+  if (note) { suppInfo.push(note) }
+
+  var attnames = MAPX.getAttributeNames(mapx)
+  var attsuppinfo
+  if (attnames) {
+    var attlist = []
+    for (var attname of attnames) {
+      var attval = MAPX.getFirstAttributeVal(mapx, attname)
+      var attstring = attval ? attname + ': ' + attval : attname
+      attlist.push(attstring)
+    }
+    attsuppinfo = 'Attributes description: ' + attlist.join('; ') + '.'
+    suppInfo.push(attsuppinfo)
+  }
+
+  if (suppInfo) {
+    identification['gmd:supplementalInformation'] = { 'gco:CharacterString': suppInfo.join('\n') }
   }
 
   metadata['gmd:identificationInfo'] = { 'gmd:MD_DataIdentification': identification }
 
+  // resources
   var resources = []
+
+  if (MAPX.getHomepage(mapx)) {
+    resources.push(
+      {
+        'gmd:CI_OnlineResource':
+                    {
+                      'gmd:linkage': { 'gmd:URL': MAPX.getHomepage(mapx) },
+                      'gmd:name': { 'gco:CharacterString': 'Homepage' }
+                    }
+      }
+    )
+  }
 
   // sources
   var sources = MAPX.getSources(mapx)
@@ -271,8 +306,7 @@ export function mapxToIso19139Internal (mapx, params) {
         {
           'gmd:CI_OnlineResource':
                         {
-                          'gmd:linkage':
-                            { 'gmd:URL': source.url },
+                          'gmd:linkage': { 'gmd:URL': source.url },
                           'gmd:name':
                             { 'gco:CharacterString': source.is_download_link ? 'Downloadable resource' : 'Other resource' }
                         }
@@ -289,28 +323,12 @@ export function mapxToIso19139Internal (mapx, params) {
         {
           'gmd:CI_OnlineResource':
                         {
-                          'gmd:linkage':
-                            { 'gmd:URL': annex },
-                          'gmd:name':
-                            { 'gco:CharacterString': 'Annex' }
+                          'gmd:linkage': { 'gmd:URL': annex },
+                          'gmd:name': { 'gco:CharacterString': 'Annex' }
                         }
         }
       )
     }
-  }
-
-  if (MAPX.getHomepage(mapx)) {
-    resources.push(
-      {
-        'gmd:CI_OnlineResource':
-                    {
-                      'gmd:linkage':
-                        { 'gmd:URL': MAPX.getHomepage(mapx) },
-                      'gmd:name':
-                        { 'gco:CharacterString': 'Homepage' }
-                    }
-      }
-    )
   }
 
   if (resources.length > 0) {

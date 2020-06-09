@@ -185,7 +185,7 @@ it('#8 M2I constraints semicolon', function (done) {
   done()
 })
 
-it('#9 M2I point of concats', function (done) {
+it('#9 M2I point of contact', function (done) {
   var mapx = create_sample_mapx()
   MAPX.addContact(mapx, 'metadata f1', 'name1', 'addr1', 'mail@mail1')
   MAPX.addContact(mapx, 'metadata f2', 'name2', 'addr2', 'mail@mail2')
@@ -194,7 +194,7 @@ it('#9 M2I point of concats', function (done) {
   var isoJson = createNormalizedIsoJson(mapx)
 
   var md_contacts = isoJson[MD_ROOT_NAME]['gmd:contact']
-  assert.equal(2, md_contacts.length)
+  assert.equal(5, md_contacts.length)
 
   var identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
   var data_poc = identNode['gmd:pointOfContact']
@@ -232,7 +232,7 @@ it('#3 I2M role codes', function (done) {
 
   var cont = MAPX.getContacts(mapx)[0]
 
-  assert.equal(cont.function, 'Metadata  Point of Contact')
+  assert.equal(cont.function, 'Metadata Point of Contact')
 
   done()
 })
@@ -244,6 +244,18 @@ it('#4 I2M Org as address', function (done) {
 
   assert.ok(!cont.name.includes('Bren School'))
   assert.ok(cont.address.startsWith('Bren School'))
+
+  done()
+})
+
+it('#1 Other - parse date', function (done) {
+  assert.ok(MAPX.checkDate('2020-06-09'))
+  assert.ok(MAPX.checkDate('2020-06-09T12:00:00'))
+  assert.ok(MAPX.checkDate('2020-06-09T12:00'))
+
+  assert.ok(!MAPX.checkDate('2020'))
+  assert.ok(!MAPX.checkDate('2020-41-09'))
+  assert.ok(!MAPX.checkDate('2020-11-39'))
 
   done()
 })

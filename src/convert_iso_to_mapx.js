@@ -122,17 +122,22 @@ export function iso19139ToMapxInternal (data, params) {
   }
 
   // === Notes
-  MAPX.addNote(mapx, lang, 'PURPOSE', getFirstFromPath(identNode, ['purpose', GCO_CHAR_NAME]))
-  MAPX.addNote(mapx, lang, 'CREDIT', getFirstFromPath(identNode, ['credit', GCO_CHAR_NAME]))
-  MAPX.addNote(mapx, lang, 'ENVIRONMENT', getFirstFromPath(identNode, ['environmentDescription', GCO_CHAR_NAME]))
-  MAPX.addNote(mapx, lang, 'SUPPLEMENTAL INFO', getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME]))
+  MAPX.addNote(mapx, lang, 'Purpose', getFirstFromPath(identNode, ['purpose', GCO_CHAR_NAME]))
+  MAPX.addNote(mapx, lang, 'Credit', getFirstFromPath(identNode, ['credit', GCO_CHAR_NAME]))
+
+  var progressCode = getFirstFromPath(identNode, ['status', 'MD_ProgressCode'])
+  var progressValue = progressCode ? progressCode.$[ATTR_CLV].replace(/^\w/, (c) => c.toUpperCase()) : undefined
+  MAPX.addNote(mapx, lang, 'Status', progressValue)
+
+  MAPX.addNote(mapx, lang, 'Environment', getFirstFromPath(identNode, ['environmentDescription', GCO_CHAR_NAME]))
+  MAPX.addNote(mapx, lang, 'Supplemental information', getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME]))
 
   // add lineage and processing steps
   if (mdRoot.dataQualityInfo) {
     for (var qinfo of mdRoot.dataQualityInfo) {
       var lineage = getFirstFromPath(qinfo, ['DQ_DataQuality', 'lineage', 'LI_Lineage'])
       if (lineage) {
-        MAPX.addNote(mapx, lang, 'LINEAGE', getFirstFromPath(lineage, ['statement', GCO_CHAR_NAME]))
+        MAPX.addNote(mapx, lang, 'Lineage', getFirstFromPath(lineage, ['statement', GCO_CHAR_NAME]))
 
         // add process steps
         // "processStep":[{"LI_ProcessStep":[{"description":[{"CharacterString":["detailed description of processing: deliverables 3.7 and 3.8 available at: http://www.envirogrids.net/index.php?option=com_content&view=article&id=23&Itemid=40"]}]
@@ -194,9 +199,13 @@ export function iso19139ToMapxInternal (data, params) {
     var dateTimeVal = getFirstFromPath(date, ['CI_Date', 'date', 'DateTime'])
     var dateVal = getFirstFromPath(date, ['CI_Date', 'date', 'Date'])
 
-    var mapxdate = formatDate(dateTimeVal, dateVal)
+    var mapxdate = formatDate(
+      MAPX.checkDate(dateTimeVal) ? dateTimeVal : undefined,
+      MAPX.checkDate(dateVal) ? dateVal : undefined)
 
-    datemap[typeValue] = mapxdate
+    if (mapxdate) {
+      datemap[typeValue] = mapxdate
+    }
   }
 
   // The Publication Date field must be converted into “temporal>issuance>released_at”.
@@ -289,10 +298,10 @@ export function iso19139ToMapxInternal (data, params) {
   // === Contacts
 
   // add all metadata contacts
-  addContacts(mapx, 'Metadata ', mdRoot.contact || [])
+  addContacts(mapx, 'Metadata', mdRoot.contact || [])
 
   // add all data contacts
-  addContacts(mapx, 'Dataset ', identNode.pointOfContact || [])
+  addContacts(mapx, 'Dataset', identNode.pointOfContact || [])
 
   // === Origin
 
@@ -498,9 +507,13 @@ function getFirstDefined (valuesList) {
 }
 
 function formatDate (dateTime, date) {
-  return dateTime ? dateTime.substring(0, 10)
-    : date ? date.substring(0, 10)
-      : DATE_DEFAULT
+  var d = dateTime || date
+  if (d) {
+    if (d.length === 4) { return DATE_DEFAULT }
+    var ret = d.substring(0, 10)
+    if (MAPX.checkDate(ret)) { return ret }
+    return DATE_DEFAULT
+  } else return DATE_DEFAULT
 }
 
 function extractEpsgCode (crsid) {
