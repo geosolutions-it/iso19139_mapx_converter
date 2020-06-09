@@ -1,6 +1,6 @@
 {
   "name": "iso19139_mapx_converter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Provides functions to translate ISO19139 from/to MapX format",
   "keywords": [
     "iso19139",
@@ -55,6 +55,7 @@
   "bundleDependencies": [],
   "files": [
     "dist/**/*.js",
+    "doc/**/*.*",
     "src/**/*.js"
   ],
   "main": "src/index.js",
@@ -81,7 +82,7 @@
   "scripts": {
     "__build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js; uglifyjs dist/iso19139_mapx_converter.js -o dist/iso19139_mapx_converter.min.js ",
     "build":       "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
-    "postpublish": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
+    "prepublish": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js; ./node_modules/.bin/jsdoc src/index.js -d ./doc",
     "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules",
     "jsdoc": "./node_modules/.bin/jsdoc src/index.js"
