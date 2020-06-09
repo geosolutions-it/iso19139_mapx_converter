@@ -58,6 +58,15 @@ python -m SimpleHTTPServer
  
  then point the browser on http://localhost:8000/test.html 
 
+## Build jsdoc
+
+You can create the JSDoc for the functions in `index.js` by running:
+
+```shell
+npm run jsdoc
+```
+
+you'll find the generated doc in the `out/` directory.
 
 ## Running on command line
 
@@ -95,7 +104,7 @@ node --experimental-modules ./loadMAPX.js [-v | -vv] INPUT OUTPUT
 
 ### Using the converter in the browser
 
-You can find a working example in the `test.html` file.
+You can find a working example in the `test/test.html` file.
 
 You need to include the bundle file, e.g.
 

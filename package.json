@@ -1,6 +1,6 @@
 {
   "name": "iso19139_mapx_converter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Provides functions to translate ISO19139 from/to MapX format",
   "type": "module",
   "keywords": [
@@ -71,9 +71,9 @@
     "test": "test"
   },
   "scripts": {
-    "__build": "browserify src/index.js -o dist/bundle.js",
     "build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
     "watch": "watchify src/index.js -o dist/bundle.js -v",
-    "test": "./node_modules/mocha/bin/mocha --experimental-modules"
+    "test": "./node_modules/mocha/bin/mocha --experimental-modules",
+    "jsdoc": "./node_modules/.bin/jsdoc src/index.js"
   }
 }
