@@ -80,7 +80,7 @@ These scripts can also be used as examples for using the mapping functions.
 Basic usage:
 
 ```
-node --experimental-modules ./loadISO.js [-v | -vv] INPUT OUTPUT
+node --experimental-modules ./src/loadISO.js [-v | -vv] INPUT OUTPUT
 ```
 
 - `-v`: verbose output (i.e. INFO level logging)
@@ -94,7 +94,7 @@ node --experimental-modules ./loadISO.js [-v | -vv] INPUT OUTPUT
 Basic usage from command line:
 
 ```
-node --experimental-modules ./loadMAPX.js [-v | -vv] INPUT OUTPUT
+node --experimental-modules ./src/loadMAPX.js [-v | -vv] INPUT OUTPUT
 ```
 
 - `-v`: verbose output (i.e. INFO level logging)

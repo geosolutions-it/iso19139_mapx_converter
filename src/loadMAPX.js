@@ -49,13 +49,7 @@ async function run (source, destination, params) {
 
     if (logInfo) { console.log('PARSING MAPX into ISO') }
 
-    var mapx = JSON.parse(json)
-    var iso = m2i.mapx_to_iso19139(mapx)
-
-    if (logDebug) { console.log('METADATA as ISO/JSON', JSON.stringify(iso)) }
-
-    var xml = builder.create(iso, { encoding: 'utf-8' })
-    var xmlFormatted = xml.end({ pretty: true })
+    var xmlFormatted = m2i.mapxToIso19139(json)
 
     if (logDebug) { console.log('METADATA as XML', xmlFormatted) }
 
