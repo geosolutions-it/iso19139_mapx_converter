@@ -68,6 +68,20 @@ npm run jsdoc
 
 you'll find the generated doc in the `out/` directory.
 
+## Reformat code
+
+You can reformat the code with:
+
+```shell
+npm run format
+```
+
+Make sure you installed js-beautify globally:
+
+```shell
+npm -g install js-beautify
+```
+
 ## Running on command line
 
 This package implements a mapping from ISO19139 XML documents to MAPX JSON and vice versa.

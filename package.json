@@ -87,6 +87,7 @@
     "prepublish": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js; ./node_modules/.bin/jsdoc src/index.js -d ./doc",
     "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules",
-    "jsdoc": "./node_modules/.bin/jsdoc src/index.js"
+    "jsdoc": "./node_modules/.bin/jsdoc src/index.js",
+    "format": "for file in $(find src/ -name *.js); do echo FORMATTING $file ; js-beautify -r $file ; done"
   }
 }
