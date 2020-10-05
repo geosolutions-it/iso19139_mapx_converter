@@ -360,17 +360,35 @@ export function mapxToIso19139Internal(mapx, params) {
         }
     }
 
+    var distribution = {}
+
+    distribution['gmd:distributionFormat'] = {
+        'gmd:MD_Format': {
+            'gmd:name': {
+                'gco:CharacterString': 'GeoJSON'
+            },
+            'gmd:version': {
+                'gco:CharacterString': ''
+            },
+            'gmd:specification': {
+                '@gco:nilReason': 'missing',
+                'gco:CharacterString': ''
+            },
+        }
+    }
+
     if (resources.length > 0) {
-        metadata['gmd:distributionInfo'] = {
-            'gmd:MD_Distribution': {
-                'gmd:transferOptions': {
-                    'gmd:MD_DigitalTransferOptions': {
-                        'gmd:onLine': resources
-                    }
-                }
+        distribution['gmd:transferOptions'] = {
+            'gmd:MD_DigitalTransferOptions': {
+                'gmd:onLine': resources
             }
         }
     }
+
+    metadata['gmd:distributionInfo'] = {
+        'gmd:MD_Distribution': distribution
+    }
+
 
     // create an UUID on the hash of all the fields stored so far
     var uuid = MD5(JSON.stringify(metadata), 'hex')
