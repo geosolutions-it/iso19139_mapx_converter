@@ -8,8 +8,8 @@ import * as m2i from './convert_mapx_to_iso.js'
  *
  * @returns {string} - a MAPX object as json string
  */
-export function iso19139ToMapx (isoString) {
-  return i2m.iso19139ToMapx(isoString)
+export function iso19139ToMapx(isoString) {
+    return i2m.iso19139ToMapx(isoString)
 }
 
 /**
@@ -19,6 +19,6 @@ export function iso19139ToMapx (isoString) {
  *
  * @returns {string} an iso19139 XML string
  */
-export function mapxToIso19139 (mapxString) {
-  return m2i.mapxToIso19139(mapxString)
+export function mapxToIso19139(mapxString) {
+    return m2i.mapxToIso19139(mapxString)
 }

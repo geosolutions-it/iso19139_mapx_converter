@@ -16,19 +16,19 @@ params[UTILS.PARAM_LOG_INFO_NAME] = false
 params[UTILS.PARAM_LOG_DEBUG_NAME] = false
 
 for (let j = 2; j < process.argv.length; j++) {
-  var arg = process.argv[j]
-  if (arg === '-v') {
-    params[UTILS.PARAM_LOG_INFO_NAME] = true
-  } else if (arg === '-vv') {
-    params[UTILS.PARAM_LOG_DEBUG_NAME] = true
-  } else {
-    args.push(arg)
-  }
+    var arg = process.argv[j]
+    if (arg === '-v') {
+        params[UTILS.PARAM_LOG_INFO_NAME] = true
+    } else if (arg === '-vv') {
+        params[UTILS.PARAM_LOG_DEBUG_NAME] = true
+    } else {
+        args.push(arg)
+    }
 }
 
 if (args.length < 2) {
-  usage()
-  throw new Error('Missing arguments')
+    usage()
+    throw new Error('Missing arguments')
 }
 
 var source = args[0]
@@ -39,24 +39,28 @@ var destination = args[1]
 
 run(source, destination, params)
 
-function run (source, destination, params) {
-  var xmlText = loadFromFile(source)
-  var mapxText = iso2mapx.iso19139ToMapx(xmlText)
+function run(source, destination, params) {
+    var xmlText = loadFromFile(source)
+    var mapxText = iso2mapx.iso19139ToMapx(xmlText)
 
-  fs.writeFile(destination, mapxText, (err) => {
-    if (err) { console.log(err) } else { console.log('Successfully Written to File ', destination) }
-  })
+    fs.writeFile(destination, mapxText, (err) => {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log('Successfully Written to File ', destination)
+        }
+    })
 }
 
-function loadFromFile (url) {
-  try {
-    return fs.readFileSync(url)
-  } catch (err) {
-    console.warn('Error while reading file'.err)
-    return undefined
-  }
+function loadFromFile(url) {
+    try {
+        return fs.readFileSync(url)
+    } catch (err) {
+        console.warn('Error while reading file'.err)
+        return undefined
+    }
 }
 
-function usage () {
-  console.log('loadISO [-v] URL destination_file')
+function usage() {
+    console.log('loadISO [-v] URL destination_file')
 }
