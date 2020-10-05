@@ -29,6 +29,7 @@
     "browserify": "^16.5.1",
     "crypto-md5": "^1.0.0",
     "fs": "0.0.1-security",
+    "html-to-text": "^5.1.1",
     "http": "0.0.0",
     "https": "^1.0.0",
     "md5": "^2.2.1",
@@ -48,6 +49,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "js-beautify": "^1.13.0",
     "jsdoc": "^3.6.4",
     "mocha": "^7.1.1",
     "uglify-js": "^3.9.4"
@@ -81,7 +83,7 @@
   "readmeFilename": "README.md",
   "scripts": {
     "__build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js; uglifyjs dist/iso19139_mapx_converter.js -o dist/iso19139_mapx_converter.min.js ",
-    "build":       "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
+    "build": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js",
     "prepublish": "browserify src/index.js --s iso19139_mapx_converter -o dist/iso19139_mapx_converter.js; ./node_modules/.bin/jsdoc src/index.js -d ./doc",
     "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules",

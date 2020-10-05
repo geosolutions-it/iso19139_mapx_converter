@@ -8,6 +8,8 @@ import * as UTILS from './mapx_utils.js'
 import MD5 from 'crypto-md5/md5.js'
 import builder from 'xmlbuilder'
 
+import htmlToText from 'html-to-text'
+
 /**
  * Transforms a MAPX json text into a ISO19139 xml text.
  *
@@ -139,8 +141,13 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     // abstract
+    var ab = MAPX.getAbstract(mapx, lang)
+    ab = htmlToText.fromString(ab, {
+        tables: true
+    })
+
     identification['gmd:abstract'] = {
-        'gco:CharacterString': MAPX.getAbstract(mapx, lang)
+        'gco:CharacterString': ab
     }
 
     // data points of concat
@@ -273,6 +280,10 @@ export function mapxToIso19139Internal(mapx, params) {
 
     var note = MAPX.getNotes(mapx, lang)
     if (note) {
+        note = htmlToText.fromString(note, {
+            tables: true
+        })
+
         suppInfo.push(note)
     }
 
