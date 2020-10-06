@@ -38,7 +38,7 @@ const logInfo = params[UTILS.PARAM_LOG_INFO_NAME]
 const logDebug = params[UTILS.PARAM_LOG_DEBUG_NAME] || logInfo
 
 if (logInfo) {
-    console.log('Params --> ' + JSON.stringify(params))
+    console.log(`Params --> ${JSON.stringify(params)}`)
 }
 
 run(source, destination, params)

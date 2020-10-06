@@ -156,8 +156,8 @@ export function iso19139ToMapxInternal(data, params) {
                         var stepRatio = getFirstFromPath(pstep, ['LI_ProcessStep', 'rationale', GCO_CHAR_NAME])
 
                         var stepText =
-                            (stepDescr ? 'DESCRIPTION: ' + stepDescr + '\n' : '') +
-                            (stepRatio ? 'RATIONALE: ' + stepRatio + '\n' : '')
+                            (stepDescr ? `DESCRIPTION: ${stepDescr}\n` : '') +
+                            (stepRatio ? `RATIONALE: ${stepRatio}\n` : '')
 
                         MAPX.addNote(mapx, lang, 'PROCESSING STEP', stepText)
                     }
@@ -283,7 +283,7 @@ export function iso19139ToMapxInternal(data, params) {
     if (crsid) {
         var epsgcode = extractEpsgCode(crsid)
         if (epsgcode) {
-            MAPX.setCrs(mapx, 'EPSG:' + epsgcode, 'http://spatialreference.org/ref/epsg/' + epsgcode + '/')
+            MAPX.setCrs(mapx, `EPSG:${epsgcode}`, `http://spatialreference.org/ref/epsg/${epsgcode}/`)
         } else {
             // copy it verbatim
             MAPX.setCrs(mapx, crsid, 'http://spatialreference.org/ref/epsg/0/')
@@ -370,7 +370,7 @@ export function iso19139ToMapxInternal(data, params) {
                     var isDownload = (proto !== undefined) && proto.startsWith('WWW:DOWNLOAD')
 
                     if (proto && proto.endsWith('get-map')) {
-                        url = url + '&LAYER=' + name
+                        url = `${url}&LAYER=${name}`
                     }
 
                     if (url.length > 0) {
@@ -452,7 +452,7 @@ function addContacts(mapx, context, isoContacts) {
     for (var isoContact of isoContacts) {
         var parsedContact = parseResponsibleParty(isoContact[CI_RP][0])
         const [mfunc, mname, maddr, mmail] = mapContact(parsedContact)
-        MAPX.addContact(mapx, context + ' ' + mfunc, mname, maddr, mmail)
+        MAPX.addContact(mapx, `${context} ${mfunc}`, mname, maddr, mmail)
     }
 }
 
@@ -471,25 +471,25 @@ function mapContact(parsedContact) {
         addrs.push(parsedContact[RP_ORG_NAME])
     }
     if (parsedContact[RP_ADDR_DELIVERY]) {
-        addrs.push('Address: ' + parsedContact[RP_ADDR_DELIVERY])
+        addrs.push(`Address: ${parsedContact[RP_ADDR_DELIVERY]}`)
     }
     if (parsedContact[RP_ADDR_CITY]) {
-        addrs.push('City: ' + parsedContact[RP_ADDR_CITY])
+        addrs.push(`City: ${parsedContact[RP_ADDR_CITY]}`)
     }
     if (parsedContact[RP_ADDR_ADMINAREA]) {
-        addrs.push('(' + parsedContact[RP_ADDR_ADMINAREA] + ')')
+        addrs.push(`(${parsedContact[RP_ADDR_ADMINAREA]})`)
     }
     if (parsedContact[RP_ADDR_ZIP]) {
-        addrs.push('ZIP ' + parsedContact[RP_ADDR_ZIP])
+        addrs.push(`ZIP ${parsedContact[RP_ADDR_ZIP]}`)
     }
     if (parsedContact[RP_ADDR_COUNTRY]) {
-        addrs.push('Country: ' + parsedContact[RP_ADDR_COUNTRY])
+        addrs.push(`Country: ${parsedContact[RP_ADDR_COUNTRY]}`)
     }
     if (parsedContact[RP_VOICE]) {
-        addrs.push('Phone: ' + parsedContact[RP_VOICE])
+        addrs.push(`Phone: ${parsedContact[RP_VOICE]}`)
     }
     if (parsedContact[RP_FAX]) {
-        addrs.push('Fax: ' + parsedContact[RP_FAX])
+        addrs.push(`Fax: ${parsedContact[RP_FAX]}`)
     }
 
     var retaddr = addrs.join(' - ')
@@ -612,7 +612,7 @@ function addCostraints(mapx, constraintsList, context) {
         for (c of constraints.MD_Constraints || []) {
             for (ul of c.useLimitation) {
                 for (text of ul[GCO_CHAR_NAME]) {
-                    MAPX.addLicense(mapx, context + ' generic use limitation', text)
+                    MAPX.addLicense(mapx, `${context} generic use limitation`, text)
                 }
             }
         }
@@ -620,21 +620,21 @@ function addCostraints(mapx, constraintsList, context) {
         for (c of constraints.MD_LegalConstraints || []) {
             for (ul of c.useLimitation || []) {
                 for (text of ul[GCO_CHAR_NAME]) {
-                    MAPX.addLicense(mapx, context + ' legal use limitation', text)
+                    MAPX.addLicense(mapx, `${context} legal use limitation`, text)
                 }
             }
 
             for (acc of c.accessConstraints || []) {
                 code = acc.MD_RestrictionCode[0].$.codeListValue
-                MAPX.addLicense(mapx, context + ' legal access constraint', code)
+                MAPX.addLicense(mapx, `${context} legal access constraint`, code)
             }
             for (acc of c.useConstraints || []) {
                 code = acc.MD_RestrictionCode[0].$.codeListValue
-                MAPX.addLicense(mapx, context + ' legal use constraint', code)
+                MAPX.addLicense(mapx, `${context} legal use constraint`, code)
             }
             for (acc of c.otherConstraints || []) {
                 for (text of acc[GCO_CHAR_NAME] || []) {
-                    MAPX.addLicense(mapx, context + ' other legal constraint', text)
+                    MAPX.addLicense(mapx, `${context} other legal constraint`, text)
                 }
             }
         }
@@ -648,11 +648,11 @@ function addCostraints(mapx, constraintsList, context) {
             var hand = getFirstFromPath(c, ['handlingDescription', GCO_CHAR_NAME])
 
             var textList = []
-            if (note) textList.push('Note: ' + note)
-            if (csys) textList.push('Classification system: ' + csys)
-            if (hand) textList.push('Handling description: ' + hand)
+            if (note) textList.push(`Note: ${note}`)
+            if (csys) textList.push(`Classification system: ${csys}`)
+            if (hand) textList.push(`Handling description: ${hand}`)
 
-            MAPX.addLicense(mapx, context + ' security constraints: ' + ccode, textList.join('\n\n'))
+            MAPX.addLicense(mapx, `${context} security constraints: ${ccode}`, textList.join('\n\n'))
         }
     }
 }

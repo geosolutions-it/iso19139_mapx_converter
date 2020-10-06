@@ -136,7 +136,7 @@ export function addNote(mapx, lang, title, value) {
         checkLang(lang)
         var old = mapx.text.notes[lang]
         var sep = old.length === 0 ? '' : '. '
-        mapx.text.notes[lang] = old + sep + title + ': ' + value
+        mapx.text.notes[lang] = `${old}${sep}${title}: ${value}`
     }
 }
 
@@ -150,7 +150,7 @@ export function getKeywords(mapx) {
 export function addTopic(mapx, topic) {
     // check topic is correct
     if (!TOPICS.includes(topic)) {
-        throw new Error('Unknown topic: [' + topic + ']')
+        throw new Error(`Unknown topic: [${topic}]`)
     }
 
     // add topic
@@ -224,7 +224,7 @@ export function existModifiedDate(mapx) {
 
 export function setPeriodicity(mapx, periodicity) {
     if (!PERIODICITY.includes(periodicity)) {
-        throw new Error('Unknown periodicity: ' + periodicity)
+        throw new Error(`Unknown periodicity: ${periodicity}`)
     }
 
     mapx.temporal.issuance.periodicity = periodicity
@@ -351,7 +351,7 @@ function initLanguages(map, name) {
 
 function checkLang(langCode) {
     if (!LANGUAGES.includes(langCode)) {
-        throw new Error('Unknown language ' + langCode)
+        throw new Error(`Unknown language ${langCode}`)
     }
 }
 

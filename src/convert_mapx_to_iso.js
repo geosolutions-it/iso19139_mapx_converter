@@ -304,10 +304,10 @@ export function mapxToIso19139Internal(mapx, params) {
         var attlist = []
         for (var attname of attnames) {
             var attval = MAPX.getFirstAttributeVal(mapx, attname)
-            var attstring = attval ? attname + ': ' + attval : attname
+            var attstring = attval ? `${attname}: ${attval}` : attname
             attlist.push(attstring)
         }
-        attsuppinfo = 'Attributes description: ' + attlist.join('; ') + '.'
+        attsuppinfo = `Attributes description: ${attlist.join('; ')}.`
         suppInfo.push(attsuppinfo)
     }
 

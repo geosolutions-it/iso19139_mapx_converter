@@ -34,11 +34,11 @@ it('Basic MAPX object parsing', function(done) {
     assert.equal(MAPX.getTitle(mapx, 'en'), 'title', 'M title mismatch')
     assert.equal(MAPX.getTitle(pars, 'en'), 'title', 'P title mismatch')
 
-    assert.equal(MAPX.getContacts(mapx)[0].function, 'func1', 'M func1 mismatch ' + JSON.stringify(MAPX.getContacts(mapx)[0]))
-    assert.equal(MAPX.getContacts(pars)[0].function, 'func1', 'P func1 mismatch ' + JSON.stringify(MAPX.getContacts(pars)[0]))
+    assert.equal(MAPX.getContacts(mapx)[0].function, 'func1', `M func1 mismatch ${JSON.stringify(MAPX.getContacts(mapx)[0])}`)
+    assert.equal(MAPX.getContacts(pars)[0].function, 'func1', `P func1 mismatch ${JSON.stringify(MAPX.getContacts(pars)[0])}`)
 
-    assert.equal(MAPX.getContacts(mapx)[1].function, 'func2', 'M func1 mismatch ' + JSON.stringify(MAPX.getContacts(mapx)[1]))
-    assert.equal(MAPX.getContacts(pars)[1].function, 'func2', 'P func1 mismatch ' + JSON.stringify(MAPX.getContacts(pars)[1]))
+    assert.equal(MAPX.getContacts(mapx)[1].function, 'func2', `M func1 mismatch ${JSON.stringify(MAPX.getContacts(mapx)[1])}`)
+    assert.equal(MAPX.getContacts(pars)[1].function, 'func2', `P func1 mismatch ${JSON.stringify(MAPX.getContacts(pars)[1])}`)
 
     done()
 })
@@ -231,12 +231,12 @@ it('#9 M2I point of contact', function(done) {
 })
 
 it('#1 I2M dates', function(done) {
-    var mapx = loadXml(__dirname + '/data/no_pubdate_yes_revision.xml')
+    var mapx = loadXml(`${__dirname}/data/no_pubdate_yes_revision.xml`)
 
     assert.equal(MAPX.getReleaseDate(mapx), DATE_DEFAULT)
     assert.equal(MAPX.getModifiedDate(mapx), '2015-07-14')
 
-    mapx = loadXml(__dirname + '/data/no_pubdate_no_revision.xml')
+    mapx = loadXml(`${__dirname}/data/no_pubdate_no_revision.xml`)
 
     assert.equal(MAPX.getReleaseDate(mapx), '2020-01-01')
     assert.equal(MAPX.getModifiedDate(mapx), DATE_DEFAULT)
@@ -245,7 +245,7 @@ it('#1 I2M dates', function(done) {
 })
 
 it('#2 I2M comma separated contacts', function(done) {
-    var mapx = loadXml(__dirname + '/data/contacts_01.xml')
+    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
 
     var cont = MAPX.getContacts(mapx)[0]
 
@@ -255,7 +255,7 @@ it('#2 I2M comma separated contacts', function(done) {
 })
 
 it('#3 I2M role codes', function(done) {
-    var mapx = loadXml(__dirname + '/data/contacts_01.xml')
+    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
 
     var cont = MAPX.getContacts(mapx)[0]
 
@@ -265,7 +265,7 @@ it('#3 I2M role codes', function(done) {
 })
 
 it('#4 I2M Org as address', function(done) {
-    var mapx = loadXml(__dirname + '/data/contacts_01.xml')
+    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
 
     var cont = MAPX.getContacts(mapx)[1]
 
@@ -316,7 +316,7 @@ it('#15 M2I Topic category', function(done) {
 
 it('#15 I2M Topic category', function(done) {
 
-    var mapx = loadXml(__dirname + '/data/contacts_01.xml')
+    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
     var topics = MAPX.getTopics(mapx)
     assert.equal(2, topics.length)
 
