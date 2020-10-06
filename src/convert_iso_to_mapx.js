@@ -105,8 +105,8 @@ export function iso19139ToMapxInternal(data, params) {
         }
     }
 
-    //    if(log)
-    //        console.log("Language", lang)
+    if (log)
+        console.log("Language", lang)
 
     // === Title
     var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME])
@@ -195,7 +195,9 @@ export function iso19139ToMapxInternal(data, params) {
     var metadataDate = formatDate(datestamp, undefined)
 
     for (var date of dataCitationNode.date || []) {
-        // console.log(JSON.stringify(date));
+        if (log) {
+            console.log(`Found date ${JSON.stringify(date)}`)
+        }
         // {"CI_Date":[{
         //      "date":[{
         //          "DateTime":["2012-04-24T13:52:00"]}],
@@ -279,7 +281,9 @@ export function iso19139ToMapxInternal(data, params) {
     //                   "version":[{"CharacterString":["7.4"]}]}]}]}]}]
 
     var crsid = getFirstFromPath(mdRoot, ['referenceSystemInfo', 'MD_ReferenceSystem', 'referenceSystemIdentifier', 'RS_Identifier', 'code', GCO_CHAR_NAME])
-    // console.log("CRS --> ", JSON.stringify(crsid));
+    if (log) {
+        console.log("CRS --> ", JSON.stringify(crsid))
+    }
     if (crsid) {
         var epsgcode = extractEpsgCode(crsid)
         if (epsgcode) {
