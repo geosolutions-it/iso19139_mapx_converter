@@ -21,13 +21,15 @@ const DATE_DEFAULT = '0001-01-01'
  * Transforms an ISO19139 xml text into a MAPX json text.
  *
  * @param {string} isostring - an iso19139 XML string
+ * @param {map} params- further params to the function: MESSAGE_HANDLER
  *
  * @returns {string} - a MAPX object as json string
  */
-export function iso19139ToMapx(isostring) {
+export function iso19139ToMapx(isostring, params) {
     var isojson = xml2json(isostring)
-    var mapxjson = iso19139ToMapxInternal(isojson, null)
-    var mapxstring = JSON.stringify(mapxjson, null, 3)
+    var mapx = iso19139ToMapxInternal(isojson, params)
+    var mapxobj = mapx.mapx
+    var mapxstring = JSON.stringify(mapxobj, null, 3)
 
     return mapxstring
 }
@@ -41,28 +43,34 @@ export function iso19139ToMapx(isostring) {
  * @returns {obj} - a MAPX object
  */
 export function iso19139ToMapxInternal(data, params) {
-    var log = params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
+    // sanitize params
+    if (params === null || typeof params == 'undefined') {
+        params = {}
+    }
 
-    var mapx = MAPX.createObject()
+    var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
+    var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
+
+    var mapx = new MAPX.MapX()
 
     var mdRoot
 
     if (data[MD_ROOT_NAME]) {
         if (log) {
-            console.log('Not unwrapping ', MD_ROOT_NAME)
+            logger.log('Not unwrapping ', MD_ROOT_NAME)
         }
         mdRoot = data[MD_ROOT_NAME]
     } else {
         var rootName = Object.keys(data)[0]
         if (log) {
-            console.log('Unwrapping ', rootName)
+            logger.log('Unwrapping ', rootName)
         }
         mdRoot = data[rootName][MD_ROOT_NAME][0]
     }
 
     // Look for some of the main nodes
     if (mdRoot.identificationInfo && mdRoot.identificationInfo.length > 1) {
-        console.warn('More than 1 identinfo found')
+        logger.warn('More than 1 identinfo found')
     }
 
     var identificationInfo = mdRoot.identificationInfo[0]
@@ -78,7 +86,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     var uuid = getFirstFromPath(mdRoot, ['fileIdentifier', GCO_CHAR_NAME])
     if (log) {
-        console.log('METADATA ID', uuid)
+        logger.log('METADATA ID', uuid)
     }
 
     // Detect language
@@ -93,60 +101,67 @@ export function iso19139ToMapxInternal(data, params) {
 
         if (!lang) {
             lang = 'en' // default language
-            if (log) {
-                console.warn("Can't map language ", isoLang)
-            }
+            logger.warn(`Can't map language [${isoLang}]`)
         }
-        MAPX.add_language(mapx, lang)
+        mapx.add_language(lang)
     } else {
         lang = 'en' // default language
-        if (log) {
-            console.warn('Language definition not found')
-        }
+        logger.warn('Language definition not found')
     }
 
     if (log)
-        console.log("Language", lang)
+        logger.log("Language", lang)
+
+    var ok
 
     // === Title
     var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME])
-    MAPX.setTitle(mapx, lang, title)
+    ok = mapx.setTitle(lang, title)
+    if (!ok) {
+        logger.warn(`Could not set title: lang[${lang}] title[${title}]`)
+    }
 
     // === Abstract
     var abstract = getFirstFromPath(identNode, ['abstract', GCO_CHAR_NAME])
-    MAPX.setAbstract(mapx, lang, abstract)
+    ok = mapx.setAbstract(lang, abstract)
+    if (!ok) {
+        logger.warn(`Could not set abstract: lang[${lang}] abs[${abstract}]`)
+    }
+
 
     // === Keywords
     for (var dk of identNode.descriptiveKeywords || []) {
         for (var keywords of dk.MD_Keywords) {
             for (var keyword of keywords.keyword) {
-                MAPX.addKeyword(mapx, keyword[GCO_CHAR_NAME][0])
+                mapx.addKeyword(keyword[GCO_CHAR_NAME][0])
             }
         }
     }
 
     // === Topics
     for (var topic of identNode.topicCategory || []) {
-        MAPX.addTopic(mapx, topic.MD_TopicCategoryCode[0])
+        if (!mapx.addTopic(topic.MD_TopicCategoryCode[0])) {
+            logger.warn(`Bad topic found [${topic}]`)
+        }
     }
 
     // === Notes
-    MAPX.addNote(mapx, lang, 'Purpose', getFirstFromPath(identNode, ['purpose', GCO_CHAR_NAME]))
-    MAPX.addNote(mapx, lang, 'Credit', getFirstFromPath(identNode, ['credit', GCO_CHAR_NAME]))
+    mapx.addNote(lang, 'Purpose', getFirstFromPath(identNode, ['purpose', GCO_CHAR_NAME]))
+    mapx.addNote(lang, 'Credit', getFirstFromPath(identNode, ['credit', GCO_CHAR_NAME]))
 
     var progressCode = getFirstFromPath(identNode, ['status', 'MD_ProgressCode'])
     var progressValue = progressCode ? progressCode.$[ATTR_CLV].replace(/^\w/, (c) => c.toUpperCase()) : undefined
-    MAPX.addNote(mapx, lang, 'Status', progressValue)
+    mapx.addNote(lang, 'Status', progressValue)
 
-    MAPX.addNote(mapx, lang, 'Environment', getFirstFromPath(identNode, ['environmentDescription', GCO_CHAR_NAME]))
-    MAPX.addNote(mapx, lang, 'Supplemental information', getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME]))
+    mapx.addNote(lang, 'Environment', getFirstFromPath(identNode, ['environmentDescription', GCO_CHAR_NAME]))
+    mapx.addNote(lang, 'Supplemental information', getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME]))
 
     // add lineage and processing steps
     if (mdRoot.dataQualityInfo) {
         for (var qinfo of mdRoot.dataQualityInfo) {
             var lineage = getFirstFromPath(qinfo, ['DQ_DataQuality', 'lineage', 'LI_Lineage'])
             if (lineage) {
-                MAPX.addNote(mapx, lang, 'Lineage', getFirstFromPath(lineage, ['statement', GCO_CHAR_NAME]))
+                mapx.addNote(lang, 'Lineage', getFirstFromPath(lineage, ['statement', GCO_CHAR_NAME]))
 
                 // add process steps
                 // "processStep":[{"LI_ProcessStep":[{"description":[{"CharacterString":["detailed description of processing: deliverables 3.7 and 3.8 available at: http://www.envirogrids.net/index.php?option=com_content&view=article&id=23&Itemid=40"]}]
@@ -159,7 +174,7 @@ export function iso19139ToMapxInternal(data, params) {
                             (stepDescr ? `DESCRIPTION: ${stepDescr}\n` : '') +
                             (stepRatio ? `RATIONALE: ${stepRatio}\n` : '')
 
-                        MAPX.addNote(mapx, lang, 'PROCESSING STEP', stepText)
+                        mapx.addNote(lang, 'PROCESSING STEP', stepText)
                     }
                 }
             }
@@ -181,7 +196,7 @@ export function iso19139ToMapxInternal(data, params) {
         var isoFreqVal = isoFreqNode.$.codeListValue
 
         var mapxFreq = UTILS.FREQ_MAPPING_I2M[isoFreqVal]
-        MAPX.setPeriodicity(mapx, mapxFreq || 'unknown')
+        mapx.setPeriodicity(mapxFreq || 'unknown')
     }
 
     // Retrieve dates
@@ -244,8 +259,8 @@ export function iso19139ToMapxInternal(data, params) {
         releaseDate = metadataDate
     }
 
-    MAPX.setReleaseDate(mapx, releaseDate)
-    MAPX.setModifiedDate(mapx, updateDate)
+    mapx.setReleaseDate(releaseDate)
+    mapx.setModifiedDate(updateDate)
 
     // == Range
     // "extent":[
@@ -262,10 +277,10 @@ export function iso19139ToMapxInternal(data, params) {
         var optEnd = timePeriod.endPosition
 
         if (optStart) {
-            MAPX.setTemporalStart(mapx, formatDate(optStart[0]))
+            mapx.setTemporalStart(formatDate(optStart[0]))
         }
         if (optEnd) {
-            MAPX.setTemporalEnd(mapx, formatDate(optEnd[0]))
+            mapx.setTemporalEnd(formatDate(optEnd[0]))
         }
     }
 
@@ -287,10 +302,10 @@ export function iso19139ToMapxInternal(data, params) {
     if (crsid) {
         var epsgcode = extractEpsgCode(crsid)
         if (epsgcode) {
-            MAPX.setCrs(mapx, `EPSG:${epsgcode}`, `http://spatialreference.org/ref/epsg/${epsgcode}/`)
+            mapx.setCrs(`EPSG:${epsgcode}`, `http://spatialreference.org/ref/epsg/${epsgcode}/`)
         } else {
             // copy it verbatim
-            MAPX.setCrs(mapx, crsid, 'http://spatialreference.org/ref/epsg/0/')
+            mapx.setCrs(crsid, 'http://spatialreference.org/ref/epsg/0/')
         }
     } else {
         // use the default
@@ -302,7 +317,7 @@ export function iso19139ToMapxInternal(data, params) {
     var geoextent = findFirstFromPath(identNode, ['extent', 'EX_Extent', 'geographicElement', 'EX_GeographicBoundingBox'])
 
     if (geoextent) {
-        MAPX.setBBox(mapx,
+        mapx.setBBox(
             geoextent.westBoundLongitude[0].Decimal[0],
             geoextent.eastBoundLongitude[0].Decimal[0],
             geoextent.southBoundLatitude[0].Decimal[0],
@@ -378,7 +393,7 @@ export function iso19139ToMapxInternal(data, params) {
                     }
 
                     if (url.length > 0) {
-                        MAPX.addSource(mapx, url, isDownload)
+                        mapx.addSource(url, isDownload)
                     }
                 }
             }
@@ -456,7 +471,7 @@ function addContacts(mapx, context, isoContacts) {
     for (var isoContact of isoContacts) {
         var parsedContact = parseResponsibleParty(isoContact[CI_RP][0])
         const [mfunc, mname, maddr, mmail] = mapContact(parsedContact)
-        MAPX.addContact(mapx, `${context} ${mfunc}`, mname, maddr, mmail)
+        mapx.addContact(`${context} ${mfunc}`, mname, maddr, mmail)
     }
 }
 
@@ -616,7 +631,7 @@ function addCostraints(mapx, constraintsList, context) {
         for (c of constraints.MD_Constraints || []) {
             for (ul of c.useLimitation) {
                 for (text of ul[GCO_CHAR_NAME]) {
-                    MAPX.addLicense(mapx, `${context} generic use limitation`, text)
+                    mapx.addLicense(`${context} generic use limitation`, text)
                 }
             }
         }
@@ -624,21 +639,21 @@ function addCostraints(mapx, constraintsList, context) {
         for (c of constraints.MD_LegalConstraints || []) {
             for (ul of c.useLimitation || []) {
                 for (text of ul[GCO_CHAR_NAME]) {
-                    MAPX.addLicense(mapx, `${context} legal use limitation`, text)
+                    mapx.addLicense(`${context} legal use limitation`, text)
                 }
             }
 
             for (acc of c.accessConstraints || []) {
                 code = acc.MD_RestrictionCode[0].$.codeListValue
-                MAPX.addLicense(mapx, `${context} legal access constraint`, code)
+                mapx.addLicense(`${context} legal access constraint`, code)
             }
             for (acc of c.useConstraints || []) {
                 code = acc.MD_RestrictionCode[0].$.codeListValue
-                MAPX.addLicense(mapx, `${context} legal use constraint`, code)
+                mapx.addLicense(`${context} legal use constraint`, code)
             }
             for (acc of c.otherConstraints || []) {
                 for (text of acc[GCO_CHAR_NAME] || []) {
-                    MAPX.addLicense(mapx, `${context} other legal constraint`, text)
+                    mapx.addLicense(`${context} other legal constraint`, text)
                 }
             }
         }
@@ -656,7 +671,7 @@ function addCostraints(mapx, constraintsList, context) {
             if (csys) textList.push(`Classification system: ${csys}`)
             if (hand) textList.push(`Handling description: ${hand}`)
 
-            MAPX.addLicense(mapx, `${context} security constraints: ${ccode}`, textList.join('\n\n'))
+            mapx.addLicense(`${context} security constraints: ${ccode}`, textList.join('\n\n'))
         }
     }
 }

@@ -18,7 +18,8 @@ import htmlToText from 'html-to-text'
  * @returns {string} an iso19139 XML string
  */
 export function mapxToIso19139(mapxText) {
-    var mapx = JSON.parse(mapxText)
+    var mapxObj = JSON.parse(mapxText)
+    var mapx = new MAPX.MapX(mapxObj)
     var iso = mapxToIso19139Internal(mapx, null)
     var isoxml = builder.create(iso, {
         encoding: 'utf-8'
@@ -58,7 +59,7 @@ export function mapxToIso19139Internal(mapx, params) {
     var metadataContacts = []
     var dataContacts = []
 
-    for (var c of MAPX.getContacts(mapx)) {
+    for (var c of mapx.getContacts()) {
         var f = c.function
         metadataContacts.push(createResponsibleParty(c))
         if (!f.toLowerCase().includes('metadata')) {
@@ -79,7 +80,7 @@ export function mapxToIso19139Internal(mapx, params) {
             'gmd:referenceSystemIdentifier': {
                 'gmd:RS_Identifier': {
                     'gmd:code': {
-                        'gco:CharacterString': MAPX.getCrsCode(mapx)
+                        'gco:CharacterString': mapx.getCrsCode()
                     }
                 }
             }
@@ -88,14 +89,14 @@ export function mapxToIso19139Internal(mapx, params) {
 
     var dates = []
 
-    var useReleaseDate = MAPX.existReleaseDate(mapx) && MAPX.checkDate(MAPX.getReleaseDate(mapx))
+    var useReleaseDate = mapx.existReleaseDate() && MAPX.checkDate(mapx.getReleaseDate())
     if (useReleaseDate) {
         dates.push({
             'gmd:CI_Date': {
                 'gmd:date':
                 // modified date --> dataset
                 {
-                    'gco:Date': MAPX.getReleaseDate(mapx)
+                    'gco:Date': mapx.getReleaseDate()
                 },
                 'gmd:dateType': {
                     'gmd:CI_DateTypeCode': {
@@ -107,16 +108,16 @@ export function mapxToIso19139Internal(mapx, params) {
         })
     }
 
-    var useModifiedDate = MAPX.existModifiedDate(mapx) && MAPX.checkDate(MAPX.getModifiedDate(mapx))
+    var useModifiedDate = mapx.existModifiedDate() && MAPX.checkDate(mapx.getModifiedDate())
     if (useModifiedDate &&
         (!useReleaseDate ||
-            (MAPX.getModifiedDate(mapx) !== MAPX.getReleaseDate(mapx)))) {
+            (mapx.getModifiedDate() !== mapx.getReleaseDate()))) {
         dates.push({
             'gmd:CI_Date': {
                 'gmd:date':
                 // modified date --> dataset
                 {
-                    'gco:Date': MAPX.getModifiedDate(mapx)
+                    'gco:Date': mapx.getModifiedDate()
                 },
                 'gmd:dateType': {
                     'gmd:CI_DateTypeCode': {
@@ -134,14 +135,14 @@ export function mapxToIso19139Internal(mapx, params) {
         // title
         {
             'gmd:title': {
-                'gco:CharacterString': MAPX.getTitle(mapx, lang)
+                'gco:CharacterString': mapx.getTitle(lang)
             },
             'gmd:date': dates
         }
     }
 
     // abstract
-    var ab = MAPX.getAbstract(mapx, lang)
+    var ab = mapx.getAbstract(lang)
     ab = htmlToText.fromString(ab, {
         tables: true
     })
@@ -158,7 +159,7 @@ export function mapxToIso19139Internal(mapx, params) {
         'gmd:MD_MaintenanceInformation': {
             'gmd:maintenanceAndUpdateFrequency': {
                 'gmd:MD_MaintenanceFrequencyCode': {
-                    '@codeListValue': UTILS.FREQ_MAPPING_M2I[MAPX.getPeriodicity(mapx)],
+                    '@codeListValue': UTILS.FREQ_MAPPING_M2I[mapx.getPeriodicity()],
                     '@codeList': 'http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_MaintenanceFrequencyCode'
                 }
             }
@@ -167,7 +168,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     // gather keywords
     var keywordList = []
-    for (var kw of MAPX.getKeywords(mapx)) {
+    for (var kw of mapx.getKeywords()) {
         keywordList.push({
             'gco:CharacterString': kw
         })
@@ -183,7 +184,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     // licenses
     // gmd:resourceConstraints 0..N
-    var licenses = MAPX.getLicenses(mapx)
+    var licenses = mapx.getLicenses()
     if (licenses.length > 0) {
         var oc = []
         for (var l of licenses) {
@@ -211,7 +212,7 @@ export function mapxToIso19139Internal(mapx, params) {
         }
     }
 
-    var topics = MAPX.getTopics(mapx)
+    var topics = mapx.getTopics()
     if (topics.length > 0) {
         var topicCategory = []
         for (var topic of topics) {
@@ -225,7 +226,7 @@ export function mapxToIso19139Internal(mapx, params) {
     var extents = []
 
     // bbox
-    var [x0, x1, y0, y1] = MAPX.getBBox(mapx)
+    var [x0, x1, y0, y1] = mapx.getBBox()
     extents.push({
         'gmd:EX_Extent': {
             'gmd:geographicElement': {
@@ -248,21 +249,21 @@ export function mapxToIso19139Internal(mapx, params) {
     })
 
     // temporal
-    if (!MAPX.isTimeless(mapx)) {
+    if (!mapx.isTimeless()) {
         var period = {}
         period['@gml:id'] = 'missing'
 
         var addExtent = false
 
-        if (MAPX.existTemporalStart(mapx)) {
-            var date = MAPX.getTemporalStart(mapx)
+        if (mapx.existTemporalStart()) {
+            var date = mapx.getTemporalStart()
             if (MAPX.checkDate(date)) {
                 period['gml:beginPosition'] = date
                 addExtent = true
             }
         }
-        if (MAPX.existTemporalEnd(mapx)) {
-            date = MAPX.getTemporalEnd(mapx)
+        if (mapx.existTemporalEnd()) {
+            date = mapx.getTemporalEnd()
             if (MAPX.checkDate(date)) {
                 period['gml:endPosition'] = date
                 addExtent = true
@@ -289,7 +290,7 @@ export function mapxToIso19139Internal(mapx, params) {
     // supplementalInformation
     var suppInfo = []
 
-    var note = MAPX.getNotes(mapx, lang)
+    var note = mapx.getNotes(lang)
     if (note) {
         note = htmlToText.fromString(note, {
             tables: true
@@ -298,12 +299,12 @@ export function mapxToIso19139Internal(mapx, params) {
         suppInfo.push(note)
     }
 
-    var attnames = MAPX.getAttributeNames(mapx)
+    var attnames = mapx.getAttributeNames()
     var attsuppinfo
     if (attnames) {
         var attlist = []
         for (var attname of attnames) {
-            var attval = MAPX.getFirstAttributeVal(mapx, attname)
+            var attval = mapx.getFirstAttributeVal(attname)
             var attstring = attval ? `${attname}: ${attval}` : attname
             attlist.push(attstring)
         }
@@ -324,11 +325,11 @@ export function mapxToIso19139Internal(mapx, params) {
     // resources
     var resources = []
 
-    if (MAPX.getHomepage(mapx)) {
+    if (mapx.getHomepage()) {
         resources.push({
             'gmd:CI_OnlineResource': {
                 'gmd:linkage': {
-                    'gmd:URL': MAPX.getHomepage(mapx)
+                    'gmd:URL': mapx.getHomepage()
                 },
                 'gmd:name': {
                     'gco:CharacterString': 'Homepage'
@@ -338,7 +339,7 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     // sources
-    var sources = MAPX.getSources(mapx)
+    var sources = mapx.getSources()
     if (sources.length > 0) {
         for (var source of sources) {
             resources.push({
@@ -355,7 +356,7 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     // annexes
-    var annexes = MAPX.getReferences(mapx)
+    var annexes = mapx.getReferences()
     if (annexes.length > 0) {
         for (var annex of annexes) {
             resources.push({

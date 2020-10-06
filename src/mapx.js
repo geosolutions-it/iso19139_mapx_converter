@@ -28,6 +28,285 @@ export const TOPICS = [
     "utilitiesCommunication"
 ]
 
+
+
+export class MapX {
+
+    constructor(obj) {
+        this.mapx = obj || createObject()
+    }
+
+    setTitle(lang, value) {
+        if (!checkLang(lang)) {
+            return false
+        }
+        this.mapx.text.title[lang] = value
+        return true
+    }
+    getTitle(lang) {
+        return this.mapx.text.title[lang]
+    }
+    getAllTitles() {
+        return this.mapx.text.title
+    }
+
+    setAbstract(lang, value) {
+        if (!checkLang(lang)) {
+            return false
+        }
+        this.mapx.text.abstract[lang] = value
+        return true
+    }
+    getAbstract(lang) {
+        return this.mapx.text.abstract[lang]
+    }
+    getAllAbstracts() {
+        return this.mapx.text.abstract
+    }
+
+    setNotes(lang, value) {
+        if (!checkLang(lang)) {
+            return false
+        }
+        this.mapx.text.notes[lang] = value
+        return true
+    }
+    getNotes(lang) {
+        return this.mapx.text.notes[lang]
+    }
+    getAllNotes() {
+        return this.mapx.text.notes
+    }
+    addNote(lang, title, value) {
+        if (!checkLang(lang)) {
+            return false
+        }
+
+        if (value) {
+            var old = this.mapx.text.notes[lang]
+            var sep = old.length === 0 ? '' : '. '
+            this.mapx.text.notes[lang] = `${old}${sep}${title}: ${value}`
+        }
+        return true
+    }
+
+    addKeyword(keyword) {
+        this.mapx.text.keywords.keys.push(keyword)
+    }
+    getKeywords() {
+        return this.mapx.text.keywords.keys
+    }
+
+    addTopic(topic) {
+        if (!TOPICS.includes(topic)) {
+            return false
+        }
+        this.mapx.text.keywords.topics.push(topic)
+        return true
+    }
+    getTopics(mapx) {
+        return this.mapx.text.keywords.topics
+    }
+
+    addLanguage(lang) {
+        if (!checkLang(lang)) {
+            return false
+        }
+
+        this.mapx.text.language.codes.push({
+            code: lang
+        })
+        return false
+    }
+    getLanguages() {
+        var ret = []
+        for (var code of this.mapx.text.language.codes) {
+            ret.push(code.code)
+        }
+        return ret
+    }
+
+    setAttribute(lang, attname, value) {
+        var attr = this.mapx.text.attributes[attname] || initLanguages(this.mapx.text.attributes, attname)
+        attr.lang = value
+    }
+    getAttributeVal(lang, attname) {
+        var attr = this.mapx.text.attributes[attname]
+        return attr ? attr[lang] : undefined
+    }
+    getFirstAttributeVal(attname) {
+        var attr = this.mapx.text.attributes[attname]
+        if (attr) {
+            for (const lang of LANGUAGES) {
+                if (attr[lang]) {
+                    return attr[lang]
+                }
+            }
+        }
+        return undefined
+    }
+    getAllAttributes() {
+        return this.mapx.text.attributes
+    }
+    getAttributeNames() {
+        return Object.getOwnPropertyNames(this.mapx.text.attributes)
+    }
+
+    setReleaseDate(date) {
+        if (!checkDate(date)) {
+            return false
+        }
+        this.mapx.temporal.issuance.released_at = date
+        return true
+    }
+    getReleaseDate() {
+        return this.mapx.temporal.issuance.released_at
+    }
+    existReleaseDate(mapx) {
+        return this.mapx.temporal.issuance.released_at !== '0001-01-01'
+    }
+
+    setModifiedDate(date) {
+        if (!checkDate(date)) {
+            return false
+        }
+        this.mapx.temporal.issuance.modified_at = date
+        return true
+    }
+    getModifiedDate() {
+        return this.mapx.temporal.issuance.modified_at
+    }
+    existModifiedDate() {
+        return this.mapx.temporal.issuance.modified_at !== '0001-01-01'
+    }
+
+    setPeriodicity(periodicity) {
+        if (!PERIODICITY.includes(periodicity)) {
+            return false
+        }
+
+        this.mapx.temporal.issuance.periodicity = periodicity
+        return true
+    }
+    getPeriodicity() {
+        return this.mapx.temporal.issuance.periodicity
+    }
+
+    setTemporalStart(date) {
+        if (!checkDate(date)) {
+            return false
+        }
+        this.mapx.temporal.range.start_at = date
+        this.mapx.temporal.range.is_timeless = false
+        return true
+    }
+    setTemporalEnd(date) {
+        if (!checkDate(date)) {
+            return false
+        }
+        this.mapx.temporal.range.end_at = date
+        this.mapx.temporal.range.is_timeless = false
+        return true
+    }
+    isTimeless() {
+        return this.mapx.temporal.range.is_timeless
+    }
+    getTemporalStart() {
+        return this.mapx.temporal.range.start_at
+    }
+    getTemporalEnd() {
+        return this.mapx.temporal.range.end_at
+    }
+    existTemporalStart() {
+        return this.mapx.temporal.range.start_at !== '0001-01-01'
+    }
+    existTemporalEnd() {
+        return this.mapx.temporal.range.end_at !== '0001-01-01'
+    }
+
+    setCrs(code, url) {
+        this.mapx.spatial.crs.code = code
+        this.mapx.spatial.crs.url = url
+    }
+    getCrsCode() {
+        return this.mapx.spatial.crs.code
+    }
+
+    setBBox(lngMin, lngMax, latMin, latMax) {
+        this.mapx.spatial.bbox.lng_min = lngMin
+        this.mapx.spatial.bbox.lng_max = lngMax
+        this.mapx.spatial.bbox.lat_min = latMin
+        this.mapx.spatial.bbox.lat_max = latMax
+    }
+    getBBox() {
+        return [
+            this.mapx.spatial.bbox.lng_min,
+            this.mapx.spatial.bbox.lng_max,
+            this.mapx.spatial.bbox.lat_min,
+            this.mapx.spatial.bbox.lat_max
+        ]
+    }
+
+    addContact(func, name, addr, mail) {
+        this.mapx.contact.contacts.push({
+            function: func,
+            name: name,
+            address: addr,
+            email: mail
+        })
+    }
+    getContacts() {
+        return (this.mapx.contact || []).contacts
+    }
+
+    setHomepage(url) {
+        this.mapx.origin.homepage.url = url
+    }
+    getHomepage() {
+        return this.mapx.origin.homepage.url
+    }
+
+    addSource(url, isDownloadLink) {
+        this.mapx.origin.source.urls.push({
+            is_download_link: isDownloadLink,
+            url: url
+        })
+    }
+    getSources() {
+        return this.mapx.origin.source.urls
+    }
+
+    setLicenseDownload(allow) {
+        this.mapx.license.allowDownload = !!allow
+    }
+
+    addLicense(name, text) {
+        this.mapx.license.licenses.push({
+            name: name,
+            text: text
+        })
+    }
+    getLicenses() {
+        return this.mapx.license.licenses
+    }
+
+    addReference(url) {
+        this.mapx.annex.references.push({
+            url: url
+        })
+    }
+    getReferences() {
+        var ret = []
+        for (var u of this.mapx.annex.references) {
+            ret.push(u.url)
+        }
+        return ret
+    }
+
+
+}
+
+
 export function createObject() {
     var mapx = {}
 
@@ -99,244 +378,6 @@ export function createObject() {
     return mapx
 }
 
-export function setTitle(mapx, lang, value) {
-    checkLang(lang)
-    mapx.text.title[lang] = value
-}
-export function getTitle(mapx, lang) {
-    return mapx.text.title[lang]
-}
-export function getAllTitles(mapx) {
-    return mapx.text.title
-}
-
-export function setAbstract(mapx, lang, value) {
-    checkLang(lang)
-    mapx.text.abstract[lang] = value
-}
-export function getAbstract(mapx, lang) {
-    return mapx.text.abstract[lang]
-}
-export function getAllAbstracts(mapx) {
-    return mapx.text.abstract
-}
-
-export function setNotes(mapx, lang, value) {
-    checkLang(lang)
-    mapx.text.notes[lang] = value
-}
-export function getNotes(mapx, lang) {
-    return mapx.text.notes[lang]
-}
-export function getAllNotes(mapx) {
-    return mapx.text.notes
-}
-export function addNote(mapx, lang, title, value) {
-    if (value) {
-        checkLang(lang)
-        var old = mapx.text.notes[lang]
-        var sep = old.length === 0 ? '' : '. '
-        mapx.text.notes[lang] = `${old}${sep}${title}: ${value}`
-    }
-}
-
-export function addKeyword(mapx, keyword) {
-    mapx.text.keywords.keys.push(keyword)
-}
-export function getKeywords(mapx) {
-    return mapx.text.keywords.keys
-}
-
-export function addTopic(mapx, topic) {
-    // check topic is correct
-    if (!TOPICS.includes(topic)) {
-        throw new Error(`Unknown topic: [${topic}]`)
-    }
-
-    // add topic
-    mapx.text.keywords.topics.push(topic)
-}
-export function getTopics(mapx) {
-    return mapx.text.keywords.topics
-}
-
-export function addLanguage(mapx, langcode) {
-    checkLang(langcode)
-    mapx.text.language.codes.push({
-        code: langcode
-    })
-}
-export function getLanguages(mapx) {
-    var ret = []
-    for (var code of mapx.text.language.codes) {
-        ret.push(code.code)
-    }
-    return ret
-}
-
-export function setAttribute(mapx, lang, attname, value) {
-    var attr = mapx.text.attributes[attname] || initLanguages(mapx.text.attributes, attname)
-    attr.lang = value
-}
-export function getAttributeVal(mapx, lang, attname) {
-    var attr = mapx.text.attributes[attname]
-    return attr ? attr[lang] : undefined
-}
-export function getFirstAttributeVal(mapx, attname) {
-    var attr = mapx.text.attributes[attname]
-    if (attr) {
-        for (const lang of LANGUAGES) {
-            if (attr[lang]) {
-                return attr[lang]
-            }
-        }
-    }
-    return undefined
-}
-export function getAllAttributes(mapx) {
-    return mapx.text.attributes
-}
-export function getAttributeNames(mapx) {
-    return Object.getOwnPropertyNames(mapx.text.attributes)
-}
-
-export function setReleaseDate(mapx, date) {
-    checkDate(date)
-    mapx.temporal.issuance.released_at = date
-}
-export function getReleaseDate(mapx) {
-    return mapx.temporal.issuance.released_at
-}
-export function existReleaseDate(mapx) {
-    return mapx.temporal.issuance.released_at !== '0001-01-01'
-}
-
-export function setModifiedDate(mapx, date) {
-    checkDate(date)
-    mapx.temporal.issuance.modified_at = date
-}
-export function getModifiedDate(mapx) {
-    return mapx.temporal.issuance.modified_at
-}
-export function existModifiedDate(mapx) {
-    return mapx.temporal.issuance.modified_at !== '0001-01-01'
-}
-
-export function setPeriodicity(mapx, periodicity) {
-    if (!PERIODICITY.includes(periodicity)) {
-        throw new Error(`Unknown periodicity: ${periodicity}`)
-    }
-
-    mapx.temporal.issuance.periodicity = periodicity
-}
-export function getPeriodicity(mapx) {
-    return mapx.temporal.issuance.periodicity
-}
-
-export function setTemporalStart(mapx, date) {
-    checkDate(date)
-    mapx.temporal.range.start_at = date
-    mapx.temporal.range.is_timeless = false
-}
-export function setTemporalEnd(mapx, date) {
-    checkDate(date)
-    mapx.temporal.range.end_at = date
-    mapx.temporal.range.is_timeless = false
-}
-export function isTimeless(mapx) {
-    return mapx.temporal.range.is_timeless
-}
-export function getTemporalStart(mapx) {
-    return mapx.temporal.range.start_at
-}
-export function getTemporalEnd(mapx) {
-    return mapx.temporal.range.end_at
-}
-export function existTemporalStart(mapx) {
-    return mapx.temporal.range.start_at !== '0001-01-01'
-}
-export function existTemporalEnd(mapx) {
-    return mapx.temporal.range.end_at !== '0001-01-01'
-}
-
-export function setCrs(mapx, code, url) {
-    mapx.spatial.crs.code = code
-    mapx.spatial.crs.url = url
-}
-export function getCrsCode(mapx) {
-    return mapx.spatial.crs.code
-}
-
-export function setBBox(mapx, lngMin, lngMax, latMin, latMax) {
-    mapx.spatial.bbox.lng_min = lngMin
-    mapx.spatial.bbox.lng_max = lngMax
-    mapx.spatial.bbox.lat_min = latMin
-    mapx.spatial.bbox.lat_max = latMax
-}
-export function getBBox(mapx) {
-    return [
-        mapx.spatial.bbox.lng_min,
-        mapx.spatial.bbox.lng_max,
-        mapx.spatial.bbox.lat_min,
-        mapx.spatial.bbox.lat_max
-    ]
-}
-
-export function addContact(mapx, func, name, addr, mail) {
-    mapx.contact.contacts.push({
-        function: func,
-        name: name,
-        address: addr,
-        email: mail
-    })
-}
-export function getContacts(mapx) {
-    return (mapx.contact || []).contacts
-}
-
-export function setHomepage(mapx, url) {
-    mapx.origin.homepage.url = url
-}
-export function getHomepage(mapx) {
-    return mapx.origin.homepage.url
-}
-
-export function addSource(mapx, url, isDownloadLink) {
-    mapx.origin.source.urls.push({
-        is_download_link: isDownloadLink,
-        url: url
-    })
-}
-export function getSources(mapx) {
-    return mapx.origin.source.urls
-}
-
-export function setLicenseDownload(mapx, allow) {
-    mapx.license.allowDownload = !!allow
-}
-
-export function addLicense(mapx, name, text) {
-    mapx.license.licenses.push({
-        name: name,
-        text: text
-    })
-}
-export function getLicenses(mapx) {
-    return mapx.license.licenses
-}
-
-export function addReference(mapx, url) {
-    mapx.annex.references.push({
-        url: url
-    })
-}
-export function getReferences(mapx) {
-    var ret = []
-    for (var u of mapx.annex.references) {
-        ret.push(u.url)
-    }
-    return ret
-}
 
 function initLanguages(map, name) {
     var i18nmap = {}
@@ -350,9 +391,7 @@ function initLanguages(map, name) {
 }
 
 function checkLang(langCode) {
-    if (!LANGUAGES.includes(langCode)) {
-        throw new Error(`Unknown language ${langCode}`)
-    }
+    return LANGUAGES.includes(langCode)
 }
 
 export function checkDate(date) {

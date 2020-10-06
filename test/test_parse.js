@@ -28,17 +28,19 @@ const __dirname = dirname(fileURLToPath(
 
 it('Basic MAPX object parsing', function(done) {
     var mapx = create_sample_mapx()
-    var json = JSON.stringify(mapx, null, 3)
-    var pars = JSON.parse(json)
 
-    assert.equal(MAPX.getTitle(mapx, 'en'), 'title', 'M title mismatch')
-    assert.equal(MAPX.getTitle(pars, 'en'), 'title', 'P title mismatch')
+    var json = JSON.stringify(mapx.mapx, null, 3)
+    var mobj = JSON.parse(json)
+    var pars = new MAPX.MapX(mobj)
 
-    assert.equal(MAPX.getContacts(mapx)[0].function, 'func1', `M func1 mismatch ${JSON.stringify(MAPX.getContacts(mapx)[0])}`)
-    assert.equal(MAPX.getContacts(pars)[0].function, 'func1', `P func1 mismatch ${JSON.stringify(MAPX.getContacts(pars)[0])}`)
+    assert.equal(mapx.getTitle('en'), 'title', 'M title mismatch')
+    assert.equal(pars.getTitle('en'), 'title', 'P title mismatch')
 
-    assert.equal(MAPX.getContacts(mapx)[1].function, 'func2', `M func1 mismatch ${JSON.stringify(MAPX.getContacts(mapx)[1])}`)
-    assert.equal(MAPX.getContacts(pars)[1].function, 'func2', `P func1 mismatch ${JSON.stringify(MAPX.getContacts(pars)[1])}`)
+    assert.equal(mapx.getContacts()[0].function, 'func1', `M func1 mismatch ${JSON.stringify(mapx.getContacts()[0])}`)
+    assert.equal(pars.getContacts()[0].function, 'func1', `P func1 mismatch ${JSON.stringify(pars.getContacts()[0])}`)
+
+    assert.equal(mapx.getContacts()[1].function, 'func2', `M func1 mismatch ${JSON.stringify(mapx.getContacts()[1])}`)
+    assert.equal(pars.getContacts()[1].function, 'func2', `P func1 mismatch ${JSON.stringify(pars.getContacts()[1])}`)
 
     done()
 })
@@ -80,7 +82,7 @@ it('Check M2I dates', function(done) {
 })
 
 it('Check void M2I dates', function(done) {
-    var mapx = MAPX.createObject()
+    var mapx = new MAPX.MapX()
 
     var iso = M2I.mapxToIso19139Internal(mapx)
     var xml = builder.create(iso, {
@@ -98,10 +100,10 @@ it('Check void M2I dates', function(done) {
 })
 
 it('Check equals M2I dates', function(done) {
-    var mapx = MAPX.createObject()
+    var mapx = new MAPX.MapX()
 
-    MAPX.setModifiedDate(mapx, '2019-09-25')
-    MAPX.setReleaseDate(mapx, '2019-09-25')
+    mapx.setModifiedDate('2019-09-25')
+    mapx.setReleaseDate('2019-09-25')
 
     var iso = M2I.mapxToIso19139Internal(mapx)
     var xml = builder.create(iso, {
@@ -121,7 +123,7 @@ it('Check equals M2I dates', function(done) {
 
 it('Check begin time extent', function(done) {
     var mapx = create_sample_mapx()
-    MAPX.setTemporalStart(mapx, '2019-09-26')
+    mapx.setTemporalStart('2019-09-26')
 
     var iso = M2I.mapxToIso19139Internal(mapx)
     var xml = builder.create(iso, {
@@ -142,7 +144,7 @@ it('Check begin time extent', function(done) {
 
 it('#5 M2I check default date mapping', function(done) {
     var mapx = create_sample_mapx()
-    assert.equal(true, MAPX.isTimeless(mapx))
+    assert.equal(true, mapx.isTimeless())
 
     var isoJson = createNormalizedIsoJson(mapx)
     var identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
@@ -150,14 +152,14 @@ it('#5 M2I check default date mapping', function(done) {
     assert.ok(typeof timeExtent === 'undefined')
 
     mapx = create_sample_mapx()
-    MAPX.setTemporalStart(mapx, '2019-09-26')
+    mapx.setTemporalStart('2019-09-26')
     isoJson = createNormalizedIsoJson(mapx)
     identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
     timeExtent = findFirstFromPath(identNode, ['gmd:extent', 'gmd:EX_Extent', 'gmd:temporalElement'])
     assert.ok(typeof timeExtent !== 'undefined')
 
     mapx = create_sample_mapx()
-    MAPX.setTemporalStart(mapx, DATE_DEFAULT)
+    mapx.setTemporalStart(DATE_DEFAULT)
     isoJson = createNormalizedIsoJson(mapx)
     identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
     timeExtent = findFirstFromPath(identNode, ['gmd:extent', 'gmd:EX_Extent', 'gmd:temporalElement'])
@@ -168,8 +170,8 @@ it('#5 M2I check default date mapping', function(done) {
 
 it('#7 M2I add annexes', function(done) {
     var mapx = create_sample_mapx()
-    assert.equal(3, MAPX.getReferences(mapx).length)
-    assert.equal('ref3', MAPX.getReferences(mapx)[2])
+    assert.equal(3, mapx.getReferences().length)
+    assert.equal('ref3', mapx.getReferences()[2])
 
     var isoJson = createNormalizedIsoJson(mapx)
     const MD_ROOT_NAME = 'gmd:MD_Metadata'
@@ -198,7 +200,7 @@ it('#7 M2I add annexes', function(done) {
 
 it('#8 M2I constraints semicolon', function(done) {
     var mapx = create_sample_mapx()
-    assert.equal(3, MAPX.getLicenses(mapx).length)
+    assert.equal(3, mapx.getLicenses().length)
 
     var isoJson = createNormalizedIsoJson(mapx)
     var identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
@@ -214,10 +216,10 @@ it('#8 M2I constraints semicolon', function(done) {
 
 it('#9 M2I point of contact', function(done) {
     var mapx = create_sample_mapx()
-    MAPX.addContact(mapx, 'metadata f1', 'name1', 'addr1', 'mail@mail1')
-    MAPX.addContact(mapx, 'metadata f2', 'name2', 'addr2', 'mail@mail2')
+    mapx.addContact('metadata f1', 'name1', 'addr1', 'mail@mail1')
+    mapx.addContact('metadata f2', 'name2', 'addr2', 'mail@mail2')
 
-    assert.equal(5, MAPX.getContacts(mapx).length)
+    assert.equal(5, mapx.getContacts().length)
     var isoJson = createNormalizedIsoJson(mapx)
 
     var md_contacts = isoJson[MD_ROOT_NAME]['gmd:contact']
@@ -233,13 +235,13 @@ it('#9 M2I point of contact', function(done) {
 it('#1 I2M dates', function(done) {
     var mapx = loadXml(`${__dirname}/data/no_pubdate_yes_revision.xml`)
 
-    assert.equal(MAPX.getReleaseDate(mapx), DATE_DEFAULT)
-    assert.equal(MAPX.getModifiedDate(mapx), '2015-07-14')
+    assert.equal(mapx.getReleaseDate(), DATE_DEFAULT)
+    assert.equal(mapx.getModifiedDate(), '2015-07-14')
 
     mapx = loadXml(`${__dirname}/data/no_pubdate_no_revision.xml`)
 
-    assert.equal(MAPX.getReleaseDate(mapx), '2020-01-01')
-    assert.equal(MAPX.getModifiedDate(mapx), DATE_DEFAULT)
+    assert.equal(mapx.getReleaseDate(), '2020-01-01')
+    assert.equal(mapx.getModifiedDate(), DATE_DEFAULT)
 
     done()
 })
@@ -247,7 +249,7 @@ it('#1 I2M dates', function(done) {
 it('#2 I2M comma separated contacts', function(done) {
     var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
 
-    var cont = MAPX.getContacts(mapx)[0]
+    var cont = mapx.getContacts()[0]
 
     assert.equal(cont.name, 'CTO')
 
@@ -257,7 +259,7 @@ it('#2 I2M comma separated contacts', function(done) {
 it('#3 I2M role codes', function(done) {
     var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
 
-    var cont = MAPX.getContacts(mapx)[0]
+    var cont = mapx.getContacts()[0]
 
     assert.equal(cont.function, 'Metadata Point of Contact')
 
@@ -267,7 +269,7 @@ it('#3 I2M role codes', function(done) {
 it('#4 I2M Org as address', function(done) {
     var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
 
-    var cont = MAPX.getContacts(mapx)[1]
+    var cont = mapx.getContacts()[1]
 
     assert.ok(!cont.name.includes('Bren School'))
     assert.ok(cont.address.startsWith('Bren School'))
@@ -294,7 +296,7 @@ it('#15 M2I Topic category', function(done) {
     var topic = identNode['gmd:topicCategory']
     assert.equal(topic, undefined)
 
-    MAPX.addTopic(mapx, MAPX.TOPICS[0])
+    mapx.addTopic(MAPX.TOPICS[0])
     isoJson = createNormalizedIsoJson(mapx)
     identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
     topic = identNode['gmd:topicCategory']
@@ -302,7 +304,7 @@ it('#15 M2I Topic category', function(done) {
     var catcode = topic[0]['gmd:MD_TopicCategoryCode']
     assert.equal(1, catcode.length)
 
-    MAPX.addTopic(mapx, MAPX.TOPICS[1])
+    mapx.addTopic(MAPX.TOPICS[1])
     isoJson = createNormalizedIsoJson(mapx)
     identNode = isoJson[MD_ROOT_NAME]['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
     topic = identNode['gmd:topicCategory']
@@ -317,7 +319,7 @@ it('#15 M2I Topic category', function(done) {
 it('#15 I2M Topic category', function(done) {
 
     var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
-    var topics = MAPX.getTopics(mapx)
+    var topics = mapx.getTopics()
     assert.equal(2, topics.length)
 
     done()
@@ -411,38 +413,38 @@ function get_time_extent_from_iso(iso_xml) {
 }
 
 function create_sample_mapx() {
-    var mapx = MAPX.createObject()
+    var mapx = new MAPX.MapX()
 
-    MAPX.addContact(mapx, 'func1', 'name1', 'addr1', 'mail@mail1')
-    MAPX.addContact(mapx, 'func2', 'name2', 'addr2', 'mail@mail2')
-    MAPX.addContact(mapx, 'func3', 'name3', 'addr3', 'mail@mail3')
+    mapx.addContact('func1', 'name1', 'addr1', 'mail@mail1')
+    mapx.addContact('func2', 'name2', 'addr2', 'mail@mail2')
+    mapx.addContact('func3', 'name3', 'addr3', 'mail@mail3')
 
-    MAPX.addKeyword(mapx, 'kw1')
-    MAPX.addKeyword(mapx, 'kw2')
+    mapx.addKeyword('kw1')
+    mapx.addKeyword('kw2')
 
-    MAPX.addLanguage(mapx, 'en')
+    mapx.addLanguage('en')
 
-    MAPX.addLicense(mapx, 'licname1', 'lictext1')
-    MAPX.addLicense(mapx, 'licname2', 'lictext2')
-    MAPX.addLicense(mapx, '', 'lictext3')
+    mapx.addLicense('licname1', 'lictext1')
+    mapx.addLicense('licname2', 'lictext2')
+    mapx.addLicense('', 'lictext3')
 
-    MAPX.setNotes(mapx, 'en', 'note1', 'textnote1')
+    mapx.setNotes('en', 'note1', 'textnote1')
 
-    MAPX.addReference(mapx, 'ref1')
-    MAPX.addReference(mapx, 'ref2')
-    MAPX.addReference(mapx, 'ref3')
+    mapx.addReference('ref1')
+    mapx.addReference('ref2')
+    mapx.addReference('ref3')
 
-    MAPX.addSource(mapx, 'http://source1', true)
-    MAPX.addSource(mapx, 'http://source2', false)
+    mapx.addSource('http://source1', true)
+    mapx.addSource('http://source2', false)
 
-    MAPX.setAbstract(mapx, 'en', 'very abstract')
-    MAPX.setBBox(mapx, -10, 10, -20, 20)
-    MAPX.setCrs(mapx, 'EPSG:4326', 'http://epsg/4326')
-    MAPX.setHomepage(mapx, 'http://homepage')
-    MAPX.setModifiedDate(mapx, '2019-05-01')
-    MAPX.setPeriodicity(mapx, 'daily')
-    MAPX.setReleaseDate(mapx, '2019-01-01')
-    MAPX.setTitle(mapx, 'en', 'title')
+    mapx.setAbstract('en', 'very abstract')
+    mapx.setBBox(-10, 10, -20, 20)
+    mapx.setCrs('EPSG:4326', 'http://epsg/4326')
+    mapx.setHomepage('http://homepage')
+    mapx.setModifiedDate('2019-05-01')
+    mapx.setPeriodicity('daily')
+    mapx.setReleaseDate('2019-01-01')
+    mapx.setTitle('en', 'title')
 
     return mapx
 }
