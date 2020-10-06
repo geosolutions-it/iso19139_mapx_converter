@@ -17,10 +17,10 @@ import htmlToText from 'html-to-text'
  *
  * @returns {string} an iso19139 XML string
  */
-export function mapxToIso19139(mapxText) {
+export function mapxToIso19139(mapxText, params) {
     var mapxObj = JSON.parse(mapxText)
     var mapx = new MAPX.MapX(mapxObj)
-    var iso = mapxToIso19139Internal(mapx, null)
+    var iso = mapxToIso19139Internal(mapx, params)
     var isoxml = builder.create(iso, {
         encoding: 'utf-8'
     })
@@ -39,7 +39,15 @@ export function mapxToIso19139(mapxText) {
  * @returns {string} an iso19139 XML object
  */
 export function mapxToIso19139Internal(mapx, params) {
-    //  var log = params ? params[UTILS.PARAM_LOG_INFO_NAME] : false;
+    // sanitize params
+    if (params === null || typeof params == 'undefined') {
+        params = {}
+    }
+
+    var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
+    var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
+
+    //    logger.warn("INIT LOG FOR mapxToIso19139Internal")
 
     var fileIdentifier = 'TODO'
     var lang = 'en'

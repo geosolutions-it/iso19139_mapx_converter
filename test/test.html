@@ -16,15 +16,21 @@
         // document.addEventListener('onload', loadiso());
         
         function iso2mapx() {
-            var iso_xml = document.getElementById("ta_iso").value;
-            var mapx_txt = window.iso19139_mapx_converter.iso19139ToMapx(iso_xml);
+            var iso_xml = document.getElementById("ta_iso").value;            
+            var handler = new window.iso19139_mapx_converter.ExportedMessageHandler()
+            var params = {'MESSAGE_HANDLER': handler}
+            var mapx_txt = window.iso19139_mapx_converter.iso19139ToMapx(iso_xml, params);
             document.getElementById("ta_mapx").value = mapx_txt;
+            document.getElementById("ta_warn").value = handler.messages.join("\n\n");
         }
         
         function mapx2iso() {
             var mapx = document.getElementById("ta_mapx").value;
-            var iso = window.iso19139_mapx_converter.mapxToIso19139(mapx);
+            var handler = new window.iso19139_mapx_converter.ExportedMessageHandler()
+            var params = {'MESSAGE_HANDLER': handler}
+            var iso = window.iso19139_mapx_converter.mapxToIso19139(mapx, params);
             document.getElementById("ta_iso").value = iso;
+            document.getElementById("ta_warn").value = handler.messages.join("\n\n");
         }
         
     </script>
@@ -41,6 +47,11 @@
     <input id="m2i" type="button" value="MAPX 2 ISO" onclick="mapx2iso();" />    
     <br/>
     <textarea id="ta_mapx" rows="40" cols="150">
+    </textarea>
+    <br/>
+
+    <label for="ta_warn">Messages:</label>    
+    <textarea id="ta_warn" rows="10" cols="150">
     </textarea>
     <br/>
     

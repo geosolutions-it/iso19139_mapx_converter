@@ -34,10 +34,16 @@ export class MapX {
 
     constructor(obj) {
         this.mapx = obj || createObject()
+        this.logger = console
+    }
+
+    setLogger(logger) {
+        this.logger = logger
     }
 
     setTitle(lang, value) {
         if (!checkLang(lang)) {
+            this.logger.warn(`Can't set title: unknown language [${lang}]`)
             return false
         }
         this.mapx.text.title[lang] = value
@@ -52,6 +58,7 @@ export class MapX {
 
     setAbstract(lang, value) {
         if (!checkLang(lang)) {
+            this.logger.warn(`Can't set abstract: unknown language [${lang}]`)
             return false
         }
         this.mapx.text.abstract[lang] = value
@@ -66,6 +73,7 @@ export class MapX {
 
     setNotes(lang, value) {
         if (!checkLang(lang)) {
+            this.logger.warn(`Can't set note: unknown language [${lang}]`)
             return false
         }
         this.mapx.text.notes[lang] = value
@@ -79,6 +87,7 @@ export class MapX {
     }
     addNote(lang, title, value) {
         if (!checkLang(lang)) {
+            this.logger.warn(`Can't add note: unknown language [${lang}]`)
             return false
         }
 
@@ -99,6 +108,7 @@ export class MapX {
 
     addTopic(topic) {
         if (!TOPICS.includes(topic)) {
+            this.logger.warn(`Can't set topic: unknown topic [${topic}]`)
             return false
         }
         this.mapx.text.keywords.topics.push(topic)
@@ -110,6 +120,7 @@ export class MapX {
 
     addLanguage(lang) {
         if (!checkLang(lang)) {
+            this.logger.warn(`Can't add unknown language [${lang}]`)
             return false
         }
 
@@ -127,6 +138,11 @@ export class MapX {
     }
 
     setAttribute(lang, attname, value) {
+        if (!checkLang(lang)) {
+            this.logger.warn(`Can't set attribute: unknown language [${lang}]`)
+            return false
+        }
+
         var attr = this.mapx.text.attributes[attname] || initLanguages(this.mapx.text.attributes, attname)
         attr.lang = value
     }
@@ -154,6 +170,7 @@ export class MapX {
 
     setReleaseDate(date) {
         if (!checkDate(date)) {
+            this.logger.warn(`Can't set release date: bad date [${date}]`)
             return false
         }
         this.mapx.temporal.issuance.released_at = date
@@ -168,6 +185,7 @@ export class MapX {
 
     setModifiedDate(date) {
         if (!checkDate(date)) {
+            this.logger.warn(`Can't set modified date: bad date [${date}]`)
             return false
         }
         this.mapx.temporal.issuance.modified_at = date
@@ -182,6 +200,7 @@ export class MapX {
 
     setPeriodicity(periodicity) {
         if (!PERIODICITY.includes(periodicity)) {
+            this.logger.warn(`Can't set unknown periodicity [${periodicity}]`)
             return false
         }
 
@@ -194,6 +213,7 @@ export class MapX {
 
     setTemporalStart(date) {
         if (!checkDate(date)) {
+            this.logger.warn(`Can't set temporal start: bad date [${date}]`)
             return false
         }
         this.mapx.temporal.range.start_at = date
@@ -202,6 +222,7 @@ export class MapX {
     }
     setTemporalEnd(date) {
         if (!checkDate(date)) {
+            this.logger.warn(`Can't set temporal end: bad date [${date}]`)
             return false
         }
         this.mapx.temporal.range.end_at = date
@@ -302,8 +323,6 @@ export class MapX {
         }
         return ret
     }
-
-
 }
 
 

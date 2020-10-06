@@ -21,7 +21,8 @@ const DATE_DEFAULT = '0001-01-01'
  * Transforms an ISO19139 xml text into a MAPX json text.
  *
  * @param {string} isostring - an iso19139 XML string
- * @param {map} params- further params to the function: MESSAGE_HANDLER
+ * @param {obj} params - misc params to the function: 
+ *  - MESSAGE_HANDLER: class handling logging and collecting messages
  *
  * @returns {string} - a MAPX object as json string
  */
@@ -52,18 +53,19 @@ export function iso19139ToMapxInternal(data, params) {
     var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
 
     var mapx = new MAPX.MapX()
+    mapx.setLogger(logger)
 
     var mdRoot
 
     if (data[MD_ROOT_NAME]) {
         if (log) {
-            logger.log('Not unwrapping ', MD_ROOT_NAME)
+            logger.log(`Not unwrapping root ${MD_ROOT_NAME}`)
         }
         mdRoot = data[MD_ROOT_NAME]
     } else {
         var rootName = Object.keys(data)[0]
         if (log) {
-            logger.log('Unwrapping ', rootName)
+            logger.log(`Unwrapping ${rootName}`)
         }
         mdRoot = data[rootName][MD_ROOT_NAME][0]
     }
@@ -86,7 +88,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     var uuid = getFirstFromPath(mdRoot, ['fileIdentifier', GCO_CHAR_NAME])
     if (log) {
-        logger.log('METADATA ID', uuid)
+        logger.log(`METADATA ID [${uuid}]`)
     }
 
     // Detect language
@@ -112,22 +114,13 @@ export function iso19139ToMapxInternal(data, params) {
     if (log)
         logger.log("Language", lang)
 
-    var ok
-
     // === Title
     var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME])
-    ok = mapx.setTitle(lang, title)
-    if (!ok) {
-        logger.warn(`Could not set title: lang[${lang}] title[${title}]`)
-    }
+    mapx.setTitle(lang, title)
 
     // === Abstract
     var abstract = getFirstFromPath(identNode, ['abstract', GCO_CHAR_NAME])
-    ok = mapx.setAbstract(lang, abstract)
-    if (!ok) {
-        logger.warn(`Could not set abstract: lang[${lang}] abs[${abstract}]`)
-    }
-
+    mapx.setAbstract(lang, abstract)
 
     // === Keywords
     for (var dk of identNode.descriptiveKeywords || []) {
@@ -140,9 +133,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     // === Topics
     for (var topic of identNode.topicCategory || []) {
-        if (!mapx.addTopic(topic.MD_TopicCategoryCode[0])) {
-            logger.warn(`Bad topic found [${topic}]`)
-        }
+        mapx.addTopic(topic.MD_TopicCategoryCode[0])
     }
 
     // === Notes
@@ -297,7 +288,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     var crsid = getFirstFromPath(mdRoot, ['referenceSystemInfo', 'MD_ReferenceSystem', 'referenceSystemIdentifier', 'RS_Identifier', 'code', GCO_CHAR_NAME])
     if (log) {
-        console.log("CRS --> ", JSON.stringify(crsid))
+        logger.log(`CRS --> ${JSON.stringify(crsid)}`)
     }
     if (crsid) {
         var epsgcode = extractEpsgCode(crsid)
@@ -309,7 +300,7 @@ export function iso19139ToMapxInternal(data, params) {
         }
     } else {
         // use the default
-        console.warn('CRS not found')
+        logger.warn('CRS not found')
     }
 
     // == BBOX

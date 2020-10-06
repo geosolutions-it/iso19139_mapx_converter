@@ -90,10 +90,12 @@ export class DefaultMessageHandler {
     }
 
     log(message) {
+        // this.messages.push(message) // to be used for test only
         console.warn(message)
     }
 
     messages() {
+        console.log("MESSAGES REQUESTED: " + this.messages.length)
         return this.messages
     }
 }
