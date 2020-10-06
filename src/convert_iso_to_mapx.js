@@ -125,12 +125,9 @@ export function iso19139ToMapxInternal(data, params) {
         }
     }
 
-    var cat = getFirstFromPath(identNode, ['topicCategory', 'MD_TopicCategoryCode'])
-    if (cat) {
-        if (log) {
-            console.log('Category is ', cat)
-        }
-        MAPX.addKeyword(mapx, cat)
+    // === Topics
+    for (var topic of identNode.topicCategory || []) {
+        MAPX.addTopic(mapx, topic.MD_TopicCategoryCode[0])
     }
 
     // === Notes

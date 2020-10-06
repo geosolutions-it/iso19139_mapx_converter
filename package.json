@@ -88,6 +88,6 @@
     "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules",
     "jsdoc": "./node_modules/.bin/jsdoc src/index.js",
-    "format": "for file in $(find src/ -name *.js); do echo FORMATTING $file ; js-beautify -r $file ; done"
+    "format": "for file in $(find src/ -name *.js) $(find test/ -name *.js); do echo FORMATTING $file ; js-beautify -r $file ; done"
   }
 }

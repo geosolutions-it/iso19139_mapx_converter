@@ -211,6 +211,17 @@ export function mapxToIso19139Internal(mapx, params) {
         }
     }
 
+    var topics = MAPX.getTopics(mapx)
+    if (topics.length > 0) {
+        var topicCategory = []
+        for (var topic of topics) {
+            topicCategory.push({
+                'gmd:MD_TopicCategoryCode': topic
+            })
+        }
+        identification['gmd:topicCategory'] = topicCategory
+    }
+
     var extents = []
 
     // bbox

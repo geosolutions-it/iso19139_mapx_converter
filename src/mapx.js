@@ -6,6 +6,27 @@ export const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps']
 export const PERIODICITY = ['continual', 'daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'biannually',
     'annually', 'as_needed', 'irregular', 'not_planned', 'unknown'
 ]
+export const TOPICS = [
+    "biota",
+    "boundaries",
+    "farming",
+    "climatologyMeteorologyAtmosphere",
+    "economy",
+    "elevation",
+    "environment",
+    "geoscientificInformation",
+    "health",
+    "imageryBaseMapsEarthCover",
+    "intelligenceMilitary",
+    "inlandWaters",
+    "location",
+    "oceans",
+    "planningCadastre",
+    "society",
+    "structure",
+    "transportation",
+    "utilitiesCommunication"
+]
 
 export function createObject() {
     var mapx = {}
@@ -18,7 +39,8 @@ export function createObject() {
     }
 
     text.keywords = {
-        keys: []
+        keys: [],
+        topics: []
     }
     text.attributes = {}
     text.attributes_alias = {}
@@ -123,6 +145,19 @@ export function addKeyword(mapx, keyword) {
 }
 export function getKeywords(mapx) {
     return mapx.text.keywords.keys
+}
+
+export function addTopic(mapx, topic) {
+    // check topic is correct
+    if (!TOPICS.includes(topic)) {
+        throw new Error('Unknown topic: [' + topic + ']')
+    }
+
+    // add topic
+    mapx.text.keywords.topics.push(topic)
+}
+export function getTopics(mapx) {
+    return mapx.text.keywords.topics
 }
 
 export function addLanguage(mapx, langcode) {
