@@ -125,9 +125,9 @@ export class MapX {
         }
 
         this.mapx.text.language.codes.push({
-            code: lang
+            'code': lang
         })
-        return false
+        return true
     }
     getLanguages() {
         var ret = []
@@ -145,6 +145,7 @@ export class MapX {
 
         var attr = this.mapx.text.attributes[attname] || initLanguages(this.mapx.text.attributes, attname)
         attr.lang = value
+        return true
     }
     getAttributeVal(lang, attname) {
         var attr = this.mapx.text.attributes[attname]

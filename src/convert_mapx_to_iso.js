@@ -160,7 +160,7 @@ export function mapxToIso19139Internal(mapx, params) {
         })
     }
 
-    if(!identDateAdded) {
+    if (!identDateAdded) {
         logger.warn(`No date set, defaulting to [${defaultDate}]`)
         dates.push({
             'gmd:CI_Date': {
@@ -176,7 +176,7 @@ export function mapxToIso19139Internal(mapx, params) {
                     }
                 }
             }
-        })                
+        })
     }
 
     var identification = {}

@@ -83,6 +83,7 @@ it('Check M2I dates', function(done) {
 
 it('Check void M2I dates', function(done) {
     var mapx = new MAPX.MapX()
+    mapx.addLanguage('en') // avoid warn about missing language
 
     var iso = M2I.mapxToIso19139Internal(mapx)
     var xml = builder.create(iso, {
@@ -94,7 +95,7 @@ it('Check void M2I dates', function(done) {
 
     var dates = get_date_from_iso(xmlFormatted)
 
-    assert.equal(Object.keys(dates).length, 0)
+    assert.equal(Object.keys(dates).length, 1) // 1: forced date in identification for validity
 
     done()
 })
@@ -325,6 +326,39 @@ it('#15 I2M Topic category', function(done) {
     done()
 })
 
+it('#14 M2I Check void language', function(done) {
+    var mapx = new MAPX.MapX()
+    mapx.setReleaseDate('2020-10-10') // avoid warn about missing date
+
+    var iso = M2I.mapxToIso19139Internal(mapx)
+    var xml = builder.create(iso, {
+        encoding: 'utf-8'
+    })
+    var xmlFormatted = xml.end({
+        pretty: true
+    })
+
+    var isoObj
+    xml2js.parseString(xmlFormatted, function(err, isoJson) {
+        if (err) {
+            assert.fail(err)
+        }
+        isoObj = isoJson
+    })
+    assert.ok(isoObj)
+
+    // forced language in metadata
+    var mdRoot = isoObj[MD_ROOT_NAME]
+    var mdLang = mdRoot['gmd:language'][0]['gmd:LanguageCode'][0]['$']['codeListValue']
+    assert.equal(mdLang, 'eng')
+
+    // forced language in resource
+    var identNode = mdRoot['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
+    var resLang = findFirstFromPath(identNode, ['gmd:language', 'gmd:LanguageCode'])
+    assert.equal(resLang['$']['codeListValue'], 'eng')
+
+    done()
+})
 
 
 function get_date_from_iso(isoXml) {
