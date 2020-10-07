@@ -95,9 +95,11 @@ export function mapxToIso19139Internal(mapx, params) {
 
     metadata['gmd:contact'] = metadataContacts
 
-    // current date
+    // current date in yyyy-mm-dd format 
+    var defaultDate = new Date().toISOString().substring(0, 10)
+
     metadata['gmd:dateStamp'] = {
-        'gco:Date': new Date().toISOString()
+        'gco:Date': defaultDate
     }
 
     // crs
@@ -114,9 +116,11 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     var dates = []
+    var identDateAdded = false
 
     var useReleaseDate = mapx.existReleaseDate() && MAPX.checkDate(mapx.getReleaseDate())
     if (useReleaseDate) {
+        identDateAdded = true
         dates.push({
             'gmd:CI_Date': {
                 'gmd:date':
@@ -138,6 +142,7 @@ export function mapxToIso19139Internal(mapx, params) {
     if (useModifiedDate &&
         (!useReleaseDate ||
             (mapx.getModifiedDate() !== mapx.getReleaseDate()))) {
+        identDateAdded = true
         dates.push({
             'gmd:CI_Date': {
                 'gmd:date':
@@ -153,6 +158,25 @@ export function mapxToIso19139Internal(mapx, params) {
                 }
             }
         })
+    }
+
+    if(!identDateAdded) {
+        logger.warn(`No date set, defaulting to [${defaultDate}]`)
+        dates.push({
+            'gmd:CI_Date': {
+                'gmd:date':
+                // modified date --> dataset
+                {
+                    'gco:Date': defaultDate
+                },
+                'gmd:dateType': {
+                    'gmd:CI_DateTypeCode': {
+                        '@codeListValue': 'publication',
+                        '@codeList': 'http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode'
+                    }
+                }
+            }
+        })                
     }
 
     var identification = {}
