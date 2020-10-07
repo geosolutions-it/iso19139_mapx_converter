@@ -99,7 +99,7 @@ export function iso19139ToMapxInternal(data, params) {
         mdLang = mdLang.$.codeListValue
         langList.push(mdLang)
     } else {
-        logger.info('Metadata language not found - forcing eng')
+        logger.log('Metadata language not found - forcing eng')
         mdLang = 'eng'
     }
 
