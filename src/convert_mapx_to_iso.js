@@ -50,7 +50,6 @@ export function mapxToIso19139Internal(mapx, params) {
     //    logger.warn("INIT LOG FOR mapxToIso19139Internal")
 
     var fileIdentifier = 'TODO'
-    var lang = 'en'
 
     var metadata = {}
     metadata['@xmlns:gmd'] = 'http://www.isotc211.org/2005/gmd'
@@ -60,8 +59,27 @@ export function mapxToIso19139Internal(mapx, params) {
     metadata['gmd:fileIdentifier'] = {
         'gco:CharacterString': fileIdentifier
     }
+
+    var lang
+    var languages = mapx.getLanguages()
+    if (languages.length > 0) {
+        lang = languages[0]
+    } else {
+        logger.warn('Language not set. Default to [en]')
+        lang = 'en'
+    }
+
+    isoLang = UTILS.LANG_MAPPING_M2I[lang]
+    if (!isoLang) {
+        isoLang = 'eng' // default language
+        logger.warn(`Can't map language [${lang}]`)
+    }
+
     metadata['gmd:language'] = {
-        'gco:CharacterString': lang
+        'gmd:LanguageCode': {
+            '@codeList': 'http://www.loc.gov/standards/iso639-2/',
+            '@codeListValue': isoLang
+        }
     }
 
     var metadataContacts = []
@@ -219,6 +237,33 @@ export function mapxToIso19139Internal(mapx, params) {
             }
         }
     }
+
+    var languages = mapx.getLanguages()
+    var isoLangList = []
+    if (languages.length > 0) {
+        for (var l of languages) {
+            var isoLang = UTILS.LANG_MAPPING_M2I[l]
+            if (isoLang) {
+                isoLangList.push(isoLang)
+            } else {
+                logger.warn(`Can't map language [${l}]`)
+            }
+        }
+    }
+    if (isoLangList.length == 0) {
+        logger.warn('No valid language found. Default to [eng]')
+        isoLangList.push('eng')
+    }
+    var identLangList = []
+    for (var isoLang of isoLangList) {
+        identLangList.push({
+            'gmd:LanguageCode': {
+                '@codeList': 'http://www.loc.gov/standards/iso639-2/',
+                '@codeListValue': isoLang
+            }
+        })
+    }
+    identification['gmd:language'] = identLangList
 
     var topics = mapx.getTopics()
     if (topics.length > 0) {

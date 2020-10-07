@@ -91,28 +91,59 @@ export function iso19139ToMapxInternal(data, params) {
         logger.log(`METADATA ID [${uuid}]`)
     }
 
-    // Detect language
-    var lang
-    var isoLang = getFirstFromPath(identNode, ['language', GCO_CHAR_NAME])
-    if (isoLang) {
-        if (isoLang.length === 2) {
-            lang = isoLang
-        } else {
-            lang = UTILS.LANG_MAPPING_I2M[isoLang]
-        }
+    // Fetch languages
+    var langList = []
 
-        if (!lang) {
-            lang = 'en' // default language
-            logger.warn(`Can't map language [${isoLang}]`)
-        }
-        mapx.add_language(lang)
+    var mdLang = getFirstFromPath(mdRoot, ['language', 'LanguageCode'])
+    if (mdLang) {
+        mdLang = mdLang.$.codeListValue
+        langList.push(mdLang)
     } else {
-        lang = 'en' // default language
-        logger.warn('Language definition not found')
+        logger.info('Metadata language not found - forcing eng')
+        mdLang = 'eng'
     }
 
-    if (log)
-        logger.log("Language", lang)
+    // rmb metadata lang for inserting text in mapx
+    var lang = UTILS.LANG_MAPPING_I2M[mdLang]
+    if (!lang) {
+        logger.warn(`Can't map metadata language [${mdLang}] - forcing eng`)
+        lang = 'en'
+    }
+
+    if (log) {
+        logger.log(`Metadata language [${lang}]`)
+    }
+
+    var resLangList = identNode['language']
+    if (resLangList) {
+        for (var resLang of resLangList) {
+            var langCode = resLang['LanguageCode'][0].$.codeListValue
+            if (!(langList.includes(langCode))) {
+                langList.push(langCode)
+            }
+        }
+    }
+
+    // Parse languages
+    if (langList.length == 0) {
+        logger.warn('Language definition not found')
+        langList.push('eng') // default entry
+    }
+
+    for (var isoLang of langList) {
+        var mapxlang
+        if (isoLang.length === 2) {
+            logger.warn(`ISO language definition should be 3 letter [${isoLang}]`)
+            mapxlang = isoLang
+        } else {
+            mapxlang = UTILS.LANG_MAPPING_I2M[isoLang]
+            if (!mapxlang) {
+                mapxlang = 'en' // default language
+                logger.warn(`Can't map language [${isoLang}]`)
+            }
+        }
+        mapx.addLanguage(mapxlang) // will check for lang existence by itself
+    }
 
     // === Title
     var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME])
@@ -288,7 +319,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     var crsid = getFirstFromPath(mdRoot, ['referenceSystemInfo', 'MD_ReferenceSystem', 'referenceSystemIdentifier', 'RS_Identifier', 'code', GCO_CHAR_NAME])
     if (log) {
-        logger.log(`CRS --> ${JSON.stringify(crsid)}`)
+        logger.log(`CRS [${JSON.stringify(crsid)}]`)
     }
     if (crsid) {
         var epsgcode = extractEpsgCode(crsid)

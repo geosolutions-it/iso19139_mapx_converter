@@ -34,10 +34,10 @@ var source = args[0]
 var destination = args[1]
 params[UTILS.PARAM_HOMEPAGE_TEMPLATE_NAME] = args[2]
 
-const logInfo = params[UTILS.PARAM_LOG_INFO_NAME]
-const logDebug = params[UTILS.PARAM_LOG_DEBUG_NAME] || logInfo
+const logDebug = params[UTILS.PARAM_LOG_DEBUG_NAME]
+const logInfo = params[UTILS.PARAM_LOG_INFO_NAME] || logDebug
 
-if (logInfo) {
+if (logDebug) {
     console.log('Params -->', JSON.stringify(params))
 }
 
@@ -55,7 +55,7 @@ async function run(source, destination, params) {
             console.log('PARSING MAPX into ISO')
         }
 
-        var xmlFormatted = m2i.mapxToIso19139(json)
+        var xmlFormatted = m2i.mapxToIso19139(json, params)
 
         if (logDebug) {
             console.log('METADATA as XML', xmlFormatted)

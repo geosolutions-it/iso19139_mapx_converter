@@ -91,7 +91,7 @@ export class DefaultMessageHandler {
 
     log(message) {
         // this.messages.push(message) // to be used for test only
-        console.warn(message)
+        console.log(`INFO: ${message}`)
     }
 
     messages() {

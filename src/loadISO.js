@@ -41,7 +41,7 @@ run(source, destination, params)
 
 function run(source, destination, params) {
     var xmlText = loadFromFile(source)
-    var mapxText = iso2mapx.iso19139ToMapx(xmlText)
+    var mapxText = iso2mapx.iso19139ToMapx(xmlText, params)
 
     fs.writeFile(destination, mapxText, (err) => {
         if (err) {
