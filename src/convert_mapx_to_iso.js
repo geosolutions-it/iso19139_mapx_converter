@@ -33,7 +33,7 @@ export function mapxToIso19139(mapxText, params) {
 /**
  * Transforms a MAPX object into a ISO19139 object.
  *
- * @param {string} mapx - a MAPX object
+ * @param {MapX} mapx - a MAPX object
  * @param {obj} params - a multipurpose obj for passing extra params
  *
  * @returns {string} an iso19139 XML object
@@ -376,16 +376,32 @@ export function mapxToIso19139Internal(mapx, params) {
         suppInfo.push(note)
     }
 
+    // Encoding attributes into text, so that they can be parsed back as 
+    // couples (key, value).
+    // 
+    // SUPPINFOATTDESC := "Attributes description: " : ATTLIST
+    // ATTLIST := ATTCOUPLE | ATTCOUPLE "; " ATTLIST
+    // ATTCOUPLE := ATTNAME ": " ATTVALUE
+    // ATTNAME := string
+    // ATTVALUE := string
+    // In order to use ";" and ":" as separators, and not to be confused 
+    // with ";" and ":" inside ATTNAME and VALUE, we'll escape ":" and ";" in values 
+    // by doubling them
+
     var attnames = mapx.getAttributeNames()
     var attsuppinfo
     if (attnames) {
         var attlist = []
         for (var attname of attnames) {
             var attval = mapx.getFirstAttributeVal(attname)
-            var attstring = attval ? `${attname}: ${attval}` : attname
+
+            var escapedName = attname.replace(":", "::").replace(";", ";;")
+            var escapedVal = attval ? attval.replace(":", "::").replace(";", ";;") : attval
+
+            var attstring = attval ? `${escapedName}: ${escapedVal};` : `${escapedName};`
             attlist.push(attstring)
         }
-        attsuppinfo = `Attributes description: ${attlist.join('; ')}.`
+        attsuppinfo = `Attributes description: ${attlist.join(' ')}`
         suppInfo.push(attsuppinfo)
     }
 

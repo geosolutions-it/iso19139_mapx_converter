@@ -167,6 +167,20 @@ export function iso19139ToMapxInternal(data, params) {
         mapx.addTopic(topic.MD_TopicCategoryCode[0])
     }
 
+    // === SuppInfo
+    var suppInfo = getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME])
+    var parsedSuppInfo = parseSuppInfo(suppInfo)
+
+    suppInfo = parsedSuppInfo.text
+    var attributes = parsedSuppInfo.attributes
+
+    for (var attr of attributes) {
+
+        var decodedName = attr.name.replace("::", ":").replace(";;", ";")
+        var decodedVal = attr.value ? attr.value.replace("::", ":").replace(";;", ";") : attr.value
+        mapx.setAttribute(lang, decodedName, decodedVal)
+    }
+
     // === Notes
     mapx.addNote(lang, 'Purpose', getFirstFromPath(identNode, ['purpose', GCO_CHAR_NAME]))
     mapx.addNote(lang, 'Credit', getFirstFromPath(identNode, ['credit', GCO_CHAR_NAME]))
@@ -176,7 +190,9 @@ export function iso19139ToMapxInternal(data, params) {
     mapx.addNote(lang, 'Status', progressValue)
 
     mapx.addNote(lang, 'Environment', getFirstFromPath(identNode, ['environmentDescription', GCO_CHAR_NAME]))
-    mapx.addNote(lang, 'Supplemental information', getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME]))
+
+    var suppInfoTitle = suppInfo && suppInfo.startsWith('Supplemental information') ? null : 'Supplemental information'
+    mapx.addNote(lang, suppInfoTitle, suppInfo)
 
     // add lineage and processing steps
     if (mdRoot.dataQualityInfo) {
@@ -398,24 +414,26 @@ export function iso19139ToMapxInternal(data, params) {
     //                           "description":[{"CharacterString":[""]}]}]}]}]}]}]}],
 
     var distributionNode = getFirstFromPath(mdRoot, ['distributionInfo', 'MD_Distribution'])
-    for (var transfOpt of distributionNode.transferOptions) {
-        for (var dto of transfOpt.MD_DigitalTransferOptions) {
-            for (var online of dto.onLine || []) {
-                for (var onlineRes of online.CI_OnlineResource) {
-                    var link = onlineRes.linkage[0]
-                    var url = getFirstFromPath(link, ['URL'])
-                    var proto = getFirstFromPath(onlineRes, ['protocol', GCO_CHAR_NAME])
-                    var name = getFirstFromPath(onlineRes, ['name', GCO_CHAR_NAME])
+    if (distributionNode && distributionNode.transferOptions) {
+        for (var transfOpt of distributionNode.transferOptions) {
+            for (var dto of transfOpt.MD_DigitalTransferOptions) {
+                for (var online of dto.onLine || []) {
+                    for (var onlineRes of online.CI_OnlineResource) {
+                        var link = onlineRes.linkage[0]
+                        var url = getFirstFromPath(link, ['URL'])
+                        var proto = getFirstFromPath(onlineRes, ['protocol', GCO_CHAR_NAME])
+                        var name = getFirstFromPath(onlineRes, ['name', GCO_CHAR_NAME])
 
-                    // lots of heuristic here
-                    var isDownload = (proto !== undefined) && proto.startsWith('WWW:DOWNLOAD')
+                        // lots of heuristic here
+                        var isDownload = (proto !== undefined) && proto.startsWith('WWW:DOWNLOAD')
 
-                    if (proto && proto.endsWith('get-map')) {
-                        url = `${url}&LAYER=${name}`
-                    }
+                        if (proto && proto.endsWith('get-map')) {
+                            url = `${url}&LAYER=${name}`
+                        }
 
-                    if (url.length > 0) {
-                        mapx.addSource(url, isDownload)
+                        if (url.length > 0) {
+                            mapx.addSource(url, isDownload)
+                        }
                     }
                 }
             }
@@ -710,4 +728,67 @@ const xml2json = function(bodyStr) {
             }
         })
     return d
+}
+
+/**
+ * Split attributes definition from inside supplemental text.
+ * 
+ * @param {string} suppInfo
+ * @returns {obj} parsed suppinfo: "attributes" a list of attributes found, "text" the text left after removing the attribs
+ */
+export const parseSuppInfo = function(suppInfo) {
+
+    if (!suppInfo) {
+        return {
+            text: suppInfo,
+            attributes: []
+        }
+    }
+
+    var cleanSuppInfo = suppInfo
+    var attrs = []
+
+    // SUPPINFOATTDESC := "Attributes description:" SPACES ATTLIST
+    // ATTLIST := ATTCOUPLE | ATTCOUPLE ";" SPACES ATTLIST
+    // ATTCOUPLE := ATTNAME | ATTNAME ":" SPACES ATTVALUE
+    // ATTNAME := string
+    // ATTVALUE := string
+    // SPACES = \s*
+    // In order to use ";" and ":" as separators, and not to be confused 
+    // with ";" and ":" inside ATTNAME and VALUE, we'll escape ":" and ";" in values 
+    // by doubling them
+
+    const coreRE = "(\\s*(?<name>(?:[^:;]*|::|;;)*)(:\\s*(?<value>([^;]|;;)*))?);"
+    const fullRE = `\n?Attributes description:(?<attribs>(${coreRE})+)`
+
+    var re = new RegExp(fullRE);
+
+    var result = re.exec(suppInfo);
+    if (!result) {
+        return {
+            text: cleanSuppInfo,
+            attributes: attrs
+        }
+    }
+
+    var attrString = result.groups['attribs']
+
+    cleanSuppInfo = suppInfo.replace(re, '')
+
+    var re = new RegExp(coreRE, 'g');
+    while ((result = re.exec(attrString)) !== null) {
+        var name = result.groups['name']
+        var val = result.groups['value']
+
+        //      console.log(`   <${name}>:<${val}>`);
+        attrs.push({
+            name: name,
+            value: val
+        })
+    }
+
+    return {
+        text: cleanSuppInfo,
+        attributes: attrs
+    }
 }

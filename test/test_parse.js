@@ -1,7 +1,10 @@
 /*
  */
 
-import * as assert from 'assert'
+//import * as assert from 'assert'
+import chai from 'chai'
+const assert = chai.assert
+
 import xml2js from 'xml2js'
 import builder from 'xmlbuilder'
 import fs from 'fs'
@@ -21,8 +24,11 @@ const getFirstFromPath = I2M.getFirstFromPath
 const findFirstFromPath = I2M.findFirstFromPath
 
 const DATE_DEFAULT = '0001-01-01'
+
 const MD_ROOT_NAME = 'gmd:MD_Metadata'
 const DATA_IDENT_NAME = 'gmd:MD_DataIdentification'
+const GCO_CHAR_NAME = 'gco:CharacterString'
+
 const __dirname = dirname(fileURLToPath(
     import.meta.url))
 
@@ -360,6 +366,65 @@ it('#14 M2I Check void language', function(done) {
     done()
 })
 
+it('Attributes codec: parser', function(done) {
+
+    const encodedSI = 'note00\nAttributes description: name1: value1; name2: value2; name3; name::4: value::4;'
+
+    var parsedSI = I2M.parseSuppInfo(encodedSI)
+
+    assert.equal(parsedSI.text, 'note00')
+    assert.equal(parsedSI.attributes.length, 4)
+    assert.equal(parsedSI.attributes[0].name, 'name1')
+    assert.equal(parsedSI.attributes[3].name, 'name::4')
+
+    assert.equal(parsedSI.attributes[0].value, 'value1')
+    assert.isUndefined(parsedSI.attributes[2].value)
+    assert.equal(parsedSI.attributes[3].value, 'value::4')
+
+    done()
+})
+
+
+it('Attributes codec: supplementalInfo', function(done) {
+    var mapx = new MAPX.MapX()
+
+    mapx.setNotes('en', 'note00')
+
+    mapx.setAttribute('en', 'name1', 'value1')
+    mapx.setAttribute('en', 'name2', 'value2')
+    mapx.setAttribute('en', 'name3', null)
+    mapx.setAttribute('en', 'name:4', 'value:4')
+
+    var isoObj = createNormalizedIsoJson(mapx)
+    var mdRoot = isoObj[MD_ROOT_NAME]
+    var identNode = mdRoot['gmd:identificationInfo'][0][DATA_IDENT_NAME][0]
+    var suppInfo = getFirstFromPath(identNode, ['gmd:supplementalInformation', GCO_CHAR_NAME])
+    //    console.log("SUPP INFO ---> ", JSON.stringify(suppInfo,null,3));
+
+    const expectedSuppInfo = 'note00\nAttributes description: name1: value1; name2: value2; name3; name::4: value::4;'
+
+    assert.equal(suppInfo, expectedSuppInfo, "Error encoding M2I")
+
+    // == convert back to mapx
+    var mapx2 = I2M.iso19139ToMapxInternal(createStrippedIsoJson(mapx), null)
+    //    console.log("MAPX ---> ", JSON.stringify(mapx2,null,3));
+
+    assert.equal(mapx2.getNotes('en'), 'Supplemental information: note00')
+
+    var attributes = mapx2.getAllAttributes()
+    var attNames = Object.getOwnPropertyNames(attributes)
+
+    assert.equal(attNames.length, 4)
+    assert.equal(attNames[0], 'name1')
+    assert.equal(attNames[3], 'name:4')
+
+    assert.equal(attributes['name1']['en'], 'value1')
+    assert.isUndefined(attributes['name3']['en'])
+    assert.equal(attributes['name:4']['en'], 'value:4')
+
+    done()
+})
+
 
 function get_date_from_iso(isoXml) {
     const MD_ROOT_NAME = 'gmd:MD_Metadata'
@@ -406,8 +471,35 @@ function createNormalizedIsoJson(mapx) {
     var result
     //    var prc = {tagNameProcessors: [xml2js.processors.stripPrefix]};
     new xml2js.Parser().parseString(xmlFormatted, (e, r) => {
+        if (e) {
+            console.warn(e)
+        }
         result = r
     })
+    return result
+}
+
+function createStrippedIsoJson(mapx) {
+    var iso = M2I.mapxToIso19139Internal(mapx)
+    var xml = builder.create(iso, {
+        encoding: 'utf-8'
+    })
+    var xmlFormatted = xml.end({
+        pretty: true
+    })
+
+    var result
+    var prc = {
+        tagNameProcessors: [xml2js.processors.stripPrefix]
+    }
+    new xml2js.parseString(xmlFormatted, prc, (e, r) => {
+        if (e) {
+            console.warn(e)
+        }
+        result = r
+    })
+
+    //    console.log("STRIPPED ISO ---> ", JSON.stringify(result, null, 3));
     return result
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "iso19139_mapx_converter",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Provides functions to translate ISO19139 from/to MapX format",
   "keywords": [
     "iso19139",
@@ -88,6 +88,6 @@
     "watch": "watchify src/index.js -o dist/bundle.js -v",
     "test": "./node_modules/mocha/bin/mocha --experimental-modules",
     "jsdoc": "./node_modules/.bin/jsdoc src/index.js -d doc",
-    "format": "for file in $(find src/ -name *.js) $(find test/ -name *.js); do echo FORMATTING $file ; js-beautify -r $file ; done"
+    "format": "for file in $(find src/ -name \"*.js\") $(find test/ -name \"*.js\"); do echo FORMATTING $file ; js-beautify -r $file ; done"
   }
 }

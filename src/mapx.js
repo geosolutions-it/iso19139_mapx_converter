@@ -94,7 +94,10 @@ export class MapX {
         if (value) {
             var old = this.mapx.text.notes[lang]
             var sep = old.length === 0 ? '' : '. '
-            this.mapx.text.notes[lang] = `${old}${sep}${title}: ${value}`
+
+            var note = title ? `${old}${sep}${title}: ${value}` : `${old}${sep}${value}`
+
+            this.mapx.text.notes[lang] = note
         }
         return true
     }
@@ -144,7 +147,7 @@ export class MapX {
         }
 
         var attr = this.mapx.text.attributes[attname] || initLanguages(this.mapx.text.attributes, attname)
-        attr.lang = value
+        attr[lang] = value
         return true
     }
     getAttributeVal(lang, attname) {
