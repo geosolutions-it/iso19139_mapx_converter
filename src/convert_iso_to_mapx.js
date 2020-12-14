@@ -252,7 +252,7 @@ export function iso19139ToMapxInternal(data, params) {
     }
 
     var datestamp = getFirstFromPath(mdRoot, ['dateStamp', 'Date'])
-    var metadataDate = formatDate(datestamp, undefined)
+    var metadataDate = formatDate(datestamp, undefined, logger)
 
     for (var date of dataCitationNode.date || []) {
         if (log) {
@@ -272,7 +272,8 @@ export function iso19139ToMapxInternal(data, params) {
 
         var mapxdate = formatDate(
             MAPX.checkDate(dateTimeVal) ? dateTimeVal : undefined,
-            MAPX.checkDate(dateVal) ? dateVal : undefined)
+            MAPX.checkDate(dateVal) ? dateVal : undefined,
+            logger)
 
         if (mapxdate) {
             datemap[typeValue] = mapxdate
@@ -322,10 +323,10 @@ export function iso19139ToMapxInternal(data, params) {
         var optEnd = timePeriod.endPosition
 
         if (optStart) {
-            mapx.setTemporalStart(formatDate(optStart[0]))
+            mapx.setTemporalStart(formatDate(optStart[0]), null, logger)
         }
         if (optEnd) {
-            mapx.setTemporalEnd(formatDate(optEnd[0]))
+            mapx.setTemporalEnd(formatDate(optEnd[0]), null, logger)
         }
     }
 
@@ -619,7 +620,7 @@ function getFirstDefined(valuesList) {
     return undefined
 }
 
-function formatDate(dateTime, date) {
+function formatDate(dateTime, date, logger) {
     var d = dateTime || date
     if (d) {
         if (d.length === 4) {
