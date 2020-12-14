@@ -56,7 +56,7 @@ Run:
 python -m SimpleHTTPServer
 ```
  
- then point the browser on http://localhost:8000/test.html 
+ then point the browser on http://localhost:8000/test/test.html 
 
 ## Build jsdoc
 
@@ -66,7 +66,7 @@ You can create the JSDoc for the functions in `index.js` by running:
 npm run jsdoc
 ```
 
-you'll find the generated doc in the `out/` directory.
+you'll find the generated doc in the `doc/` directory.
 
 ## Reformat code
 
