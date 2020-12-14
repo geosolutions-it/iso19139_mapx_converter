@@ -7,8 +7,6 @@ import * as UTILS from './mapx_utils.js'
 
 import * as fs from 'fs'
 
-import builder from 'xmlbuilder'
-
 // ===== Parse arguments
 
 var args = []

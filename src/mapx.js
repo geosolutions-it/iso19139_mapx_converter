@@ -117,7 +117,7 @@ export class MapX {
         this.mapx.text.keywords.topics.push(topic)
         return true
     }
-    getTopics(mapx) {
+    getTopics() {
         return this.mapx.text.keywords.topics
     }
 
@@ -183,7 +183,7 @@ export class MapX {
     getReleaseDate() {
         return this.mapx.temporal.issuance.released_at
     }
-    existReleaseDate(mapx) {
+    existReleaseDate() {
         return this.mapx.temporal.issuance.released_at !== '0001-01-01'
     }
 

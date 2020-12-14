@@ -775,7 +775,7 @@ export const parseSuppInfo = function(suppInfo) {
 
     cleanSuppInfo = suppInfo.replace(re, '')
 
-    var re = new RegExp(coreRE, 'g');
+    re = new RegExp(coreRE, 'g');
     while ((result = re.exec(attrString)) !== null) {
         var name = result.groups['name']
         var val = result.groups['value']

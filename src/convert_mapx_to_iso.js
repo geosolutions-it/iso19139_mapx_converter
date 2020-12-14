@@ -44,10 +44,11 @@ export function mapxToIso19139Internal(mapx, params) {
         params = {}
     }
 
-    var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
+    //    var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
     var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
 
-    //    logger.warn("INIT LOG FOR mapxToIso19139Internal")
+    // generic loop var
+    var l
 
     var fileIdentifier = 'TODO'
 
@@ -237,7 +238,7 @@ export function mapxToIso19139Internal(mapx, params) {
     var licenses = mapx.getLicenses()
     if (licenses.length > 0) {
         var oc = []
-        for (var l of licenses) {
+        for (l of licenses) {
             var larr = []
             if (l.name) {
                 larr.push(l.name)
@@ -262,13 +263,12 @@ export function mapxToIso19139Internal(mapx, params) {
         }
     }
 
-    var languages = mapx.getLanguages()
     var isoLangList = []
     if (languages.length > 0) {
-        for (var l of languages) {
-            var isoLang = UTILS.LANG_MAPPING_M2I[l]
-            if (isoLang) {
-                isoLangList.push(isoLang)
+        for (l of languages) {
+            var ilang = UTILS.LANG_MAPPING_M2I[l]
+            if (ilang) {
+                isoLangList.push(ilang)
             } else {
                 logger.warn(`Can't map language [${l}]`)
             }
