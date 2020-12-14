@@ -27,7 +27,14 @@ const DATE_DEFAULT = '0001-01-01'
  * @returns {string} - a MAPX object as json string
  */
 export function iso19139ToMapx(isostring, params) {
-    var isojson = xml2json(isostring)
+
+    var logger = createLogger(params)
+
+    var isojson = xml2json(isostring, logger)
+    if (!isojson) {
+        logger.warn("Could not parse XML document, skipping mapx creation")
+        return null
+    }
     var mapx = iso19139ToMapxInternal(isojson, params)
     var mapxobj = mapx.mapx
     var mapxstring = JSON.stringify(mapxobj, null, 3)
@@ -718,8 +725,8 @@ function addCostraints(mapx, constraintsList, context) {
     }
 }
 
-const xml2json = function(bodyStr) {
-    var d = {}
+const xml2json = function(bodyStr, logger) {
+    var d = null
     xml2js.parseString(
         bodyStr, {
             tagNameProcessors: [xml2js.processors.stripPrefix]
@@ -727,6 +734,8 @@ const xml2json = function(bodyStr) {
         function(err, result) {
             if (!err) {
                 d = result
+            } else {
+                logger.warn(`Error parsing XML document: ${err}`)
             }
         })
     return d
@@ -793,4 +802,11 @@ export const parseSuppInfo = function(suppInfo) {
         text: cleanSuppInfo,
         attributes: attrs
     }
+}
+
+function createLogger(params) {
+    var logger = params && UTILS.PARAM_MESSAGE_HANDLER in params ?
+        params[UTILS.PARAM_MESSAGE_HANDLER] :
+        new UTILS.DefaultMessageHandler()
+    return logger
 }
