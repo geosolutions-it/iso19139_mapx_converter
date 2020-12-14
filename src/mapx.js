@@ -258,10 +258,10 @@ export class MapX {
     }
 
     setBBox(lngMin, lngMax, latMin, latMax) {
-        this.mapx.spatial.bbox.lng_min = lngMin
-        this.mapx.spatial.bbox.lng_max = lngMax
-        this.mapx.spatial.bbox.lat_min = latMin
-        this.mapx.spatial.bbox.lat_max = latMax
+        this.mapx.spatial.bbox.lng_min = Number(lngMin)
+        this.mapx.spatial.bbox.lng_max = Number(lngMax)
+        this.mapx.spatial.bbox.lat_min = Number(latMin)
+        this.mapx.spatial.bbox.lat_max = Number(latMax)
     }
     getBBox() {
         return [
