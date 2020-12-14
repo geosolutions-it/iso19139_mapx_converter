@@ -47,6 +47,8 @@ export function mapxToIso19139Internal(mapx, params) {
     //    var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
     var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
 
+    mapx.setLogger(logger)
+
     // generic loop var
     var l
 

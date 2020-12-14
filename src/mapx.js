@@ -109,15 +109,23 @@ export class MapX {
         return this.mapx.text.keywords.keys
     }
 
+    _fixTopics() {
+        if (!Object.prototype.hasOwnProperty.call(this.mapx.text.keywords, 'topics')) {
+            this.logger.warn(`Topics field missing. Fixing.`)
+            this.mapx.text.keywords.topics = {}
+        }
+    }
     addTopic(topic) {
         if (!TOPICS.includes(topic)) {
             this.logger.warn(`Can't set topic: unknown topic [${topic}]`)
             return false
         }
+        this._fixTopics()
         this.mapx.text.keywords.topics.push(topic)
         return true
     }
     getTopics() {
+        this._fixTopics()
         return this.mapx.text.keywords.topics
     }
 
