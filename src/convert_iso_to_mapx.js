@@ -616,12 +616,14 @@ function formatDate(dateTime, date) {
     var d = dateTime || date
     if (d) {
         if (d.length === 4) {
+            logger.warn(`Date not valid "${d}"`)
             return DATE_DEFAULT
         }
         var ret = d.substring(0, 10)
         if (MAPX.checkDate(ret)) {
             return ret
         }
+        logger.warn(`Date not valid "${ret}"`)
         return DATE_DEFAULT
     } else return DATE_DEFAULT
 }
