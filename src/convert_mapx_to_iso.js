@@ -9,6 +9,7 @@ import MD5 from 'crypto-md5/md5.js'
 import builder from 'xmlbuilder'
 
 import htmlToText from 'html-to-text'
+import he from 'he'
 
 /**
  * Transforms a MAPX json text into a ISO19139 xml text.
@@ -196,10 +197,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     // abstract
     var ab = mapx.getAbstract(lang)
-    ab = htmlToText.fromString(ab, {
-        tables: true,
-        wordwrap: false
-    })
+    ab = _htmlToText(ab)
 
     identification['gmd:abstract'] = {
         'gco:CharacterString': ab
@@ -372,11 +370,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     var note = mapx.getNotes(lang)
     if (note) {
-        note = htmlToText.fromString(note, {
-            tables: true,
-            wordwrap: false
-        })
-
+        note = _htmlToText(note)
         suppInfo.push(note)
     }
 
@@ -545,6 +539,72 @@ function createResponsibleParty(c) {
                     '@codeListValue': 'pointOfContact'
                 }
             }
+        }
+    }
+}
+
+function _htmlToText(html) {
+    return htmlToText.htmlToText(html, {
+        tables: true,
+        wordwrap: false,
+        formatters: {
+            'anchor': formatAnchor
+        },
+        tags: {
+            'foo': {
+                format: 'fooBlockFormatter',
+                options: {
+                    leadingLineBreaks: 1,
+                    trailingLineBreaks: 1
+                }
+            }
+        }
+    })
+}
+
+function formatAnchor(elem, walk, builder, formatOptions) {
+    function getHref() {
+        if (formatOptions.ignoreHref) {
+            return '';
+        }
+        if (!elem.attribs || !elem.attribs.href) {
+            return '';
+        }
+        let href = elem.attribs.href.replace(/^mailto:/, '');
+        if (formatOptions.noAnchorUrl && href[0] === '#') {
+            return '';
+        }
+        href = (formatOptions.baseUrl && href[0] === '/') ?
+            formatOptions.baseUrl + href :
+            href;
+        return he.decode(href, builder.options.decodeOptions);
+    }
+    const href = getHref();
+    if (!href) {
+        walk(elem.children, builder);
+    } else {
+        let text = '';
+        builder.pushWordTransform(
+            str => {
+                if (str) {
+                    text += str;
+                }
+                return str;
+            }
+        );
+        walk(elem.children, builder);
+        builder.popWordTransform();
+
+        const hideSameLink = formatOptions.hideLinkHrefIfSameAsText && href === text;
+        if (!hideSameLink) {
+            builder.addInline(
+                (!text) ?
+                href :
+                (formatOptions.noLinkBrackets) ?
+                ' ' + href :
+                ' (' + href + ')',
+                true
+            );
         }
     }
 }
