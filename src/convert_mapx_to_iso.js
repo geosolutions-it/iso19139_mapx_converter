@@ -197,7 +197,8 @@ export function mapxToIso19139Internal(mapx, params) {
     // abstract
     var ab = mapx.getAbstract(lang)
     ab = htmlToText.fromString(ab, {
-        tables: true
+        tables: true,
+        wordwrap: false
     })
 
     identification['gmd:abstract'] = {
@@ -372,7 +373,8 @@ export function mapxToIso19139Internal(mapx, params) {
     var note = mapx.getNotes(lang)
     if (note) {
         note = htmlToText.fromString(note, {
-            tables: true
+            tables: true,
+            wordwrap: false
         })
 
         suppInfo.push(note)
