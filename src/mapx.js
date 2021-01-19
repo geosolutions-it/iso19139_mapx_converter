@@ -309,10 +309,6 @@ export class MapX {
         return this.mapx.origin.source.urls
     }
 
-    setLicenseDownload(allow) {
-        this.mapx.license.allowDownload = !!allow
-    }
-
     addLicense(name, text) {
         this.mapx.license.licenses.push({
             name: name,
@@ -398,7 +394,6 @@ export function createObject() {
     }
 
     mapx.license = {
-        allowDownload: true,
         licenses: []
     }
 
