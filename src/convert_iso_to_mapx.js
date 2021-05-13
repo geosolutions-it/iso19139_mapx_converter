@@ -36,10 +36,14 @@ export function iso19139ToMapx(isostring, params) {
         return null
     }
     var mapx = iso19139ToMapxInternal(isojson, params)
-    var mapxobj = mapx.mapx
-    var mapxstring = JSON.stringify(mapxobj, null, 3)
+    if (mapx) {
+        var mapxobj = mapx.mapx
+        var mapxstring = JSON.stringify(mapxobj, null, 3)
 
-    return mapxstring
+        return mapxstring
+    } else {
+        return null
+    }
 }
 
 /**
@@ -68,32 +72,37 @@ export function iso19139ToMapxInternal(data, params) {
         if (log) {
             logger.log(`Not unwrapping root ${MD_ROOT_NAME}`)
         }
-        mdRoot = data[MD_ROOT_NAME]
+        mdRoot = getFirstFromPath(data, MD_ROOT_NAME, logger)
     } else {
         var rootName = Object.keys(data)[0]
         if (log) {
             logger.log(`Unwrapping ${rootName}`)
         }
-        mdRoot = data[rootName][MD_ROOT_NAME][0]
+        mdRoot = getFirstFromPath(data, [rootName, MD_ROOT_NAME], logger)
+    }
+
+    if (!mdRoot) {
+        logger.warn(`Could not find the root ${MD_ROOT_NAME} element`)
+        return null
     }
 
     // Look for some of the main nodes
     if (mdRoot.identificationInfo && mdRoot.identificationInfo.length > 1) {
-        logger.warn('More than 1 identinfo found')
+        logger.warn('More than 1 identificationInfo found')
     }
 
-    var identificationInfo = mdRoot.identificationInfo[0]
+    var identificationInfo = getFirstFromPath(mdRoot, 'identificationInfo', logger)
 
-    var dataIdent = identificationInfo[DATA_IDENT_NAME]
-    var srvIdent = identificationInfo[SERV_IDENT_NAME]
+    var dataIdent = getFirstFromPath(identificationInfo, DATA_IDENT_NAME)
+    var srvIdent = getFirstFromPath(identificationInfo, SERV_IDENT_NAME)
 
     var identNode = dataIdent ?
-        dataIdent[0] :
-        srvIdent[0]
+        dataIdent :
+        srvIdent
 
-    var dataCitationNode = getFirstFromPath(identNode, ['citation', CI_CITATION])
+    var dataCitationNode = getFirstFromPath(identNode, ['citation', CI_CITATION], logger)
 
-    var uuid = getFirstFromPath(mdRoot, ['fileIdentifier', GCO_CHAR_NAME])
+    var uuid = getFirstFromPath(mdRoot, ['fileIdentifier', GCO_CHAR_NAME], logger)
     if (log) {
         logger.log(`METADATA ID [${uuid}]`)
     }
@@ -121,19 +130,24 @@ export function iso19139ToMapxInternal(data, params) {
         logger.log(`Metadata language [${lang}]`)
     }
 
-    var resLangList = identNode['language']
+    var resLangList = getListFromPath(identNode, 'language')
     if (resLangList) {
         for (var resLang of resLangList) {
-            var langCode = resLang['LanguageCode'][0].$.codeListValue
-            if (!(langList.includes(langCode))) {
-                langList.push(langCode)
+            var langNode = getFirstFromPath(resLang, 'LanguageCode', logger)
+            if (langNode) {
+                var langCode = langNode.$.codeListValue
+                if (!(langList.includes(langCode))) {
+                    langList.push(langCode)
+                }
+            } else {
+                logger.warn(`Can't find expected LanguageCode element for data`)
             }
         }
     }
 
     // Parse languages
     if (langList.length == 0) {
-        logger.warn('Language definition not found')
+        // logger.warn('No language definition found') // we dont need another warn
         langList.push('eng') // default entry
     }
 
@@ -153,25 +167,35 @@ export function iso19139ToMapxInternal(data, params) {
     }
 
     // === Title
-    var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME])
+    var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME], logger)
     mapx.setTitle(lang, title)
 
     // === Abstract
-    var abstract = getFirstFromPath(identNode, ['abstract', GCO_CHAR_NAME])
+    var abstract = getFirstFromPath(identNode, ['abstract', GCO_CHAR_NAME], logger)
     mapx.setAbstract(lang, abstract)
 
     // === Keywords
-    for (var dk of identNode.descriptiveKeywords || []) {
+    var descrKwList = getListFromPath(identNode, 'descriptiveKeywords')
+    for (var dk of descrKwList || []) {
         for (var keywords of dk.MD_Keywords) {
             for (var keyword of keywords.keyword) {
-                mapx.addKeyword(keyword[GCO_CHAR_NAME][0])
+                var kwNode = getFirstFromPath(keyword, GCO_CHAR_NAME)
+                if (kwNode)
+                    mapx.addKeyword(kwNode)
+                else
+                    logger.warn(`Can't find expected keyword`)
             }
         }
     }
 
     // === Topics
-    for (var topic of identNode.topicCategory || []) {
-        mapx.addTopic(topic.MD_TopicCategoryCode[0])
+    var topicCatList = getListFromPath(identNode, 'topicCategory')
+    for (var topic of topicCatList || []) {
+        var codeNode = getFirstFromPath(topic, 'MD_TopicCategoryCode')
+        if (codeNode)
+            mapx.addTopic(codeNode)
+        else
+            logger.warn(`Can't find expected MD_TopicCategoryCode element`)
     }
 
     // === SuppInfo
@@ -254,7 +278,8 @@ export function iso19139ToMapxInternal(data, params) {
     var datestamp = getFirstFromPath(mdRoot, ['dateStamp', 'Date'])
     var metadataDate = formatDate(datestamp, undefined, logger)
 
-    for (var date of dataCitationNode.date || []) {
+    var dateList = getListFromPath(dataCitationNode, 'date')
+    for (var date of dateList || []) {
         if (log) {
             console.log(`Found date ${JSON.stringify(date)}`)
         }
@@ -302,6 +327,7 @@ export function iso19139ToMapxInternal(data, params) {
     ])
 
     if (releaseDate === DATE_DEFAULT && updateDate === DATE_DEFAULT) {
+        logger.warn(`Can not find a valid publication, creation or revision date. Using dateStamp instead`)
         releaseDate = metadataDate
     }
 
@@ -364,20 +390,20 @@ export function iso19139ToMapxInternal(data, params) {
 
     if (geoextent) {
         mapx.setBBox(
-            geoextent.westBoundLongitude[0].Decimal[0],
-            geoextent.eastBoundLongitude[0].Decimal[0],
-            geoextent.southBoundLatitude[0].Decimal[0],
-            geoextent.northBoundLatitude[0].Decimal[0]
+            getFirstFromPath(geoextent, ['westBoundLongitude', 'Decimal'], logger) || null,
+            getFirstFromPath(geoextent, ['eastBoundLongitude', 'Decimal'], logger) || null,
+            getFirstFromPath(geoextent, ['southBoundLatitude', 'Decimal'], logger) || null,
+            getFirstFromPath(geoextent, ['northBoundLatitude', 'Decimal'], logger) || null
         )
     }
 
     // === Contacts
 
     // add all metadata contacts
-    addContacts(mapx, 'Metadata', mdRoot.contact || [])
+    addContacts(mapx, 'Metadata', getListFromPath(mdRoot, 'contact') || [])
 
     // add all data contacts
-    addContacts(mapx, 'Dataset', identNode.pointOfContact || [])
+    addContacts(mapx, 'Dataset', getListFromPath(identNode, 'pointOfContact') || [])
 
     // === Origin
 
@@ -427,8 +453,8 @@ export function iso19139ToMapxInternal(data, params) {
             for (var dto of transfOpt.MD_DigitalTransferOptions) {
                 for (var online of dto.onLine || []) {
                     for (var onlineRes of online.CI_OnlineResource) {
-                        var link = onlineRes.linkage[0]
-                        var url = getFirstFromPath(link, ['URL'])
+                        var link = getFirstFromPath(onlineRes, 'linkage', logger)
+                        var url = getFirstFromPath(link, 'URL', logger)
                         var proto = getFirstFromPath(onlineRes, ['protocol', GCO_CHAR_NAME])
                         var name = getFirstFromPath(onlineRes, ['name', GCO_CHAR_NAME])
 
@@ -449,8 +475,8 @@ export function iso19139ToMapxInternal(data, params) {
     }
 
     // === License
-    addCostraints(mapx, mdRoot.metadataConstraints, 'Metadata')
-    addCostraints(mapx, identNode.resourceConstraints, 'Dataset')
+    addCostraints(mapx, getListFromPath(mdRoot, 'metadataConstraints'), 'Metadata')
+    addCostraints(mapx, getListFromPath(identNode, 'resourceConstraints'), 'Dataset')
 
     return mapx
 }
@@ -517,7 +543,7 @@ function parseResponsibleParty(rp) {
 
 function addContacts(mapx, context, isoContacts) {
     for (var isoContact of isoContacts) {
-        var parsedContact = parseResponsibleParty(isoContact[CI_RP][0])
+        var parsedContact = parseResponsibleParty(getFirstFromPath(isoContact, CI_RP) || {})
         const [mfunc, mname, maddr, mmail] = mapContact(parsedContact)
         mapx.addContact(`${context} ${mfunc}`, mname, maddr, mmail)
     }
@@ -564,23 +590,66 @@ function mapContact(parsedContact) {
     return [parsedContact[RP_ROLE], retnames, retaddr, parsedContact[RP_ADDR_EMAIL]]
 }
 
-export function getFirstFromPath(m, path) {
+
+export function getFirstFromPath(m, path, logger = null) {
+    return getFromPath(true, m, path, logger)
+}
+
+export function getListFromPath(m, path, logger = null) {
+    return getFromPath(false, m, path, logger)
+}
+
+function getFromPath(cutlastlist, m, path, logger = null) {
     if (m === undefined) {
+        if (logger) {
+            logger.warn(`Could not search path ${path.join('/')}: root node is null`)
+        }
+
         return undefined
+    }
+
+    if (!Array.isArray(path)) {
+        path = [path]
     }
 
     var nodeset = m
 
+    var index = 0
     for (var step of path) {
         var node = nodeset[step]
         if (node) {
-            nodeset = node[0] // take first node
+            // console.log(`FOUND step ${step} -- ${node}`)
+            if (Array.isArray(node)) {
+                // console.log(`UNLISTING step ${step}`)
+                if (index < path.length - 1 || cutlastlist) {
+                    nodeset = node[0] // take first node in list
+                } else {
+                    // console.log(`NOT CUTTING LIST for step ${step} in ${path}`)
+                    nodeset = node
+                }
+            } else {
+                nodeset = node
+            }
         } else {
+            if (logger) {
+                logger.warn(`Could not find element ${step} in path ${path.join('/')}`)
+            }
             return undefined
         }
+        index++
     }
 
     return nodeset
+}
+
+
+function local_log(logger, msg) {
+    if (logger) {
+        logger.warn(msg)
+    } else {
+        console.log(msg)
+    }
+
 }
 
 export function findFirstFromPath(nodeset, path, index) {

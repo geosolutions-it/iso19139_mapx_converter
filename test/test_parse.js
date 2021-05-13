@@ -240,12 +240,12 @@ it('#9 M2I point of contact', function(done) {
 })
 
 it('#1 I2M dates', function(done) {
-    var mapx = loadXml(`${__dirname}/data/no_pubdate_yes_revision.xml`)
+    var mapx = loadXmlAndTransform(`${__dirname}/data/no_pubdate_yes_revision.xml`)
 
     assert.equal(mapx.getReleaseDate(), DATE_DEFAULT)
     assert.equal(mapx.getModifiedDate(), '2015-07-14')
 
-    mapx = loadXml(`${__dirname}/data/no_pubdate_no_revision.xml`)
+    mapx = loadXmlAndTransform(`${__dirname}/data/no_pubdate_no_revision.xml`)
 
     assert.equal(mapx.getReleaseDate(), '2020-01-01')
     assert.equal(mapx.getModifiedDate(), DATE_DEFAULT)
@@ -254,7 +254,7 @@ it('#1 I2M dates', function(done) {
 })
 
 it('#2 I2M comma separated contacts', function(done) {
-    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
+    var mapx = loadXmlAndTransform(`${__dirname}/data/contacts_01.xml`)
 
     var cont = mapx.getContacts()[0]
 
@@ -264,7 +264,7 @@ it('#2 I2M comma separated contacts', function(done) {
 })
 
 it('#3 I2M role codes', function(done) {
-    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
+    var mapx = loadXmlAndTransform(`${__dirname}/data/contacts_01.xml`)
 
     var cont = mapx.getContacts()[0]
 
@@ -274,7 +274,7 @@ it('#3 I2M role codes', function(done) {
 })
 
 it('#4 I2M Org as address', function(done) {
-    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
+    var mapx = loadXmlAndTransform(`${__dirname}/data/contacts_01.xml`)
 
     var cont = mapx.getContacts()[1]
 
@@ -325,7 +325,7 @@ it('#15 M2I Topic category', function(done) {
 
 it('#15 I2M Topic category', function(done) {
 
-    var mapx = loadXml(`${__dirname}/data/contacts_01.xml`)
+    var mapx = loadXmlAndTransform(`${__dirname}/data/contacts_01.xml`)
     var topics = mapx.getTopics()
     assert.equal(2, topics.length)
 
@@ -425,6 +425,51 @@ it('Attributes codec: supplementalInfo', function(done) {
     done()
 })
 
+
+it('#32 I2M parse Bathymetrie', function(done) {
+
+    var mapx = loadXmlAndTransform(`${__dirname}/data/bathymetrie.xml`)
+    done()
+})
+
+it('#32 I2M parse missing MD_DataIdentification', function(done) {
+
+    var isoxml = loadFromFile(`${__dirname}/data/contacts_01.xml`)
+    assert.ok(isoxml)
+    var isojsn = xml2json(isoxml)
+    assert.ok(isojsn)
+
+    // console.log(isojsn['MD_Metadata']['identificationInfo'])
+    assert.ok(isojsn['MD_Metadata']['identificationInfo'][0]['MD_DataIdentification'])
+    delete isojsn['MD_Metadata']['identificationInfo'][0]['MD_DataIdentification']
+    var mapx = I2M.iso19139ToMapxInternal(isojsn, null)
+    assert.ok(mapx)
+
+    done()
+})
+
+it('#32 I2M parse missing identificationInfo', function(done) {
+
+    var isoxml = loadFromFile(`${__dirname}/data/contacts_01.xml`)
+    assert.ok(isoxml)
+    var isojsn = xml2json(isoxml)
+    assert.ok(isojsn)
+
+    assert.ok(isojsn['MD_Metadata']['identificationInfo'])
+    delete isojsn['MD_Metadata']['identificationInfo']
+    var mapx = I2M.iso19139ToMapxInternal(isojsn, null)
+    assert.ok(mapx)
+
+    done()
+})
+
+it('#32 I2M parse bad xml', function(done) {
+
+    var isoxml = 'This is not an xml document'
+    var mapx = I2M.iso19139ToMapx(isoxml, null)
+
+    done()
+})
 
 function get_date_from_iso(isoXml) {
     const MD_ROOT_NAME = 'gmd:MD_Metadata'
@@ -575,7 +620,7 @@ function create_sample_mapx() {
     return mapx
 }
 
-function loadXml(source) {
+function loadXmlAndTransform(source) {
     // const fs = require("fs");
 
     var xml = fs.readFileSync(source)
@@ -586,6 +631,7 @@ function loadXml(source) {
         },
         function(error, json) {
             if (error === null) {
+                //                mapx = I2M.iso19139ToMapxInternal(json, {'log_info':true})
                 mapx = I2M.iso19139ToMapxInternal(json, null)
             } else {
                 console.error(error)
@@ -595,4 +641,29 @@ function loadXml(source) {
     )
 
     return mapx
+}
+
+const loadFromFile = function(url) {
+    try {
+        return fs.readFileSync(url)
+    } catch (err) {
+        console.warn('Error while reading file'.err)
+        return undefined
+    }
+}
+
+const xml2json = function(bodyStr, logger) {
+    var d = null
+    xml2js.parseString(
+        bodyStr, {
+            tagNameProcessors: [xml2js.processors.stripPrefix]
+        },
+        function(err, result) {
+            if (!err) {
+                d = result
+            } else {
+                console.warn(`Error parsing XML document: ${err}`)
+            }
+        })
+    return d
 }
