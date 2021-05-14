@@ -276,7 +276,7 @@ export function iso19139ToMapxInternal(data, params) {
     }
 
     var datestamp = getFirstFromPath(mdRoot, ['dateStamp', 'Date'])
-    var metadataDate = formatDate(datestamp, undefined, logger)
+    var metadataDate = MAPX.checkDate(datestamp) ? datestamp : undefined
 
     var dateList = getListFromPath(dataCitationNode, 'date')
     for (var date of dateList || []) {
@@ -302,37 +302,37 @@ export function iso19139ToMapxInternal(data, params) {
 
         if (mapxdate) {
             datemap[typeValue] = mapxdate
+            //            logger.warn(`PARSED DATE ${typeValue} --> ${mapxdate} FROM ${dateVal}`)            
         }
     }
 
-    // The Publication Date field must be converted into “temporal>issuance>released_at”.
-    // The DateStamp field should not be used basically.
-    // In case the Publication Date field is not provided, the dateStamp field should be used instead for the issuance released date.
+    // MAPX released and modified date
+    // https://github.com/geosolutions-it/iso19139_mapx_converter/issues/33
 
-    // pub null, rev null --> rev = timestamp
+    var updateDate = datemap.revision
+    var releaseDate = datemap.publication
 
-    // = Released
-    var releaseDate = getFirstDefined([
-        datemap.publication,
-        datemap.creation,
-        DATE_DEFAULT
-    ])
+    if (!releaseDate) {
+        logger.warn(`No publication date available`)
 
-    // = Modified
-    var updateDate = getFirstDefined([
-        datemap.revision,
-        datemap.publication,
-        datemap.creation,
-        DATE_DEFAULT
-    ])
+        // some heuristic to create a releaseDate
+        if (datemap.creation) {
+            releaseDate = datemap.creation
+            logger.warn(`Trying using data creation date as release date: ${releaseDate}`)
+        } else if (metadataDate) {
+            releaseDate = metadataDate
+            logger.warn(`Trying using metadata timestamp as release date: ${releaseDate}`)
+        }
 
-    if (releaseDate === DATE_DEFAULT && updateDate === DATE_DEFAULT) {
-        logger.warn(`Can not find a valid publication, creation or revision date. Using dateStamp instead`)
-        releaseDate = metadataDate
+        // make sure the releaseDate is not after the updateDate
+        if (releaseDate && updateDate && releaseDate.localeCompare(updateDate) > 0) {
+            logger.warn(`Release date set to default value, since picked value (${releaseDate}) follows Modified Date (${updateDate})`)
+            releaseDate = undefined
+        }
     }
 
-    mapx.setReleaseDate(releaseDate)
-    mapx.setModifiedDate(updateDate)
+    mapx.setReleaseDate(releaseDate ? releaseDate : DATE_DEFAULT)
+    mapx.setModifiedDate(updateDate ? updateDate : DATE_DEFAULT)
 
     // == Range
     // "extent":[
@@ -694,15 +694,15 @@ function formatDate(dateTime, date, logger) {
     if (d) {
         if (d.length === 4) {
             logger.warn(`Date not valid "${d}"`)
-            return DATE_DEFAULT
+            return undefined
         }
         var ret = d.substring(0, 10)
         if (MAPX.checkDate(ret)) {
             return ret
         }
         logger.warn(`Date not valid "${ret}"`)
-        return DATE_DEFAULT
-    } else return DATE_DEFAULT
+        return undefined
+    } else return undefined
 }
 
 function extractEpsgCode(crsid) {
