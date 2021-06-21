@@ -12,6 +12,7 @@ import fs from 'fs'
 import * as M2I from '../src/convert_mapx_to_iso.js'
 import * as I2M from '../src/convert_iso_to_mapx.js'
 import * as MAPX from '../src/mapx.js'
+import * as UTILS from '../src/mapx_utils.js'
 
 import {
     dirname
@@ -92,7 +93,12 @@ it('Check void M2I dates', function(done) {
     var mapx = new MAPX.MapX()
     mapx.addLanguage('en') // avoid warn about missing language
 
-    var iso = M2I.mapxToIso19139Internal(mapx)
+    var mh = new UTILS.DefaultMessageHandler()
+    var params = {
+        [UTILS.PARAM_MESSAGE_HANDLER]: mh
+    }
+
+    var iso = M2I.mapxToIso19139Internal(mapx, params)
     var xml = builder.create(iso, {
         encoding: 'utf-8'
     })
@@ -102,8 +108,10 @@ it('Check void M2I dates', function(done) {
 
     var dates = get_date_from_iso(xmlFormatted)
 
-    assert.equal(Object.keys(dates).length, 2) // 1: forced date in identification for validity + datestamp
+    assert.equal(Object.keys(dates).length, 1) // 1: forced date in identification for validity + datestamp
     assert.ok(dates['datestamp']) // make sure datestmap is there
+
+    assert.include(mh.messages, `No dataset reference date given.`)
 
     done()
 })
@@ -261,7 +269,7 @@ it('#33 I2M dates', function(done) {
     set_date_into_iso(isoObj, METADATA, CREATION, REVISION, PUBLICATION)
 
     // check dates are where we expect them
-    console.log("#33 TEST0")    
+    console.log("#33 TEST0")
     var dates = get_date_from_iso_obj(isoObj)
     assert.equal(dates.creation, CREATION)
     assert.equal(dates.revision, REVISION)
@@ -572,10 +580,10 @@ function set_datestamp_into_iso(isoObj, metadataTimeStamp) {
 
     delete mdRoot['dateStamp']['Date']
     delete mdRoot['dateStamp']['DateTime']
-   
+
     if (metadataTimeStamp) {
         var dateNode = metadataTimeStamp.length > 10 ? 'DateTime' : 'Date'
-              
+
         mdRoot['dateStamp'] = {
             [dateNode]: metadataTimeStamp
         }

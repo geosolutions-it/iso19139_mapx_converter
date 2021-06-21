@@ -165,22 +165,7 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     if (!identDateAdded) {
-        logger.warn(`No date set, defaulting to [${defaultDate}]`)
-        dates.push({
-            'gmd:CI_Date': {
-                'gmd:date':
-                // modified date --> dataset
-                {
-                    'gco:Date': defaultDate
-                },
-                'gmd:dateType': {
-                    'gmd:CI_DateTypeCode': {
-                        '@codeListValue': 'publication',
-                        '@codeList': 'http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#CI_DateTypeCode'
-                    }
-                }
-            }
-        })
+        logger.warn(`No dataset reference date given.`)
     }
 
     var identification = {}
