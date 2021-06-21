@@ -643,15 +643,6 @@ function getFromPath(cutlastlist, m, path, logger = null) {
 }
 
 
-function local_log(logger, msg) {
-    if (logger) {
-        logger.warn(msg)
-    } else {
-        console.log(msg)
-    }
-
-}
-
 export function findFirstFromPath(nodeset, path, index) {
     if (nodeset === undefined) {
         return undefined
@@ -673,16 +664,6 @@ export function findFirstFromPath(nodeset, path, index) {
                     return found
                 }
             }
-        }
-    }
-
-    return undefined
-}
-
-function getFirstDefined(valuesList) {
-    for (var val of valuesList) {
-        if (val) {
-            return val
         }
     }
 
