@@ -255,10 +255,13 @@ it('#33 I2M dates', function(done) {
     var METADATA = '2020-04-01'
     var DATE_DEFAULT = '0001-01-01'
     var OLD_DATE = '1900-01-01'
+    var OLD_DATETIME = '1900-02-02T12:00:00'
+    var OLD_DATETIME_TRUNC = '1900-02-02'
 
     set_date_into_iso(isoObj, METADATA, CREATION, REVISION, PUBLICATION)
 
     // check dates are where we expect them
+    console.log("#33 TEST0")    
     var dates = get_date_from_iso_obj(isoObj)
     assert.equal(dates.creation, CREATION)
     assert.equal(dates.revision, REVISION)
@@ -291,6 +294,10 @@ it('#33 I2M dates', function(done) {
     console.log("#33 TEST7")
     set_date_into_iso(isoObj, OLD_DATE, undefined, REVISION, undefined)
     assertDates(isoObj, OLD_DATE, REVISION)
+
+    console.log("#33 TEST8")
+    set_date_into_iso(isoObj, OLD_DATETIME, undefined, REVISION, undefined)
+    assertDates(isoObj, OLD_DATETIME_TRUNC, REVISION)
 
     done()
 })
@@ -513,7 +520,7 @@ function get_date_from_iso_obj(isoJson) {
     var ret = {}
     var mdRoot = isoJson[MD_ROOT_NAME]
 
-    var datestamp = getFirstFromPath(mdRoot, ['dateStamp', 'Date'])
+    var datestamp = getFirstFromPath(mdRoot, ['dateStamp', 'Date']) || getFirstFromPath(mdRoot, ['dateStamp', 'DateTime'])
     if (datestamp) {
         ret['datestamp'] = datestamp
     }
@@ -539,15 +546,10 @@ function get_date_from_iso_obj(isoJson) {
 
 function set_date_into_iso(isoObj, metadataTimeStamp, creation, revision, publication) {
 
+    set_datestamp_into_iso(isoObj, metadataTimeStamp)
+
     var mdRoot = isoObj[MD_ROOT_NAME]
     assert.ok(mdRoot)
-
-    delete mdRoot['dateStamp']['Date']
-    if (metadataTimeStamp) {
-        mdRoot['dateStamp'] = {
-            'Date': metadataTimeStamp
-        }
-    }
 
     var identificationInfo = getFirstFromPath(mdRoot, 'identificationInfo')
     assert.ok(identificationInfo)
@@ -564,6 +566,21 @@ function set_date_into_iso(isoObj, metadataTimeStamp, creation, revision, public
     citation['date'] = date
 }
 
+function set_datestamp_into_iso(isoObj, metadataTimeStamp) {
+    var mdRoot = isoObj[MD_ROOT_NAME]
+    assert.ok(mdRoot)
+
+    delete mdRoot['dateStamp']['Date']
+    delete mdRoot['dateStamp']['DateTime']
+   
+    if (metadataTimeStamp) {
+        var dateNode = metadataTimeStamp.length > 10 ? 'DateTime' : 'Date'
+              
+        mdRoot['dateStamp'] = {
+            [dateNode]: metadataTimeStamp
+        }
+    }
+}
 
 function addDate(dateList, dateType, date) {
     if (!date)

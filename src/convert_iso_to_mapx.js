@@ -275,9 +275,13 @@ export function iso19139ToMapxInternal(data, params) {
         revision: undefined
     }
 
-    var datestamp = getFirstFromPath(mdRoot, ['dateStamp', 'Date'])
-    var metadataDate = MAPX.checkDate(datestamp) ? datestamp : undefined
-
+    var datestampDate = getFirstFromPath(mdRoot, ['dateStamp', 'Date'])
+    var datestampTime = getFirstFromPath(mdRoot, ['dateStamp', 'DateTime'])
+    var metadataDate = formatDate(
+            MAPX.checkDate(datestampTime) ? datestampTime : undefined,
+            MAPX.checkDate(datestampDate) ? datestampDate : undefined,
+            logger)
+            
     var dateList = getListFromPath(dataCitationNode, 'date')
     for (var date of dateList || []) {
         if (log) {
