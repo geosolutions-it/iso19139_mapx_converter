@@ -64,14 +64,15 @@ export function mapxToIso19139Internal(mapx, params) {
         'gco:CharacterString': fileIdentifier
     }
 
-    var lang
     var languages = mapx.getLanguages()
-    if (languages.length > 0) {
-        lang = languages[0]
-    } else {
+
+    if (languages.length == 0) {
         logger.warn('Language not set. Default to [en]')
-        lang = 'en'
+        languages = ['en']
     }
+
+    var lang = languages[0]
+
 
     isoLang = UTILS.LANG_MAPPING_M2I[lang]
     if (!isoLang) {
