@@ -148,21 +148,30 @@ export class MapX {
         return ret
     }
 
+    _fixAttributes() {
+        if (!Object.prototype.hasOwnProperty.call(this.mapx.text, 'attributes')) {
+            this.logger.warn(`Attributes field missing. Fixing.`)
+            this.mapx.text.attributes = {}
+        }
+    }
     setAttribute(lang, attname, value) {
         if (!checkLang(lang)) {
             this.logger.warn(`Can't set attribute: unknown language [${lang}]`)
             return false
         }
+        this._fixAttributes()
 
         var attr = this.mapx.text.attributes[attname] || initLanguages(this.mapx.text.attributes, attname)
         attr[lang] = value
         return true
     }
     getAttributeVal(lang, attname) {
+        this._fixAttributes()
         var attr = this.mapx.text.attributes[attname]
         return attr ? attr[lang] : undefined
     }
     getFirstAttributeVal(attname) {
+        this._fixAttributes()
         var attr = this.mapx.text.attributes[attname]
         if (attr) {
             for (const lang of LANGUAGES) {
@@ -174,9 +183,11 @@ export class MapX {
         return undefined
     }
     getAllAttributes() {
+        this._fixAttributes()
         return this.mapx.text.attributes
     }
     getAttributeNames() {
+        this._fixAttributes()
         return Object.getOwnPropertyNames(this.mapx.text.attributes)
     }
 

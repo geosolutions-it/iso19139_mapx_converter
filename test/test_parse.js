@@ -414,6 +414,19 @@ it('#14 M2I Check void language', function(done) {
     done()
 })
 
+it('#37 M2I Check void attributes', function(done) {
+    var mapx = new MAPX.MapX()
+    assert.isOk(mapx.mapx.text)
+    assert.isOk(mapx.mapx.text.attributes)
+    delete mapx.mapx.text.attributes
+    assert.isUndefined(mapx.mapx.text.attributes)
+
+    var isoObj = createStrippedIsoJson(mapx)
+    assert.isOk(isoObj)
+
+    done()
+})
+
 it('Attributes codec: parser', function(done) {
 
     const encodedSI = 'note00\nAttributes description: name1: value1; name2: value2; name3; name::4: value::4;'
