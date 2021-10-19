@@ -50,11 +50,17 @@ npx eslint src/
 ## Run a test on browser
 
 If you want to run a local test, first build the module, then make sure you have python installed on your machine.  
-Run:
+
+If you have python 2.x, run:
 
 ```shell
 python -m SimpleHTTPServer
 ```
+For python 3, run:
+```shell
+python -m SimpleHTTPServer
+```
+
  
  then point the browser on http://localhost:8000/test/test.html 
 

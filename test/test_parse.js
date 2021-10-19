@@ -20,6 +20,8 @@ import {
 import {
     fileURLToPath
 } from 'url'
+const __dirname = dirname(fileURLToPath(
+    import.meta.url))
 
 const getFirstFromPath = I2M.getFirstFromPath
 const findFirstFromPath = I2M.findFirstFromPath
@@ -31,8 +33,8 @@ const DATA_IDENT_NAME = 'MD_DataIdentification'
 const GCO_CHAR_NAME = 'CharacterString'
 const CI_CITATION = 'CI_Citation'
 
-const __dirname = dirname(fileURLToPath(
-    import.meta.url))
+const VERBOSE = false
+
 
 it('Basic MAPX object parsing', function(done) {
     var mapx = create_sample_mapx()
@@ -66,7 +68,8 @@ it('MAPX to ISO parsing', function(done) {
     var xmlFormatted = xml.end({
         pretty: true
     })
-    // console.log("METADATA as XML", xmlFormatted);
+    if (VERBOSE)
+        console.log("METADATA as XML", xmlFormatted);
     done()
 })
 
@@ -490,6 +493,8 @@ it('Attributes codec: supplementalInfo', function(done) {
 it('#32 I2M parse Bathymetrie', function(done) {
 
     var mapx = loadXmlAndTransform(`${__dirname}/data/bathymetrie.xml`)
+    assert.ok(mapx)
+
     done()
 })
 
@@ -528,6 +533,7 @@ it('#32 I2M parse bad xml', function(done) {
 
     var isoxml = 'This is not an xml document'
     var mapx = I2M.iso19139ToMapx(isoxml, null)
+    assert.isNull(mapx)
 
     done()
 })
@@ -625,26 +631,6 @@ function addDate(dateList, dateType, date) {
     dateList.push(cidate)
 }
 
-function createNormalizedIsoJson(mapx) {
-    var iso = M2I.mapxToIso19139Internal(mapx)
-    var xml = builder.create(iso, {
-        encoding: 'utf-8'
-    })
-    var xmlFormatted = xml.end({
-        pretty: true
-    })
-
-    var result
-    //    var prc = {tagNameProcessors: [xml2js.processors.stripPrefix]};
-    new xml2js.Parser().parseString(xmlFormatted, (e, r) => {
-        if (e) {
-            console.warn(e)
-        }
-        result = r
-    })
-    return result
-}
-
 function createStrippedIsoJson(mapx) {
     var iso = M2I.mapxToIso19139Internal(mapx)
     var xml = builder.create(iso, {
@@ -672,7 +658,6 @@ function createStrippedIsoJson(mapx) {
 function get_time_extent_from_iso(iso_xml) {
     const MD_ROOT_NAME = 'MD_Metadata'
     const DATA_IDENT_NAME = 'MD_DataIdentification'
-    const CI_CITATION = 'CI_Citation'
 
     var ret = {}
 
@@ -779,7 +764,10 @@ const xml2json = function(bodyStr, logger) {
             if (!err) {
                 d = result
             } else {
-                console.warn(`Error parsing XML document: ${err}`)
+                if (logger)
+                    logger.warn(`Error parsing XML document: ${err}`)
+                else
+                    console.warn(`Error parsing XML document: ${err}`)
             }
         })
     return d
