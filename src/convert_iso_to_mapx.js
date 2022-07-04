@@ -749,15 +749,24 @@ function addCostraints(mapx, constraintsList, context) {
 
             for (acc of c.accessConstraints || []) {
                 code = acc.MD_RestrictionCode[0].$.codeListValue
-                mapx.addLicense(`${context} legal access constraint`, code)
+                if (code != 'otherRestrictions') {
+                    mapx.addLicense(`${context} legal access constraint`, code)
+                }
             }
             for (acc of c.useConstraints || []) {
                 code = acc.MD_RestrictionCode[0].$.codeListValue
-                mapx.addLicense(`${context} legal use constraint`, code)
+                if (code != 'otherRestrictions') {
+                    mapx.addLicense(`${context} legal use constraint`, code)
+                }
             }
             for (acc of c.otherConstraints || []) {
                 for (text of acc[GCO_CHAR_NAME] || []) {
-                    mapx.addLicense(`${context} other legal constraint`, text)
+                    var [k, l] = heuristicConstraints(text, mapx.getLogger())
+                    if (k != null) {
+                        mapx.addLicense(k, l)
+                    } else {
+                        mapx.addLicense(`${context} other legal constraint`, text)
+                    }
                 }
             }
         }
@@ -778,6 +787,19 @@ function addCostraints(mapx, constraintsList, context) {
             mapx.addLicense(`${context} security constraints: ${ccode}`, textList.join('\n\n'))
         }
     }
+}
+
+function heuristicConstraints(text, logger) {
+    for (const k1 of ['Metadata', 'Dataset']) {
+        for (const k2 of ['legal use constraint', 'legal access constraint', 'other legal constraint']) {
+            var prefix = `${k1} ${k2}: `
+            if (text.startsWith(prefix)) {
+                logger.log("Found constraints already converted")
+                return text.split(": ")
+            }
+        }
+    }
+    return [null, null]
 }
 
 const xml2json = function(bodyStr, logger) {

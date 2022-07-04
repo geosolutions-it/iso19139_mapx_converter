@@ -44,6 +44,10 @@ export class MapX {
         this.logger = logger
     }
 
+    getLogger() {
+        return this.logger
+    }
+
     setTitle(lang, value) {
         if (!checkLang(lang)) {
             this.logger.warn(`Can't set title: unknown language [${lang}]`)
