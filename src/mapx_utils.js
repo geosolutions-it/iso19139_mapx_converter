@@ -18,7 +18,8 @@ export const LANG_MAPPING_I2M = {
     ben: 'bn',
     per: 'fa',
     fas: 'fa',
-    pus: 'ps'
+    pus: 'ps',
+    ara: 'ar'
 }
 
 export const LANG_MAPPING_M2I = {
@@ -31,7 +32,8 @@ export const LANG_MAPPING_M2I = {
     de: 'ger',
     bn: 'ben',
     fa: 'per',
-    ps: 'pus'
+    ps: 'pus',
+    ar: 'ara'
 }
 
 export const FREQ_MAPPING_I2M = {
