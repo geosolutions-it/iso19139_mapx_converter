@@ -2,7 +2,7 @@
 //
 // Author: Emanuele Tajariol (GeoSolutions) <etj@geo-solutions.it>
 
-export const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps']
+export const LANGUAGES = ['en', 'fr', 'es', 'ru', 'zh', 'de', 'bn', 'fa', 'ps', 'ar']
 export const PERIODICITY = ['continual', 'daily', 'weekly', 'fortnightly', 'monthly', 'quarterly', 'biannually',
     'annually', 'as_needed', 'irregular', 'not_planned', 'unknown'
 ]

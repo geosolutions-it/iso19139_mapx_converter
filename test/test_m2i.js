@@ -284,7 +284,7 @@ it('#14 M2I Check void language', function(done) {
     var mapx = new MAPX.MapX()
     mapx.setLogger(new TU.TestMessageHandler())
 
-    mapx.setReleaseDate('2020-10-10') // avoid warn about missing date
+    // mapx.setReleaseDate('2020-10-10') // avoid warn about missing date
     var isoObj = TU.createStrippedIsoJson(mapx)
 
     // forced language in metadata
@@ -312,7 +312,7 @@ it('#37 M2I Check void attributes', function(done) {
 
     var isoObj = TU.createStrippedIsoJson(mapx)
     assert.isOk(isoObj)
-    assert.equal(3, logger.messages.length, "Bad number of warn messages")
+    assert.equal(3, logger.messages.length, "Bad number of warn messages" + JSON.stringify(logger.messages, null, 3))
     assert.ok(logger.messages[logger.messages.length-1].includes("Attributes "))
 
     done()
@@ -361,7 +361,7 @@ it('Attributes codec: supplementalInfo', function(done) {
 })
 
 
-it('# M2I extreme', function(done) {
+it('#38 M2I extreme', function(done) {
     var mapxText = TU.loadFromFile(`${__dirname}/data/extreme.json`)
 
     var logger = new TU.TestMessageHandler()
@@ -372,6 +372,33 @@ it('# M2I extreme', function(done) {
     // console.warn(JSON.stringify(mapx.mapx, null, 3))
 
     assert.equal(10, logger.messages.length, 'Wrong number of warnings during parsing')
+
+    done()
+})
+
+it('#39 select language', function(done) {
+    var mapx = new MAPX.MapX()
+    var logger = new TU.TestMessageHandler()
+    mapx.setLogger(logger)
+
+    mapx.addLanguage('de')
+    mapx.setTitle('fr', 'FRE_TITLE')
+    mapx.setAbstract('ar', 'ARA_ABSTRACT')
+
+    assert.deepEqual(M2I.getUsedLanguages(mapx), new Set(['fr','ar']), "Bad computed lang list")
+    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'fr', logger), 'FRE_TITLE')
+    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'ar', logger), 'FRE_TITLE')
+
+
+    var isoObj = TU.createStrippedIsoJson(mapx)
+    assert.equal(TU.get_title_from_iso_obj(isoObj), 'FRE_TITLE', 'Title mismatch')
+    assert.equal(TU.get_abstract_from_iso_obj(isoObj), 'ARA_ABSTRACT', 'Abstract mismatch')
+    assert.oneOf(TU.get_metadata_language_from_iso_obj(isoObj), ['fra','ara'], 'Bad language mapped')
+
+    mapx.setNotes('en', 'ENG_NOTES')
+
+    isoObj = TU.createStrippedIsoJson(mapx)
+    assert.equal(TU.get_metadata_language_from_iso_obj(isoObj), 'eng', '"eng" should be the preferred language')
 
     done()
 })

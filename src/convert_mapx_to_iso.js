@@ -56,17 +56,26 @@ export function mapxToIso19139Internal(mapx, params) {
         'gco:CharacterString': fileIdentifier
     }
 
-    var languages = mapx.getLanguages()
-
-    if (languages.length == 0) {
-        logger.warn('Language not set. Default to [en]')
+    var languages
+    var used_langs = getUsedLanguages(mapx)
+    if (used_langs.size == 0) {
+        logger.warn('No language found. Default to [en]')
         languages = ['en']
+    } else if (used_langs.size == 1) {
+        const [first] = used_langs
+        languages = [first]
+    } else if (used_langs.has('en')) {
+        languages = ['en']
+    } else {
+        const [first] = used_langs
+        logger.warn(`Choosing random language ${first}`)
+        languages = [first]
     }
 
     var lang = languages[0]
 
 
-    isoLang = UTILS.LANG_MAPPING_M2I[lang]
+    var isoLang = UTILS.LANG_MAPPING_M2I[lang]
     if (!isoLang) {
         isoLang = 'eng' // default language
         logger.warn(`Can't map language [${lang}]`)
@@ -167,14 +176,14 @@ export function mapxToIso19139Internal(mapx, params) {
         // title
         {
             'gmd:title': {
-                'gco:CharacterString': mapx.getTitle(lang)
+                'gco:CharacterString': extractLocalized(mapx.getAllTitles(), lang, logger)
             },
             'gmd:date': dates
         }
     }
 
     // abstract
-    var ab = mapx.getAbstract(lang)
+    var ab = extractLocalized(mapx.getAllAbstracts(), lang, logger)
     ab = _htmlToText(ab)
 
     identification['gmd:abstract'] = {
@@ -258,11 +267,11 @@ export function mapxToIso19139Internal(mapx, params) {
         isoLangList.push('eng')
     }
     var identLangList = []
-    for (var isoLang of isoLangList) {
+    for (const isoLangLoop of isoLangList) {
         identLangList.push({
             'gmd:LanguageCode': {
                 '@codeList': 'http://www.loc.gov/standards/iso639-2/',
-                '@codeListValue': isoLang
+                '@codeListValue': isoLangLoop
             }
         })
     }
@@ -346,7 +355,7 @@ export function mapxToIso19139Internal(mapx, params) {
     // supplementalInformation
     var suppInfo = []
 
-    var note = mapx.getNotes(lang)
+    var note = extractLocalized(mapx.getAllNotes(), lang, logger)
     if (note) {
         note = _htmlToText(note)
         suppInfo.push(note)
@@ -588,3 +597,43 @@ function formatAnchor(elem, walk, builder, formatOptions) {
         }
     }
 }
+
+export function getUsedLanguages(mapx) {
+    var langs = new Set()
+
+    collectLanguages(langs, mapx.getAllTitles())
+    collectLanguages(langs, mapx.getAllAbstracts())
+    collectLanguages(langs, mapx.getAllNotes())
+
+    return langs
+}
+
+function collectLanguages(collectSet, items) {
+    for (const [lang, text] of Object.entries(items)) {
+        if (text) {
+            collectSet.add(lang)
+        }
+    }
+}
+
+/**
+ * Get the tile using the given lang as a preference.
+ * If such lang does not exist, try using english
+ * As a fallbck use the first available language
+ */
+export function extractLocalized(localizedEntries, preferredLang, logger) {
+    if (localizedEntries[preferredLang]) {
+        return localizedEntries[preferredLang]
+    } else if (localizedEntries['en']) {
+        return localizedEntries[preferredLang]
+    } else {
+        for (const [lang, text] of Object.entries(localizedEntries)) {
+            if (text) {
+                logger.info(`Choosing random entry (${lang})`)
+                return text
+            }
+        }
+    }
+    return "N/A"
+}
+
