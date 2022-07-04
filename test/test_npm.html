@@ -1,10 +1,10 @@
 <html>
     <body onload="loadiso();">
 
-    <script src="https://unpkg.com/iso19139_mapx_converter@1.3.4/dist/iso19139_mapx_converter.js"></script> 
-        
+    <script src="https://unpkg.com/iso19139_mapx_converter@1.3.6/dist/iso19139_mapx_converter.js"></script>
+
     <script>
-      
+
         function loadiso() {
             var url = "http://localhost:8000/test/data/contacts_01.xml";
             var xmlhttp, text;
@@ -15,7 +15,7 @@
             document.getElementById("ta_iso").value = text;
         }
         // document.addEventListener('onload', loadiso());
-        
+
         function iso2mapx() {
             var iso_xml = document.getElementById("ta_iso").value;
             var handler = new window.iso19139_mapx_converter.ExportedMessageHandler()
@@ -24,7 +24,7 @@
             document.getElementById("ta_mapx").value = mapx_txt;
             document.getElementById("ta_warn").value = handler.messages.join("\n\n");
         }
-        
+
         function mapx2iso() {
             var mapx = document.getElementById("ta_mapx").value;
             var handler = new window.iso19139_mapx_converter.ExportedMessageHandler()
@@ -33,25 +33,25 @@
             document.getElementById("ta_iso").value = iso;
             document.getElementById("ta_warn").value = handler.messages.join("\n\n");
         }
-        
+
     </script>
-    
+
     <label for="ta_iso">ISO19139:</label>
-    <input id="i2m" type="button" value="ISO 2 MAPX" onclick="iso2mapx();" />    
+    <input id="i2m" type="button" value="ISO 2 MAPX" onclick="iso2mapx();" />
     <br/>
-    <textarea id="ta_iso" rows="40" cols="150"></textarea>       
+    <textarea id="ta_iso" rows="40" cols="150"></textarea>
     <br/>
-    
+
     <label for="ta_mapx">mapX:</label>
-    <input id="m2i" type="button" value="MAPX 2 ISO" onclick="mapx2iso();" />    
+    <input id="m2i" type="button" value="MAPX 2 ISO" onclick="mapx2iso();" />
     <br/>
     <textarea id="ta_mapx" rows="40" cols="150"></textarea>
     <br/>
-    
-    <label for="ta_warn">Messages:</label>    
+
+    <label for="ta_warn">Messages:</label>
     <br/>
     <textarea id="ta_warn" rows="10" cols="150"></textarea>
     <br/>
-    
-  </body>      
+
+  </body>
 </html>
