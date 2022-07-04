@@ -78,6 +78,15 @@ export const ROLE_MAPPING_TRANS = {
     author: 'Author'
 }
 
+export function getLogger(params) {
+    if (params === null || typeof params == 'undefined') {
+        params = {}
+    }
+
+    return PARAM_MESSAGE_HANDLER in params ? params[PARAM_MESSAGE_HANDLER] : new DefaultMessageHandler()
+}
+
+
 export class DefaultMessageHandler {
 
     constructor() {

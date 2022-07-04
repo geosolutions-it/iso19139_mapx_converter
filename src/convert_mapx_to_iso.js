@@ -20,7 +20,7 @@ import he from 'he'
  */
 export function mapxToIso19139(mapxText, params) {
     var mapxObj = JSON.parse(mapxText)
-    var mapx = new MAPX.MapX(mapxObj)
+    var mapx = new MAPX.MapX(mapxObj, UTILS.getLogger(params))
     var iso = mapxToIso19139Internal(mapx, params)
     var isoxml = builder.create(iso, {
         encoding: 'utf-8'
@@ -34,21 +34,13 @@ export function mapxToIso19139(mapxText, params) {
 /**
  * Transforms a MAPX object into a ISO19139 object.
  *
- * @param {MapX} mapx - a MAPX object
+ * @param {MapX} mapx - a MAPX object. We expect the logger to be already set.
  * @param {obj} params - a multipurpose obj for passing extra params
  *
  * @returns {string} an iso19139 XML object
  */
 export function mapxToIso19139Internal(mapx, params) {
-    // sanitize params
-    if (params === null || typeof params == 'undefined') {
-        params = {}
-    }
-
-    //    var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
-    var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
-
-    mapx.setLogger(logger)
+    var logger = UTILS.getLogger(params)
 
     // generic loop var
     var l
@@ -100,7 +92,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     metadata['gmd:contact'] = metadataContacts
 
-    // current date in yyyy-mm-dd format 
+    // current date in yyyy-mm-dd format
     var defaultDate = new Date().toISOString().substring(0, 10)
 
     metadata['gmd:dateStamp'] = {
@@ -360,16 +352,16 @@ export function mapxToIso19139Internal(mapx, params) {
         suppInfo.push(note)
     }
 
-    // Encoding attributes into text, so that they can be parsed back as 
+    // Encoding attributes into text, so that they can be parsed back as
     // couples (key, value).
-    // 
+    //
     // SUPPINFOATTDESC := "Attributes description: " : ATTLIST
     // ATTLIST := ATTCOUPLE | ATTCOUPLE "; " ATTLIST
     // ATTCOUPLE := ATTNAME ": " ATTVALUE
     // ATTNAME := string
     // ATTVALUE := string
-    // In order to use ";" and ":" as separators, and not to be confused 
-    // with ";" and ":" inside ATTNAME and VALUE, we'll escape ":" and ";" in values 
+    // In order to use ";" and ":" as separators, and not to be confused
+    // with ";" and ":" inside ATTNAME and VALUE, we'll escape ":" and ";" in values
     // by doubling them
 
     var attnames = mapx.getAttributeNames()
@@ -385,8 +377,10 @@ export function mapxToIso19139Internal(mapx, params) {
             var attstring = attval ? `${escapedName}: ${escapedVal};` : `${escapedName};`
             attlist.push(attstring)
         }
-        attsuppinfo = `Attributes description: ${attlist.join(' ')}`
-        suppInfo.push(attsuppinfo)
+        if (attlist.length > 0) {
+            attsuppinfo = `Attributes description: ${attlist.join(' ')}`
+            suppInfo.push(attsuppinfo)
+        }
     }
 
     if (suppInfo) {

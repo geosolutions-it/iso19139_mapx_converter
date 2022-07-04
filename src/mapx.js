@@ -29,12 +29,15 @@ export const TOPICS = [
 ]
 
 
-
 export class MapX {
 
-    constructor(obj) {
-        this.mapx = obj || createObject()
-        this.logger = console
+    constructor(obj, logger=console) {
+        this.logger = logger
+        this.mapx = fixObject(obj, logger)
+    }
+
+    load(obj) {
+        this.mapx = fixObject(obj, this.logger)
     }
 
     setLogger(logger) {
@@ -342,86 +345,191 @@ export class MapX {
         }
         return ret
     }
+
 }
 
-
-export function createObject() {
-    var mapx = {}
-
-    var text = {}
-    mapx.text = text
-
-    for (const name of ['title', 'abstract', 'notes']) {
-        initLanguages(text, name)
-    }
-
-    text.keywords = {
-        keys: [],
-        topics: []
-    }
-    text.attributes = {}
-    text.attributes_alias = {}
-    text.language = {
-        codes: []
-    }
-
-    mapx.temporal = {
-        issuance: {
-            periodicity: 'unknown',
-            released_at: '0001-01-01',
-            modified_at: '0001-01-01'
+/**
+ * Creates the mapx schema
+ *
+ * @returns {obj} - the MAPX schema
+ */
+function createSchema() {
+    var schema = {
+        'text': { 'mandatory': true, 'default': {}, 'children': {
+            'title': {'mandatory': true, 'default': {}},
+            'abstract': {'mandatory': true, 'default': {}},
+            'notes': {'mandatory': true, 'default': {}},
+            'keywords': {'mandatory': true, 'default': {}, 'children': {
+                'keys' : {'mandatory': true, 'default': []},
+                'topics' : {'mandatory': true, 'default': []}}
+            },
+            'attributes': {'mandatory': false, 'default': {}},
+            'attributes_alias': {'mandatory': false, 'default': {}},
+            'language': {'mandatory': true, 'default': {}, 'children': {
+                'codes' : {'mandatory': true, 'default': []}}
+            }}
         },
-        range: {
-            is_timeless: true,
-            start_at: '0001-01-01',
-            end_at: '0001-01-01'
-        }
-    }
-
-    mapx.spatial = {
-        crs: {
-            code: 'EPSG:4326',
-            url: 'http://spatialreference.org/ref/epsg/4326/'
+        'temporal': {'mandatory': true, 'default': {}, 'children': {
+            'issuance' : {'mandatory': true, 'default': {}, 'children': {
+                'periodicity' : {'mandatory': true, 'default': 'unknown'},
+                'released_at' : {'mandatory': true, 'default': '0001-01-01'},
+                'modified_at' : {'mandatory': true, 'default': '0001-01-01'}}
+            },
+            'range' : {'mandatory': true, 'default': {}, 'children': {
+                'is_timeless' : {'mandatory': true, 'default': true},
+                'start_at' : {'mandatory': false, 'default': '0001-01-01'},
+                'end_at' : {'mandatory': false, 'default': '0001-01-01'}}
+            },
+        }},
+        'spatial': {'mandatory': true, 'default': {}, 'children': {
+            'crs' : {'mandatory': true, 'default': {}, 'children': {
+                'code' : {'mandatory': true, 'default': 'EPSG:4326'},
+                'url' : {'mandatory': true, 'default': '0001-01-01'}}
+            },
+            'bbox' : {'mandatory': true, 'default': {}, 'children': {
+                'lng_min' : {'mandatory': true, 'default': -180},
+                'lng_max' : {'mandatory': true, 'default': 180},
+                'lat_min' : {'mandatory': true, 'default': -90},
+                'lat_max' : {'mandatory': true, 'default': 90}}
+            },
+        }},
+        'contact': {'mandatory': true, 'default': {}, 'children': {
+            'contacts' : {'mandatory': true, 'default': []}}
         },
-        bbox: {
-            lng_min: -180,
-            lng_max: 190,
-            lat_min: -90,
-            lat_max: 90
-        }
-    }
-
-    mapx.contact = {
-        contacts: []
-    }
-
-    mapx.origin = {
-        homepage: {
-            url: undefined
+        'origin': {'mandatory': true, 'default': {}, 'children': {
+            'homepage' : {'mandatory': true, 'default': {}, 'children': {
+                'url' : {'mandatory': true, 'default': undefined}}
+            },
+            'source': {'mandatory': true, 'default': {}, 'children': {
+                'urls' : {'mandatory': true, 'default': []}}
+            }
+        }},
+        'license': {'mandatory': true, 'default': {}, 'children': {
+            'licenses' : {'mandatory': true, 'default': []}}
         },
-        source: {
-            urls: []
-        }
+        'annex': {'mandatory': true, 'default': {}, 'children': {
+            'references' : {'mandatory': true, 'default': [] }}
+        },
     }
 
-    mapx.license = {
-        licenses: []
+    attachLanguages(schema, ['text', 'title'])
+    attachLanguages(schema, ['text', 'abstract'])
+    attachLanguages(schema, ['text', 'notes'])
+
+    return schema
+}
+
+function attachLanguages(schema, path) {
+    var el = schema
+    for (const step of path) {
+        var info = el[step]
+        el = info.children
+    }
+    var children = info['children']
+    if (children === undefined) {
+        children = {}
+        info['children'] = children
     }
 
-    mapx.annex = {
-        references: []
+    for (const lang of LANGUAGES) {
+        children[lang] = {'mandatory': false, 'default': ''}
     }
+}
+
+/**
+ * Validate and fix a mapx object according to the schema.
+ * If the passed mapx object is null, a valid minimalistic mpax object will be created.
+ *
+ * @param {obj} mapx - a wannabe mapx object
+ * @param {obj} logger - (optional) an object handling logging and collecting messages
+ *
+ * @returns {obj} - the MAPX schema
+ */
+function fixObject(mapx, logger=console) {
+    var do_checks = true
+    if (mapx === undefined) {
+        mapx = {}
+        do_checks = false  // we're initializing the object
+    }
+
+    // check / fix static content
+    var schema = createSchema()
+    _checkSchema(schema, mapx, do_checks, logger)
+
+    // copy dynamic content (attributes stuff)
+    fixAttribs(mapx, 'attributes', logger)
+    fixAttribs(mapx, 'attributes_alias', logger)
 
     return mapx
 }
 
+function fixAttribs(mapx, attr_field, logger=console) {
+    var attributes = mapx.text[attr_field]
+    if (attributes === undefined)
+        return
+    for (const [attr_name, langs] of Object.entries(attributes)) {
+        var missing_lang = Set()
+        for (const lang of LANGUAGES) {
+            if (!Object.prototype.hasOwnProperty.call(langs, lang)) {
+                missing_lang.add(lang)
+                langs[lang] = ''
+            }
+        }
+        if (missing_lang.size() > 0) {
+            logger.warn(`${attr_field} ${attr_name} is missing languages: ${missing_lang}`)
+        }
+    }
+}
+
+/**
+ * Recursively validate and fix a mapx object according to the schema.
+ *
+ * @param {obj} schema_nodes - sibling nodes
+ * @param {obj} mapx_element - a node in the mapx object -- first call uses the whole mapx object
+ * @param {bool} do_checks - we want to log messages only if a parent node has not been logged yet.
+ *                           Also, log is diable on mapx creation from scratch.
+ * @param {obj} logger - (optional) an object handling logging and/or collecting messages
+ */
+function _checkSchema(schema_nodes, mapx_element, do_checks, logger) {
+    for (const [schema_field_name, info] of Object.entries(schema_nodes)) {
+        // logger.warn(`CHECKING element [${fieldname}]`)
+        var el = null
+        var do_checks_in_node = do_checks
+        if (!Object.prototype.hasOwnProperty.call(mapx_element, schema_field_name)) {
+            if (info.mandatory) {
+                if(do_checks) {
+                    logger.warn(`Missing mandatory element [${schema_field_name}]`)
+                    do_checks_in_node = false
+                }
+            }
+            el = info.default  // create the missing element (even if it is not mandatory
+            mapx_element[schema_field_name] = el
+        } else {
+            el = mapx_element[schema_field_name]
+        }
+
+        var children = info['children']
+        if (children !== undefined) {
+            // var c = JSON.stringify(children, null, 3)
+            // logger.warn(`children for ${fieldname} --> ${c}`)
+            _checkSchema(children, el, do_checks_in_node, logger)
+        }
+    }
+}
+
+function getOrCreate(object, fieldname, val={}) {
+    if (!Object.prototype.hasOwnProperty.call(object, fieldname)) {
+        object[fieldname] = val
+    }
+    return object[fieldname]
+}
 
 function initLanguages(map, name) {
-    var i18nmap = {}
-    map[name] = i18nmap
+
+    var i18nmap = getOrCreate(map, name)
 
     for (const lang of LANGUAGES) {
-        i18nmap[lang] = ''
+        getOrCreate(i18nmap, lang, '')
     }
 
     return i18nmap

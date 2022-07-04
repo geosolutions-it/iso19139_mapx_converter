@@ -21,12 +21,12 @@ const DATE_DEFAULT = '0001-01-01'
  * Transforms an ISO19139 xml text into a MAPX json text.
  *
  * @param {string} isostring - an iso19139 XML string
- * @param {obj} params - misc params to the function: 
+ * @param {obj} params - misc params to the function:
  *  - MESSAGE_HANDLER: class handling logging and collecting messages
  *
  * @returns {string} - a MAPX object as json string
  */
-export function iso19139ToMapx(isostring, params) {
+export function iso19139ToMapx(isostring, params=null) {
 
     var logger = createLogger(params)
 
@@ -306,7 +306,7 @@ export function iso19139ToMapxInternal(data, params) {
 
         if (mapxdate) {
             datemap[typeValue] = mapxdate
-            //            logger.warn(`PARSED DATE ${typeValue} --> ${mapxdate} FROM ${dateVal}`)            
+            //            logger.warn(`PARSED DATE ${typeValue} --> ${mapxdate} FROM ${dateVal}`)
         }
     }
 
@@ -798,7 +798,7 @@ const xml2json = function(bodyStr, logger) {
 
 /**
  * Split attributes definition from inside supplemental text.
- * 
+ *
  * @param {string} suppInfo
  * @returns {obj} parsed suppinfo: "attributes" a list of attributes found, "text" the text left after removing the attribs
  */
@@ -820,8 +820,8 @@ export const parseSuppInfo = function(suppInfo) {
     // ATTNAME := string
     // ATTVALUE := string
     // SPACES = \s*
-    // In order to use ";" and ":" as separators, and not to be confused 
-    // with ";" and ":" inside ATTNAME and VALUE, we'll escape ":" and ";" in values 
+    // In order to use ";" and ":" as separators, and not to be confused
+    // with ";" and ":" inside ATTNAME and VALUE, we'll escape ":" and ";" in values
     // by doubling them
 
     const coreRE = "(\\s*(?<name>(?:[^:;]*|::|;;)*)(:\\s*(?<value>([^;]|;;)*))?);"
