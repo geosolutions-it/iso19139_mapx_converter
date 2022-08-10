@@ -472,14 +472,14 @@ function fixAttribs(mapx, attr_field, logger=console) {
     if (attributes === undefined)
         return
     for (const [attr_name, langs] of Object.entries(attributes)) {
-        var missing_lang = Set()
+        var missing_lang = new Set()
         for (const lang of LANGUAGES) {
             if (!Object.prototype.hasOwnProperty.call(langs, lang)) {
                 missing_lang.add(lang)
                 langs[lang] = ''
             }
         }
-        if (missing_lang.size() > 0) {
+        if (missing_lang.size > 0) {
             logger.warn(`${attr_field} ${attr_name} is missing languages: ${missing_lang}`)
         }
     }

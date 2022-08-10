@@ -402,3 +402,14 @@ it('#39 select language', function(done) {
 
     done()
 })
+
+it('#43 M2I attrib parsing', function(done) {
+    var mapxText = TU.loadFromFile(`${__dirname}/data/43_attrib.json`)
+
+    var logger = new TU.TestMessageHandler()
+
+    var mapxObj = JSON.parse(mapxText)
+    new MAPX.MapX(mapxObj, logger) // try parsing
+
+    done()
+})
