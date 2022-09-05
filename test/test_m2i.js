@@ -319,7 +319,7 @@ it('#37 M2I Check void attributes', function(done) {
 })
 
 
-it('Attributes codec: supplementalInfo', function(done) {
+it('M2I Attributes codec: supplementalInfo', function(done) {
     var mapx = new MAPX.MapX()
     mapx.setLogger(new TU.TestMessageHandler())
 
@@ -334,7 +334,7 @@ it('Attributes codec: supplementalInfo', function(done) {
     var mdRoot = isoObj[TU.MD_ROOT_NAME]
     var identNode = mdRoot['identificationInfo'][0][TU.DATA_IDENT_NAME][0]
     var suppInfo = getFirstFromPath(identNode, ['supplementalInformation', TU.GCO_CHAR_NAME])
-    //    console.log("SUPP INFO ---> ", JSON.stringify(suppInfo,null,3));
+    // console.log("SUPP INFO ---> ", JSON.stringify(suppInfo,null,3));
 
     const expectedSuppInfo = 'note00\nAttributes description: name1: value1; name2: value2; name3; name::4: value::4;'
 
@@ -376,24 +376,28 @@ it('#38 M2I extreme', function(done) {
     done()
 })
 
-it('#39 select language', function(done) {
+it('#44 M2I data/md language handling', function(done) {
     var mapx = new MAPX.MapX()
     var logger = new TU.TestMessageHandler()
     mapx.setLogger(logger)
 
     mapx.addLanguage('de')
+    mapx.addLanguage('ps')
+
     mapx.setTitle('fr', 'FRE_TITLE')
+    mapx.setTitle('en', 'Title: English info are always set')
     mapx.setAbstract('ar', 'ARA_ABSTRACT')
+    mapx.setAbstract('en', 'Abstract: English info are always set')
 
-    assert.deepEqual(M2I.getUsedLanguages(mapx), new Set(['fr','ar']), "Bad computed lang list")
+    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'en', logger), 'Title: English info are always set')
     assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'fr', logger), 'FRE_TITLE')
-    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'ar', logger), 'FRE_TITLE')
-
+    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'ar', logger), '')
 
     var isoObj = TU.createStrippedIsoJson(mapx)
-    assert.equal(TU.get_title_from_iso_obj(isoObj), 'FRE_TITLE', 'Title mismatch')
-    assert.equal(TU.get_abstract_from_iso_obj(isoObj), 'ARA_ABSTRACT', 'Abstract mismatch')
-    assert.oneOf(TU.get_metadata_language_from_iso_obj(isoObj), ['fra','ara'], 'Bad language mapped')
+    assert.equal(TU.get_title_from_iso_obj(isoObj), 'Title: English info are always set', 'Title mismatch')
+    assert.equal(TU.get_abstract_from_iso_obj(isoObj), 'Abstract: English info are always set', 'Abstract mismatch')
+    assert.equal(TU.get_metadata_language_from_iso_obj(isoObj), ['eng'], 'Bad metadata language mapped')
+    assert.deepEqual(TU.get_data_languages_from_iso_obj(isoObj), ['ger', 'pus'], 'Bad data language mapped')
 
     mapx.setNotes('en', 'ENG_NOTES')
 

@@ -56,35 +56,27 @@ export function mapxToIso19139Internal(mapx, params) {
         'gco:CharacterString': fileIdentifier
     }
 
-    var languages
-    var used_langs = getUsedLanguages(mapx)
-    if (used_langs.size == 0) {
-        logger.warn('No language found. Default to [en]')
-        languages = ['en']
-    } else if (used_langs.size == 1) {
-        const [first] = used_langs
-        languages = [first]
-    } else if (used_langs.has('en')) {
-        languages = ['en']
-    } else {
-        const [first] = used_langs
-        logger.warn(`Choosing random language ${first}`)
-        languages = [first]
+    var mdLang = 'eng' // language to be set as metadata language
+    var mapxLang = 'en' // language to be used for extracting data from mapx object
+
+    var dataLangList = [] // languages to be set as data languages
+    for (l of mapx.getLanguages()) {
+        var ilang = UTILS.LANG_MAPPING_M2I[l]
+        if (ilang) {
+            dataLangList.push(ilang)
+        } else {
+            logger.warn(`Can't map language [${l}]`)
+        }
     }
-
-    var lang = languages[0]
-
-
-    var isoLang = UTILS.LANG_MAPPING_M2I[lang]
-    if (!isoLang) {
-        isoLang = 'eng' // default language
-        logger.warn(`Can't map language [${lang}]`)
+    if (dataLangList.length == 0) {
+        logger.warn('No valid language found. Default to [eng]')
+        dataLangList.push('eng')
     }
 
     metadata['gmd:language'] = {
         'gmd:LanguageCode': {
             '@codeList': 'http://www.loc.gov/standards/iso639-2/',
-            '@codeListValue': isoLang
+            '@codeListValue': mdLang
         }
     }
 
@@ -176,14 +168,14 @@ export function mapxToIso19139Internal(mapx, params) {
         // title
         {
             'gmd:title': {
-                'gco:CharacterString': extractLocalized(mapx.getAllTitles(), lang, logger)
+                'gco:CharacterString': extractLocalized(mapx.getAllTitles(), mapxLang, logger)
             },
             'gmd:date': dates
         }
     }
 
     // abstract
-    var ab = extractLocalized(mapx.getAllAbstracts(), lang, logger)
+    var ab = extractLocalized(mapx.getAllAbstracts(), mapxLang, logger)
     ab = _htmlToText(ab)
 
     identification['gmd:abstract'] = {
@@ -251,31 +243,16 @@ export function mapxToIso19139Internal(mapx, params) {
         }
     }
 
-    var isoLangList = []
-    if (languages.length > 0) {
-        for (l of languages) {
-            var ilang = UTILS.LANG_MAPPING_M2I[l]
-            if (ilang) {
-                isoLangList.push(ilang)
-            } else {
-                logger.warn(`Can't map language [${l}]`)
-            }
-        }
-    }
-    if (isoLangList.length == 0) {
-        logger.warn('No valid language found. Default to [eng]')
-        isoLangList.push('eng')
-    }
-    var identLangList = []
-    for (const isoLangLoop of isoLangList) {
-        identLangList.push({
+    var langElementList = []
+    for (const isoLangLoop of dataLangList) {
+        langElementList.push({
             'gmd:LanguageCode': {
                 '@codeList': 'http://www.loc.gov/standards/iso639-2/',
                 '@codeListValue': isoLangLoop
             }
         })
     }
-    identification['gmd:language'] = identLangList
+    identification['gmd:language'] = langElementList
 
     var topics = mapx.getTopics()
     if (topics.length > 0) {
@@ -355,7 +332,7 @@ export function mapxToIso19139Internal(mapx, params) {
     // supplementalInformation
     var suppInfo = []
 
-    var note = extractLocalized(mapx.getAllNotes(), lang, logger)
+    var note = extractLocalized(mapx.getAllNotes(), mapxLang, logger)
     if (note) {
         note = _htmlToText(note)
         suppInfo.push(note)
@@ -598,23 +575,6 @@ function formatAnchor(elem, walk, builder, formatOptions) {
     }
 }
 
-export function getUsedLanguages(mapx) {
-    var langs = new Set()
-
-    collectLanguages(langs, mapx.getAllTitles())
-    collectLanguages(langs, mapx.getAllAbstracts())
-    collectLanguages(langs, mapx.getAllNotes())
-
-    return langs
-}
-
-function collectLanguages(collectSet, items) {
-    for (const [lang, text] of Object.entries(items)) {
-        if (text) {
-            collectSet.add(lang)
-        }
-    }
-}
 
 /**
  * Get the tile using the given lang as a preference.
@@ -636,4 +596,3 @@ export function extractLocalized(localizedEntries, preferredLang, logger) {
     }
     return "N/A"
 }
-

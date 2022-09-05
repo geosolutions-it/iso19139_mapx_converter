@@ -494,15 +494,16 @@ function fixAttribs(mapx, attr_field, logger=console) {
  *                           Also, log is diable on mapx creation from scratch.
  * @param {obj} logger - (optional) an object handling logging and/or collecting messages
  */
-function _checkSchema(schema_nodes, mapx_element, do_checks, logger) {
+function _checkSchema(schema_nodes, mapx_element, do_checks, logger, path="") {
     for (const [schema_field_name, info] of Object.entries(schema_nodes)) {
-        // logger.warn(`CHECKING element [${fieldname}]`)
+        var local_path = `${path}/${schema_field_name}`
+        // logger.warn(`CHECKING element [${path}]`)
         var el = null
         var do_checks_in_node = do_checks
         if (!Object.prototype.hasOwnProperty.call(mapx_element, schema_field_name)) {
             if (info.mandatory) {
                 if(do_checks) {
-                    logger.warn(`Missing mandatory element [${schema_field_name}]`)
+                    logger.warn(`Missing mandatory element [${local_path}]`)
                     do_checks_in_node = false
                 }
             }
@@ -516,7 +517,7 @@ function _checkSchema(schema_nodes, mapx_element, do_checks, logger) {
         if (children !== undefined) {
             // var c = JSON.stringify(children, null, 3)
             // logger.warn(`children for ${fieldname} --> ${c}`)
-            _checkSchema(children, el, do_checks_in_node, logger)
+            _checkSchema(children, el, do_checks_in_node, logger, local_path)
         }
     }
 }

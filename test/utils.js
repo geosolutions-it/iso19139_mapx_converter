@@ -11,6 +11,7 @@ import * as MAPX from '../src/mapx.js'
 import * as UTILS from '../src/mapx_utils.js'
 
 const getFirstFromPath = I2M.getFirstFromPath
+const getListFromPath = I2M.getListFromPath
 const findFirstFromPath = I2M.findFirstFromPath
 
 export const DATE_DEFAULT = '0001-01-01'
@@ -82,6 +83,22 @@ export function get_metadata_language_from_iso_obj(isoObj) {
     return  mdRoot['language'][0]['LanguageCode'][0]['$']['codeListValue']
 }
 
+export function get_data_languages_from_iso_obj(isoJson) {
+    var mdRoot = isoJson[MD_ROOT_NAME]
+    var identificationInfo = mdRoot['identificationInfo'][0]
+    var identNode = identificationInfo[DATA_IDENT_NAME][0]
+    var resLangList = getListFromPath(identNode, 'language')
+    var ret = []
+    if (resLangList) {
+        for (var resLang of resLangList) {
+            var langNode = getFirstFromPath(resLang, 'LanguageCode')
+            if (langNode) {
+                ret.push(langNode.$.codeListValue)
+            }
+        }
+    }
+    return ret
+}
 
 export function set_date_into_iso(isoObj, metadataTimeStamp, creation, revision, publication) {
 
