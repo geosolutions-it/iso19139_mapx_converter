@@ -1,7 +1,7 @@
 # iso19139_mapx_converter
 JS functions to translate ISO19139 from/to MapX format
 
-## Environment 
+## Environment
 
 The package has been developed and tested using
 - node v12.16.2
@@ -46,10 +46,10 @@ For a syntax check, run
 ```shell
 npx eslint src/
 ```
-  
+
 ## Run a test on browser
 
-If you want to run a local test, first build the module, then make sure you have python installed on your machine.  
+If you want to run a local test, first build the module, then make sure you have python installed on your machine.
 
 If you have python 2.x, run:
 
@@ -61,8 +61,8 @@ For python 3, run:
 python -m SimpleHTTPServer
 ```
 
- 
- then point the browser on http://localhost:8000/test/test.html 
+
+ then point the browser on http://localhost:8000/test/test.html
 
 ## Build jsdoc
 
@@ -92,7 +92,7 @@ npm -g install js-beautify
 
 This package implements a mapping from ISO19139 XML documents to MAPX JSON and vice versa.
 
-There are a couple of command line scripts that performs the conversions. 
+There are a couple of command line scripts that performs the conversions.
 These scripts can also be used as examples for using the mapping functions.
 
 ### ISO19139 to MAPX conversion
@@ -138,13 +138,13 @@ You can then call the functions in this way:
         function iso2mapx() {
             var iso_xml = document.getElementById("ta_iso").value;
             var mapx_txt = window.iso19139_mapx_converter.iso19139_to_mapx(iso_xml);
-            document.getElementById("ta_mapx").value = mapx_txt;            
+            document.getElementById("ta_mapx").value = mapx_txt;
         }
-        
+
         function mapx2iso() {
             var mapx = document.getElementById("ta_mapx").value;
             var iso = window.iso19139_mapx_converter.mapx_to_iso19139(mapx);
-            document.getElementById("ta_iso").value = iso;            
+            document.getElementById("ta_iso").value = iso;
         }
 ```
 

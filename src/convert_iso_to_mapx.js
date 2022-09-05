@@ -126,7 +126,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     if (lang != 'en') {
         logger.warn("English metadata were not found during the conversion process. " +
-                    "These are compulsory in MapX and must be filled manually before the metadata are published.")
+            "These are compulsory in MapX and must be filled manually before the metadata are published.")
     }
 
     if (log) {

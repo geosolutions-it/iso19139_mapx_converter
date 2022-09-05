@@ -31,7 +31,7 @@ export const TOPICS = [
 
 export class MapX {
 
-    constructor(obj, logger=console) {
+    constructor(obj, logger = console) {
         this.logger = logger
         this.mapx = fixObject(obj, logger)
     }
@@ -436,7 +436,10 @@ function attachLanguages(schema, path) {
     }
 
     for (const lang of LANGUAGES) {
-        children[lang] = {'mandatory': false, 'default': ''}
+        children[lang] = {
+            'mandatory': false,
+            'default': ''
+        }
     }
 }
 
@@ -449,11 +452,11 @@ function attachLanguages(schema, path) {
  *
  * @returns {obj} - the MAPX schema
  */
-function fixObject(mapx, logger=console) {
+function fixObject(mapx, logger = console) {
     var do_checks = true
     if (mapx === undefined) {
         mapx = {}
-        do_checks = false  // we're initializing the object
+        do_checks = false // we're initializing the object
     }
 
     // check / fix static content
@@ -467,7 +470,7 @@ function fixObject(mapx, logger=console) {
     return mapx
 }
 
-function fixAttribs(mapx, attr_field, logger=console) {
+function fixAttribs(mapx, attr_field, logger = console) {
     var attributes = mapx.text[attr_field]
     if (attributes === undefined)
         return
@@ -494,7 +497,7 @@ function fixAttribs(mapx, attr_field, logger=console) {
  *                           Also, log is diable on mapx creation from scratch.
  * @param {obj} logger - (optional) an object handling logging and/or collecting messages
  */
-function _checkSchema(schema_nodes, mapx_element, do_checks, logger, path="") {
+function _checkSchema(schema_nodes, mapx_element, do_checks, logger, path = "") {
     for (const [schema_field_name, info] of Object.entries(schema_nodes)) {
         var local_path = `${path}/${schema_field_name}`
         // logger.warn(`CHECKING element [${path}]`)
@@ -502,12 +505,12 @@ function _checkSchema(schema_nodes, mapx_element, do_checks, logger, path="") {
         var do_checks_in_node = do_checks
         if (!Object.prototype.hasOwnProperty.call(mapx_element, schema_field_name)) {
             if (info.mandatory) {
-                if(do_checks) {
+                if (do_checks) {
                     logger.warn(`Missing mandatory element [${local_path}]`)
                     do_checks_in_node = false
                 }
             }
-            el = info.default  // create the missing element (even if it is not mandatory
+            el = info.default // create the missing element (even if it is not mandatory
             mapx_element[schema_field_name] = el
         } else {
             el = mapx_element[schema_field_name]
@@ -522,7 +525,7 @@ function _checkSchema(schema_nodes, mapx_element, do_checks, logger, path="") {
     }
 }
 
-function getOrCreate(object, fieldname, val={}) {
+function getOrCreate(object, fieldname, val = {}) {
     if (!Object.prototype.hasOwnProperty.call(object, fieldname)) {
         object[fieldname] = val
     }

@@ -88,7 +88,9 @@ it('Check void M2I dates', function(done) {
     var mh = new TU.TestMessageHandler()
     mapx.setLogger(mh)
 
-    var iso = M2I.mapxToIso19139Internal(mapx, {[UTILS.PARAM_MESSAGE_HANDLER]: mh})
+    var iso = M2I.mapxToIso19139Internal(mapx, {
+        [UTILS.PARAM_MESSAGE_HANDLER]: mh
+    })
     var xml = builder.create(iso, {
         encoding: 'utf-8'
     })
@@ -113,7 +115,9 @@ it('Check equals M2I dates', function(done) {
     mapx.setModifiedDate('2019-09-25')
     mapx.setReleaseDate('2019-09-25')
 
-    var iso = M2I.mapxToIso19139Internal(mapx, {[UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger})
+    var iso = M2I.mapxToIso19139Internal(mapx, {
+        [UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger
+    })
     var xml = builder.create(iso, {
         encoding: 'utf-8'
     })
@@ -134,7 +138,9 @@ it('Check begin time extent', function(done) {
     var mapx = TU.create_sample_mapx()
     mapx.setTemporalStart('2019-09-26')
 
-    var iso = M2I.mapxToIso19139Internal(mapx, {[UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger})
+    var iso = M2I.mapxToIso19139Internal(mapx, {
+        [UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger
+    })
     var xml = builder.create(iso, {
         encoding: 'utf-8'
     })
@@ -313,7 +319,7 @@ it('#37 M2I Check void attributes', function(done) {
     var isoObj = TU.createStrippedIsoJson(mapx)
     assert.isOk(isoObj)
     assert.equal(3, logger.messages.length, "Bad number of warn messages" + JSON.stringify(logger.messages, null, 3))
-    assert.ok(logger.messages[logger.messages.length-1].includes("Attributes "))
+    assert.ok(logger.messages[logger.messages.length - 1].includes("Attributes "))
 
     done()
 })
@@ -341,7 +347,9 @@ it('M2I Attributes codec: supplementalInfo', function(done) {
     assert.equal(suppInfo, expectedSuppInfo, "Error encoding M2I")
 
     // == convert back to mapx
-    var mapx2 = I2M.iso19139ToMapxInternal(TU.createStrippedIsoJson(mapx), {[UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger})
+    var mapx2 = I2M.iso19139ToMapxInternal(TU.createStrippedIsoJson(mapx), {
+        [UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger
+    })
     //    console.log("MAPX ---> ", JSON.stringify(mapx2,null,3));
 
     assert.equal(mapx2.getNotes('en'), 'Supplemental information: note00')
@@ -367,7 +375,7 @@ it('#38 M2I extreme', function(done) {
     var logger = new TU.TestMessageHandler()
 
     var mapxObj = JSON.parse(mapxText)
-    new MAPX.MapX(mapxObj, logger)  // try parsing
+    new MAPX.MapX(mapxObj, logger) // try parsing
 
     // console.warn(JSON.stringify(mapx.mapx, null, 3))
 

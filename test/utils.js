@@ -80,7 +80,7 @@ export function get_abstract_from_iso_obj(isoJson) {
 
 export function get_metadata_language_from_iso_obj(isoObj) {
     var mdRoot = isoObj[MD_ROOT_NAME]
-    return  mdRoot['language'][0]['LanguageCode'][0]['$']['codeListValue']
+    return mdRoot['language'][0]['LanguageCode'][0]['$']['codeListValue']
 }
 
 export function get_data_languages_from_iso_obj(isoJson) {
@@ -162,7 +162,9 @@ export function addDate(dateList, dateType, date) {
 
 export function createStrippedIsoJson(mapx) {
 
-    var logger_param = {[UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger}
+    var logger_param = {
+        [UTILS.PARAM_MESSAGE_HANDLER]: mapx.logger
+    }
 
     var iso = M2I.mapxToIso19139Internal(mapx, logger_param)
     var xml = builder.create(iso, {
@@ -310,7 +312,9 @@ export const xml2json = function(bodyStr, logger) {
 
 
 export function createLoggerParams(logger) {
-    return {[UTILS.PARAM_MESSAGE_HANDLER]: logger}
+    return {
+        [UTILS.PARAM_MESSAGE_HANDLER]: logger
+    }
 }
 
 export function createTestParams() {
@@ -319,7 +323,7 @@ export function createTestParams() {
 
 export class TestMessageHandler {
 
-    constructor(log_warn=false, log_info=false) {
+    constructor(log_warn = false, log_info = false) {
         this.messages = []
         this.log_warn = log_warn
         this.log_info = log_info
