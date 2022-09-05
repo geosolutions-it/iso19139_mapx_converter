@@ -127,7 +127,7 @@ it('#15 I2M Topic category', function(done) {
 })
 
 
-it('Attributes codec: parser', function(done) {
+it('I2M Attributes codec: parser', function(done) {
 
     const encodedSI = 'note00\nAttributes description: name1: value1; name2: value2; name3; name::4: value::4;'
 
@@ -190,6 +190,25 @@ it('#32 I2M parse bad xml', function(done) {
     var isoxml = 'This is not an xml document'
     var mapx = I2M.iso19139ToMapx(isoxml, null)
     assert.isNull(mapx)
+
+    done()
+})
+
+it('#45 I2M language handling', function(done) {
+
+    var isoxml = TU.loadFromFile(`${__dirname}/data/5_french_language.xml`)
+    assert.ok(isoxml, "Error loading file")
+    var iso = TU.xml2json(isoxml)
+    assert.ok(iso)
+
+    var logger = new TU.TestMessageHandler()
+    var mapx = I2M.iso19139ToMapxInternal(iso, TU.createLoggerParams(logger))
+    assert.ok(mapx)
+
+    assert.equal(logger.messages.length, 1)
+    assert.include(logger.messages[0], 'English metadata were not found')
+
+    assert.deepEqual(mapx.getLanguages(), ['ar', 'de'], 'Bad data language mapped')
 
     done()
 })

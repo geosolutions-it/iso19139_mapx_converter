@@ -26,7 +26,7 @@ const DATE_DEFAULT = '0001-01-01'
  *
  * @returns {string} - a MAPX object as json string
  */
-export function iso19139ToMapx(isostring, params=null) {
+export function iso19139ToMapx(isostring, params = null) {
 
     var logger = createLogger(params)
 
@@ -61,7 +61,8 @@ export function iso19139ToMapxInternal(data, params) {
     }
 
     var log = UTILS.PARAM_LOG_INFO_NAME in params ? params[UTILS.PARAM_LOG_INFO_NAME] : false
-    var logger = UTILS.PARAM_MESSAGE_HANDLER in params ? params[UTILS.PARAM_MESSAGE_HANDLER] : new UTILS.DefaultMessageHandler()
+    var logger = UTILS.getLogger(params)
+
 
     var mapx = new MAPX.MapX()
     mapx.setLogger(logger)
@@ -107,13 +108,10 @@ export function iso19139ToMapxInternal(data, params) {
         logger.log(`METADATA ID [${uuid}]`)
     }
 
-    // Fetch languages
-    var langList = []
-
+    // Fetch metadata language
     var mdLang = getFirstFromPath(mdRoot, ['language', 'LanguageCode'])
     if (mdLang) {
         mdLang = mdLang.$.codeListValue
-        langList.push(mdLang)
     } else {
         logger.log('Metadata language not found - forcing eng')
         mdLang = 'eng'
@@ -126,9 +124,17 @@ export function iso19139ToMapxInternal(data, params) {
         lang = 'en'
     }
 
+    if (lang != 'en') {
+        logger.warn("English metadata were not found during the conversion process. " +
+                    "These are compulsory in MapX and must be filled manually before the metadata are published.")
+    }
+
     if (log) {
         logger.log(`Metadata language [${lang}]`)
     }
+
+    // Fetch data languages
+    var langList = []
 
     var resLangList = getListFromPath(identNode, 'language')
     if (resLangList) {
@@ -147,7 +153,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     // Parse languages
     if (langList.length == 0) {
-        // logger.warn('No language definition found') // we dont need another warn
+        logger.warn('Data language not found - forcing eng')
         langList.push('eng') // default entry
     }
 

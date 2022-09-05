@@ -309,8 +309,12 @@ export const xml2json = function(bodyStr, logger) {
 }
 
 
+export function createLoggerParams(logger) {
+    return {[UTILS.PARAM_MESSAGE_HANDLER]: logger}
+}
+
 export function createTestParams() {
-    return {PARAM_MESSAGE_HANDLER: new TestMessageHandler()}
+    return createLoggerParams(new TestMessageHandler())
 }
 
 export class TestMessageHandler {
