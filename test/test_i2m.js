@@ -20,6 +20,8 @@ const __dirname = dirname(fileURLToPath(
 
 it('#33 I2M dates', function(done) {
 
+    var logger = new TU.TestMessageHandler()
+
     var isoxml = TU.loadFromFile(`${__dirname}/data/no_pubdate_yes_revision.xml`)
     assert.ok(isoxml)
     var isoObj = TU.xml2json(isoxml)
@@ -37,41 +39,41 @@ it('#33 I2M dates', function(done) {
     TU.set_date_into_iso(isoObj, METADATA, CREATION, REVISION, PUBLICATION)
 
     // check dates are where we expect them
-    console.log("#33 TEST0")
+    logger.log("#33 TEST0")
     var dates = TU.get_date_from_iso_obj(isoObj)
     assert.equal(dates.creation, CREATION)
     assert.equal(dates.revision, REVISION)
     assert.equal(dates.publication, PUBLICATION)
     assert.equal(dates.datestamp, METADATA)
 
-    console.log("#33 TEST1")
+    logger.log("#33 TEST1")
     assertDates(isoObj, PUBLICATION, REVISION)
 
-    console.log("#33 TEST2")
+    logger.log("#33 TEST2")
     TU.set_date_into_iso(isoObj, METADATA, CREATION, 'pippo', PUBLICATION)
     assertDates(isoObj, PUBLICATION, DATE_DEFAULT)
 
-    console.log("#33 TEST3")
+    logger.log("#33 TEST3")
     TU.set_date_into_iso(isoObj, METADATA, CREATION, 'pippo', undefined)
     assertDates(isoObj, CREATION, DATE_DEFAULT)
 
-    console.log("#33 TEST4")
+    logger.log("#33 TEST4")
     TU.set_date_into_iso(isoObj, METADATA, undefined, undefined, undefined)
     assertDates(isoObj, METADATA, DATE_DEFAULT)
 
-    console.log("#33 TEST5")
+    logger.log("#33 TEST5")
     TU.set_date_into_iso(isoObj, METADATA, CREATION, REVISION, undefined)
     assertDates(isoObj, CREATION, REVISION)
 
-    console.log("#33 TEST6")
+    logger.log("#33 TEST6")
     TU.set_date_into_iso(isoObj, METADATA, undefined, REVISION, undefined)
     assertDates(isoObj, DATE_DEFAULT, REVISION)
 
-    console.log("#33 TEST7")
+    logger.log("#33 TEST7")
     TU.set_date_into_iso(isoObj, OLD_DATE, undefined, REVISION, undefined)
     assertDates(isoObj, OLD_DATE, REVISION)
 
-    console.log("#33 TEST8")
+    logger.log("#33 TEST8")
     TU.set_date_into_iso(isoObj, OLD_DATETIME, undefined, REVISION, undefined)
     assertDates(isoObj, OLD_DATETIME_TRUNC, REVISION)
 
@@ -80,7 +82,7 @@ it('#33 I2M dates', function(done) {
 
 
 function assertDates(isoObj, released, modified) {
-    var mapx = I2M.iso19139ToMapxInternal(isoObj, null)
+    var mapx = I2M.iso19139ToMapxInternal(isoObj, TU.createTestParams())
 
     assert.equal(mapx.getReleaseDate(), released)
     assert.equal(mapx.getModifiedDate(), modified)
@@ -164,7 +166,7 @@ it('#32 I2M parse missing MD_DataIdentification', function(done) {
     // console.log(isojsn['MD_Metadata']['identificationInfo'])
     assert.ok(isojsn['MD_Metadata']['identificationInfo'][0]['MD_DataIdentification'])
     delete isojsn['MD_Metadata']['identificationInfo'][0]['MD_DataIdentification']
-    var mapx = I2M.iso19139ToMapxInternal(isojsn, null)
+    var mapx = I2M.iso19139ToMapxInternal(isojsn, TU.createTestParams())
     assert.ok(mapx)
 
     done()
@@ -179,7 +181,7 @@ it('#32 I2M parse missing identificationInfo', function(done) {
 
     assert.ok(isojsn['MD_Metadata']['identificationInfo'])
     delete isojsn['MD_Metadata']['identificationInfo']
-    var mapx = I2M.iso19139ToMapxInternal(isojsn, null)
+    var mapx = I2M.iso19139ToMapxInternal(isojsn, TU.createTestParams())
     assert.ok(mapx)
 
     done()
@@ -188,7 +190,7 @@ it('#32 I2M parse missing identificationInfo', function(done) {
 it('#32 I2M parse bad xml', function(done) {
 
     var isoxml = 'This is not an xml document'
-    var mapx = I2M.iso19139ToMapx(isoxml, null)
+    var mapx = I2M.iso19139ToMapx(isoxml, TU.createTestParams())
     assert.isNull(mapx)
 
     done()

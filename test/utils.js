@@ -269,7 +269,7 @@ export function loadXmlAndTransform(source) {
         function(error, json) {
             if (error === null) {
                 //                mapx = I2M.iso19139ToMapxInternal(json, {'log_info':true})
-                mapx = I2M.iso19139ToMapxInternal(json, null)
+                mapx = I2M.iso19139ToMapxInternal(json, createTestParams())
             } else {
                 console.error(error)
                 console.log(xml)
