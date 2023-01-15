@@ -16,7 +16,7 @@ const CI_RP = 'CI_ResponsibleParty'
 const CI_CITATION = 'CI_Citation'
 
 const DATE_DEFAULT = '0001-01-01'
-const DEFAULT_MISSING_CONTENT = 'N/A'
+
 
 /**
  * Transforms an ISO19139 xml text into a MAPX json text.
@@ -175,14 +175,18 @@ export function iso19139ToMapxInternal(data, params) {
 
     // === Title
     var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME], logger)
-    if (title != DEFAULT_MISSING_CONTENT) {
+    if (title && title != UTILS.DEFAULT_MISSING_CONTENT) {
         mapx.setTitle(lang, title)
+    } else {
+        logger.warn("Can't generate mandatory MAPX element: title")
     }
 
     // === Abstract
     var abstract = getFirstFromPath(identNode, ['abstract', GCO_CHAR_NAME], logger)
-    if (abstract != DEFAULT_MISSING_CONTENT) {
+    if (abstract && abstract != UTILS.DEFAULT_MISSING_CONTENT) {
         mapx.setAbstract(lang, abstract)
+    } else {
+        logger.warn("Can't generate mandatory MAPX element: abstract")
     }
 
     // === Keywords
@@ -198,6 +202,9 @@ export function iso19139ToMapxInternal(data, params) {
             }
         }
     }
+    if (mapx.getKeywords().length == 0) {
+        logger.warn("Can't generate mandatory MAPX element: keys")
+    }
 
     // === Topics
     var topicCatList = getListFromPath(identNode, 'topicCategory')
@@ -211,7 +218,7 @@ export function iso19139ToMapxInternal(data, params) {
 
     // === SuppInfo
     var suppInfo = getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME])
-    if (suppInfo == DEFAULT_MISSING_CONTENT) {
+    if (suppInfo == UTILS.DEFAULT_MISSING_CONTENT) {
         suppInfo = ''
     }
     var parsedSuppInfo = parseSuppInfo(suppInfo)
