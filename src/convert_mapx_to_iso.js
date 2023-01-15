@@ -163,12 +163,17 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     var identification = {}
+
+    var title = extractLocalized(mapx.getAllTitles(), mapxLang, logger)
+    if (title == UTILS.DEFAULT_MISSING_CONTENT) {
+        logger.warn("Can't generate mandatory ISO element: title")
+    }
     identification['gmd:citation'] = {
         'gmd:CI_Citation':
         // title
         {
             'gmd:title': {
-                'gco:CharacterString': extractLocalized(mapx.getAllTitles(), mapxLang, logger)
+                'gco:CharacterString': title
             },
             'gmd:date': dates
         }
@@ -176,6 +181,10 @@ export function mapxToIso19139Internal(mapx, params) {
 
     // abstract
     var ab = extractLocalized(mapx.getAllAbstracts(), mapxLang, logger)
+    if (ab == UTILS.DEFAULT_MISSING_CONTENT) {
+        logger.warn("Can't generate mandatory ISO element: abstract")
+    }
+
     ab = _htmlToText(ab)
 
     identification['gmd:abstract'] = {

@@ -358,61 +358,62 @@ export class MapX {
  * @returns {obj} - the MAPX schema
  */
 function createSchema() {
+
     var schema = {
-        'text': { 'mandatory': true, 'default': {}, 'children': {
+        'text': { 'mandatory': false, 'default': {}, 'children': {
             'title': {'mandatory': true, 'default': {}},
             'abstract': {'mandatory': true, 'default': {}},
-            'notes': {'mandatory': true, 'default': {}},
-            'keywords': {'mandatory': true, 'default': {}, 'children': {
-                'keys' : {'mandatory': true, 'default': []},
-                'topics' : {'mandatory': true, 'default': []}}
+            'notes': {'mandatory': false, 'default': {}},
+            'keywords': {'mandatory': false, 'default': {}, 'children': {
+                'keys' : {'mandatory': false, 'default': []},
+                'topics' : {'mandatory': false, 'default': []}}
             },
             'attributes': {'mandatory': false, 'default': {}},
             'attributes_alias': {'mandatory': false, 'default': {}},
-            'language': {'mandatory': true, 'default': {}, 'children': {
-                'codes' : {'mandatory': true, 'default': []}}
+            'language': {'mandatory': false, 'default': {}, 'children': {
+                'codes' : {'mandatory': false, 'default': []}}
             }}
         },
-        'temporal': {'mandatory': true, 'default': {}, 'children': {
-            'issuance' : {'mandatory': true, 'default': {}, 'children': {
-                'periodicity' : {'mandatory': true, 'default': 'unknown'},
-                'released_at' : {'mandatory': true, 'default': '0001-01-01'},
-                'modified_at' : {'mandatory': true, 'default': '0001-01-01'}}
+        'temporal': {'mandatory': false, 'default': {}, 'children': {
+            'issuance' : {'mandatory': false, 'default': {}, 'children': {
+                'periodicity' : {'mandatory': false, 'default': 'unknown'},
+                'released_at' : {'mandatory': false, 'default': '0001-01-01'},
+                'modified_at' : {'mandatory': false, 'default': '0001-01-01'}}
             },
-            'range' : {'mandatory': true, 'default': {}, 'children': {
-                'is_timeless' : {'mandatory': true, 'default': true},
+            'range' : {'mandatory': false, 'default': {}, 'children': {
+                'is_timeless' : {'mandatory': false, 'default': true},
                 'start_at' : {'mandatory': false, 'default': '0001-01-01'},
                 'end_at' : {'mandatory': false, 'default': '0001-01-01'}}
             },
         }},
-        'spatial': {'mandatory': true, 'default': {}, 'children': {
-            'crs' : {'mandatory': true, 'default': {}, 'children': {
-                'code' : {'mandatory': true, 'default': 'EPSG:4326'},
-                'url' : {'mandatory': true, 'default': '0001-01-01'}}
+        'spatial': {'mandatory': false, 'default': {}, 'children': {
+            'crs' : {'mandatory': false, 'default': {}, 'children': {
+                'code' : {'mandatory': false, 'default': 'EPSG:4326'},
+                'url' : {'mandatory': false, 'default': '0001-01-01'}}
             },
             'bbox' : {'mandatory': true, 'default': {}, 'children': {
-                'lng_min' : {'mandatory': true, 'default': -180},
-                'lng_max' : {'mandatory': true, 'default': 180},
-                'lat_min' : {'mandatory': true, 'default': -90},
-                'lat_max' : {'mandatory': true, 'default': 90}}
+                'lng_min' : {'mandatory': false, 'default': -180},
+                'lng_max' : {'mandatory': false, 'default': 180},
+                'lat_min' : {'mandatory': false, 'default': -90},
+                'lat_max' : {'mandatory': false, 'default': 90}}
             },
         }},
-        'contact': {'mandatory': true, 'default': {}, 'children': {
+        'contact': {'mandatory': false, 'default': {}, 'children': {
             'contacts' : {'mandatory': true, 'default': []}}
         },
-        'origin': {'mandatory': true, 'default': {}, 'children': {
-            'homepage' : {'mandatory': true, 'default': {}, 'children': {
-                'url' : {'mandatory': true, 'default': undefined}}
+        'origin': {'mandatory': false, 'default': {}, 'children': {
+            'homepage' : {'mandatory': false, 'default': {}, 'children': {
+                'url' : {'mandatory': false, 'default': undefined}}
             },
-            'source': {'mandatory': true, 'default': {}, 'children': {
-                'urls' : {'mandatory': true, 'default': []}}
+            'source': {'mandatory': false, 'default': {}, 'children': {
+                'urls' : {'mandatory': false, 'default': []}}
             }
         }},
-        'license': {'mandatory': true, 'default': {}, 'children': {
-            'licenses' : {'mandatory': true, 'default': []}}
+        'license': {'mandatory': false, 'default': {}, 'children': {
+            'licenses' : {'mandatory': false, 'default': []}}
         },
-        'annex': {'mandatory': true, 'default': {}, 'children': {
-            'references' : {'mandatory': true, 'default': [] }}
+        'annex': {'mandatory': false, 'default': {}, 'children': {
+            'references' : {'mandatory': false, 'default': [] }}
         },
     }
 
@@ -504,12 +505,12 @@ function _checkSchema(schema_nodes, mapx_element, do_checks, logger, path = "") 
         var el = null
         var do_checks_in_node = do_checks
         if (!Object.prototype.hasOwnProperty.call(mapx_element, schema_field_name)) {
-            if (info.mandatory) {
-                if (do_checks) {
-                    logger.warn(`Missing mandatory element [${local_path}]`)
-                    do_checks_in_node = false
-                }
-            }
+            // if (info.mandatory) {
+            //    if (do_checks) {
+            //       logger.debug(`Missing mapx element [${local_path}] - ${info.msg}`)
+            //       do_checks_in_node = false
+            //    }
+            // }
             el = info.default // create the missing element (even if it is not mandatory
             mapx_element[schema_field_name] = el
         } else {

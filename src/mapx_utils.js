@@ -5,6 +5,8 @@ export const PARAM_LOG_INFO_NAME = 'log_info'
 export const PARAM_LOG_DEBUG_NAME = 'log_debug'
 export const PARAM_MESSAGE_HANDLER = 'MESSAGE_HANDLER'
 
+export const DEFAULT_MISSING_CONTENT = 'N/A'
+
 export const LANG_MAPPING_I2M = {
     eng: 'en',
     fre: 'fr',

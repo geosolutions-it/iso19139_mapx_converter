@@ -16,6 +16,7 @@ const CI_RP = 'CI_ResponsibleParty'
 const CI_CITATION = 'CI_Citation'
 
 const DATE_DEFAULT = '0001-01-01'
+const DEFAULT_MISSING_CONTENT = 'N/A'
 
 /**
  * Transforms an ISO19139 xml text into a MAPX json text.
@@ -174,11 +175,15 @@ export function iso19139ToMapxInternal(data, params) {
 
     // === Title
     var title = getFirstFromPath(dataCitationNode, ['title', GCO_CHAR_NAME], logger)
-    mapx.setTitle(lang, title)
+    if (title != DEFAULT_MISSING_CONTENT) {
+        mapx.setTitle(lang, title)
+    }
 
     // === Abstract
     var abstract = getFirstFromPath(identNode, ['abstract', GCO_CHAR_NAME], logger)
-    mapx.setAbstract(lang, abstract)
+    if (abstract != DEFAULT_MISSING_CONTENT) {
+        mapx.setAbstract(lang, abstract)
+    }
 
     // === Keywords
     var descrKwList = getListFromPath(identNode, 'descriptiveKeywords')
@@ -206,6 +211,9 @@ export function iso19139ToMapxInternal(data, params) {
 
     // === SuppInfo
     var suppInfo = getFirstFromPath(identNode, ['supplementalInformation', GCO_CHAR_NAME])
+    if (suppInfo == DEFAULT_MISSING_CONTENT) {
+        suppInfo = ''
+    }
     var parsedSuppInfo = parseSuppInfo(suppInfo)
 
     suppInfo = parsedSuppInfo.text

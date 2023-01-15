@@ -318,7 +318,7 @@ it('#37 M2I Check void attributes', function(done) {
 
     var isoObj = TU.createStrippedIsoJson(mapx)
     assert.isOk(isoObj)
-    assert.equal(3, logger.messages.length, "Bad number of warn messages" + JSON.stringify(logger.messages, null, 3))
+    assert.equal(5, logger.messages.length, "Bad number of warn messages: " + JSON.stringify(logger.messages, null, 3))
     assert.ok(logger.messages[logger.messages.length - 1].includes("Attributes "))
 
     done()
@@ -369,17 +369,22 @@ it('M2I Attributes codec: supplementalInfo', function(done) {
 })
 
 
-it('#38 M2I extreme', function(done) {
+it('#38 #46 M2I extreme', function(done) {
     var mapxText = TU.loadFromFile(`${__dirname}/data/extreme.json`)
 
     var logger = new TU.TestMessageHandler()
 
     var mapxObj = JSON.parse(mapxText)
-    new MAPX.MapX(mapxObj, logger) // try parsing
+    var mapx = new MAPX.MapX(mapxObj, logger) // try parsing
 
     // console.warn(JSON.stringify(mapx.mapx, null, 3))
 
-    assert.equal(10, logger.messages.length, 'Wrong number of warnings during parsing')
+    assert.equal(0, logger.messages.length, 'Wrong number of warnings during parsing')
+
+    logger = new TU.TestMessageHandler()
+    mapx.setLogger(logger)
+    TU.createStrippedIsoJson(mapx)
+    assert.equal(4, logger.messages.length, 'Wrong number of warnings during conversion: ' + JSON.stringify(logger.messages, null, 3))
 
     done()
 })
