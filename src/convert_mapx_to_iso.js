@@ -61,7 +61,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     var dataLangList = [] // languages to be set as data languages
     for (l of mapx.getLanguages()) {
-        var ilang = UTILS.LANG_MAPPING_M2I[l]
+        var ilang = UTILS.M2I_lang_map(l)
         if (ilang) {
             dataLangList.push(ilang)
         } else {

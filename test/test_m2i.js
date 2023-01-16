@@ -430,3 +430,16 @@ it('#43 M2I attrib parsing', function(done) {
 
     done()
 })
+
+it('#48 M2I all langs', function(done) {
+
+    assert.equal('eng', UTILS.M2I_lang_map('en'))
+    assert.equal('spa', UTILS.M2I_lang_map('es'))
+
+    assert.equal('ita', UTILS.M2I_lang_map('it'))
+    assert.equal('ewe', UTILS.M2I_lang_map('ee'))
+
+    assert.equal(undefined, UTILS.M2I_lang_map('99'))
+
+    done()
+})

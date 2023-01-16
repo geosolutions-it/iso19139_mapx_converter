@@ -6,6 +6,7 @@ const assert = chai.assert
 
 import * as I2M from '../src/convert_iso_to_mapx.js'
 import * as TU from './utils.js'
+import * as UTILS from '../src/mapx_utils.js'
 
 import {
     dirname
@@ -207,10 +208,26 @@ it('#45 I2M language handling', function(done) {
     var mapx = I2M.iso19139ToMapxInternal(iso, TU.createLoggerParams(logger))
     assert.ok(mapx)
 
-    assert.equal(logger.messages.length, 1)
+    assert.equal(logger.messages.length, 1, 'Unexpected messages: ' + JSON.stringify(logger.messages, null, 3))
     assert.include(logger.messages[0], 'English metadata were not found')
 
     assert.deepEqual(mapx.getLanguages(), ['ar', 'de'], 'Bad data language mapped')
+
+    done()
+})
+
+it('#48 I2M all langs', function(done) {
+
+    assert.equal('en', UTILS.I2M_lang_map('eng'))
+    assert.equal('es', UTILS.I2M_lang_map('spa'))
+
+    assert.equal('bo', UTILS.I2M_lang_map('bod'))
+    assert.equal('bo', UTILS.I2M_lang_map('tib'))
+
+    assert.equal('it', UTILS.I2M_lang_map('ita'))
+    assert.equal('ee', UTILS.I2M_lang_map('ewe'))
+
+    assert.equal(undefined, UTILS.I2M_lang_map('999'))
 
     done()
 })

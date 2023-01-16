@@ -1,6 +1,9 @@
 /*
  */
 
+import * as ISO639 from './iso639.js'
+
+
 export const PARAM_LOG_INFO_NAME = 'log_info'
 export const PARAM_LOG_DEBUG_NAME = 'log_debug'
 export const PARAM_MESSAGE_HANDLER = 'MESSAGE_HANDLER'
@@ -36,6 +39,23 @@ export const LANG_MAPPING_M2I = {
     fa: 'per',
     ps: 'pus',
     ar: 'ara'
+}
+
+
+export function I2M_lang_map(ilang) {
+    var mlang = LANG_MAPPING_I2M[ilang]
+    if (!mlang) {
+        mlang = ISO639.LANG_MAPPING_I2M_EXT[ilang]
+    }
+    return mlang
+}
+
+export function M2I_lang_map(mlang) {
+    var ilang = LANG_MAPPING_M2I[mlang]
+    if (!ilang) {
+        ilang = ISO639.LANG_MAPPING_M2I_EXT[mlang]
+    }
+    return ilang
 }
 
 export const FREQ_MAPPING_I2M = {

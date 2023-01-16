@@ -119,7 +119,7 @@ export function iso19139ToMapxInternal(data, params) {
     }
 
     // rmb metadata lang for inserting text in mapx
-    var lang = UTILS.LANG_MAPPING_I2M[mdLang]
+    var lang = UTILS.I2M_lang_map(mdLang)
     if (!lang) {
         logger.warn(`Can't map metadata language [${mdLang}] - forcing eng`)
         lang = 'en'
@@ -164,7 +164,7 @@ export function iso19139ToMapxInternal(data, params) {
             logger.warn(`ISO language definition should be 3 letter [${isoLang}]`)
             mapxlang = isoLang
         } else {
-            mapxlang = UTILS.LANG_MAPPING_I2M[isoLang]
+            mapxlang = UTILS.I2M_lang_map(isoLang)
             if (!mapxlang) {
                 mapxlang = 'en' // default language
                 logger.warn(`Can't map language [${isoLang}]`)

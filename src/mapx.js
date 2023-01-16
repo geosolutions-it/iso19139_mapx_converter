@@ -137,11 +137,6 @@ export class MapX {
     }
 
     addLanguage(lang) {
-        if (!checkLang(lang)) {
-            this.logger.warn(`Can't add unknown language [${lang}]`)
-            return false
-        }
-
         this.mapx.text.language.codes.push({
             'code': lang
         })
