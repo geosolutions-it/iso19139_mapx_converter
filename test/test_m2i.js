@@ -402,10 +402,6 @@ it('#44 M2I data/md language handling', function(done) {
     mapx.setAbstract('ar', 'ARA_ABSTRACT')
     mapx.setAbstract('en', 'Abstract: English info are always set')
 
-    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'en', logger), 'Title: English info are always set')
-    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'fr', logger), 'FRE_TITLE')
-    assert.equal(M2I.extractLocalized(mapx.getAllTitles(), 'ar', logger), '')
-
     var isoObj = TU.createStrippedIsoJson(mapx)
     assert.equal(TU.get_title_from_iso_obj(isoObj), 'Title: English info are always set', 'Title mismatch')
     assert.equal(TU.get_abstract_from_iso_obj(isoObj), 'Abstract: English info are always set', 'Abstract mismatch')
@@ -416,6 +412,21 @@ it('#44 M2I data/md language handling', function(done) {
 
     isoObj = TU.createStrippedIsoJson(mapx)
     assert.equal(TU.get_metadata_language_from_iso_obj(isoObj), 'eng', '"eng" should be the preferred language')
+
+    done()
+})
+
+it('#44 M2I handle missing eng metadata', function(done) {
+    var mapx = new MAPX.MapX()
+    var logger = new TU.TestMessageHandler()
+    mapx.setLogger(logger)
+
+    mapx.setTitle('fr', 'FRE_TITLE')
+    mapx.setAbstract('en', 'Abstract: English info are always set')
+
+    var isoObj = TU.createStrippedIsoJson(mapx)
+    assert.equal(TU.get_title_from_iso_obj(isoObj), 'N/A', 'Unexpected title')
+    assert.equal(TU.get_abstract_from_iso_obj(isoObj), 'Abstract: English info are always set', 'Abstract mismatch')
 
     done()
 })

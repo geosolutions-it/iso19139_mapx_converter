@@ -57,7 +57,6 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     var mdLang = 'eng' // language to be set as metadata language
-    var mapxLang = 'en' // language to be used for extracting data from mapx object
 
     var dataLangList = [] // languages to be set as data languages
     for (l of mapx.getLanguages()) {
@@ -164,7 +163,7 @@ export function mapxToIso19139Internal(mapx, params) {
 
     var identification = {}
 
-    var title = extractLocalized(mapx.getAllTitles(), mapxLang, logger)
+    var title = extractLocalized(mapx.getAllTitles(), logger)
     if (title == UTILS.DEFAULT_MISSING_CONTENT) {
         logger.warn("Can't generate mandatory ISO element: title")
     }
@@ -180,7 +179,7 @@ export function mapxToIso19139Internal(mapx, params) {
     }
 
     // abstract
-    var ab = extractLocalized(mapx.getAllAbstracts(), mapxLang, logger)
+    var ab = extractLocalized(mapx.getAllAbstracts(), logger)
     if (ab == UTILS.DEFAULT_MISSING_CONTENT) {
         logger.warn("Can't generate mandatory ISO element: abstract")
     }
@@ -341,7 +340,7 @@ export function mapxToIso19139Internal(mapx, params) {
     // supplementalInformation
     var suppInfo = []
 
-    var note = extractLocalized(mapx.getAllNotes(), mapxLang, logger)
+    var note = extractLocalized(mapx.getAllNotes(), logger)
     if (note) {
         note = _htmlToText(note)
         suppInfo.push(note)
@@ -586,22 +585,13 @@ function formatAnchor(elem, walk, builder, formatOptions) {
 
 
 /**
- * Get the tile using the given lang as a preference.
- * If such lang does not exist, try using english
- * As a fallbck use the first available language
+ * Metadata is always expected as english text (#44)
  */
-export function extractLocalized(localizedEntries, preferredLang, logger) {
-    if (localizedEntries[preferredLang]) {
-        return localizedEntries[preferredLang]
-    } else if (localizedEntries['en']) {
-        return localizedEntries[preferredLang]
+export function extractLocalized(localizedEntries, logger) {
+    if (localizedEntries['en']) {
+        return localizedEntries['en']
     } else {
-        for (const [lang, text] of Object.entries(localizedEntries)) {
-            if (text) {
-                logger.info(`Choosing random entry (${lang})`)
-                return text
-            }
-        }
+        logger.log("Missing eng entry")
+        return UTILS.DEFAULT_MISSING_CONTENT
     }
-    return "N/A"
 }
